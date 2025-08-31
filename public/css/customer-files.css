@@ -1,0 +1,549 @@
+/* customer-files.css */
+
+/* الأنماط العامة لشبكة أيقونات الملفات */
+.file-icons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    /* تغيير لون الخلفية للرمادي الشفاف في وضع النهار */
+    background-color: rgba(240, 240, 240, 0.8); /* رمادي فاتح شفاف */
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    margin-top: 20px;
+    min-height: 200px;
+    align-content: start;
+}
+
+.no-files-message {
+    grid-column: 1 / -1; /* لجعل الرسالة تمتد على عرض الشبكة بالكامل */
+    text-align: center;
+    padding: 30px;
+    color: var(--text-color); /* استخدام متغير من main.css */
+    font-size: 1.1em;
+}
+
+.file-card {
+    /* يمكنك الإبقاء على --secondary-bg-color إذا أردت أن تكون البطاقات معتمة قليلاً */
+    /* أو تغييرها إلى لون رمادي شفاف مختلف إذا أردت شفافة أكثر */
+    background-color: var(--secondary-bg-color); /* يمكن أن يكون هذا أفتح قليلاً من الحاوية */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    box-shadow: var(--card-shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+
+.file-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md); /* استخدام متغير من main.css */
+    z-index: 10; /* لإظهار البطاقة التي يتم التمرير فوقها فوق البطاقات الأخرى */
+}
+
+.file-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative; /* لموضع مربع الاختيار */
+    flex-grow: 1; /* للسماح للمحتوى الأساسي بالتوسع */
+    padding-bottom: 5px; /* مسافة لاسم الملف */
+}
+
+.file-card-checkbox {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 20; /* فوق المحتوى الآخر */
+    opacity: 0; /* مخفي افتراضيًا */
+    transition: opacity 0.2s ease;
+    width: 20px; /* لتسهيل النقر */
+    height: 20px;
+    cursor: pointer;
+}
+
+.file-card:hover .file-card-checkbox {
+    opacity: 1; /* إظهار مربع الاختيار عند التمرير */
+}
+
+/* ضمان أن مربع الاختيار مرئي دائمًا عند تحديده */
+.file-card-checkbox:checked {
+    opacity: 1;
+}
+
+.file-card .file-icon {
+    font-size: 3.5em; /* حجم الأيقونة */
+    margin-bottom: 5px;
+    transition: transform 0.2s ease; /* لتأثير التمرير على الأيقونة */
+}
+
+.file-card:hover .file-icon {
+    transform: translateY(-10px); /* تحريك الأيقونة قليلاً للأعلى عند التمرير */
+}
+
+.file-card-name {
+    font-weight: 600;
+    color: var(--heading-color); /* استخدام متغير من main.css */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* لإضافة علامات الحذف إذا كان النص طويلاً */
+    max-width: 100%;
+    margin-top: 5px; /* مسافة أسفل الأيقونة */
+    font-size: 0.95em; /* حجم خط أصغر قليلاً للاسم */
+}
+
+/* تفاصيل التمرير (hover) والإجراءات */
+.file-card-hover-details {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(var(--secondary-bg-rgb), 0.95); /* خلفية شبه شفافة */
+    padding: 10px 5px;
+    box-sizing: border-box;
+    transform: translateY(100%); /* تبدأ مخفية أسفل البطاقة */
+    transition: transform 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    border-radius: 0 0 8px 8px;
+    opacity: 0; /* إخفاء أيضًا باستخدام الشفافية */
+}
+
+.file-card:hover .file-card-hover-details {
+    transform: translateY(0); /* تنزلق للأعلى عند التمرير */
+    opacity: 1;
+}
+
+.file-card-date,
+.file-card-size {
+    font-size: 0.75em; /* خط أصغر للتفاصيل */
+    color: var(--text-color-secondary); /* استخدام متغير من main.css */
+}
+
+.file-card-actions-hover {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.file-card-actions-hover .btn-icon {
+    font-size: 1em; /* أزرار إجراءات أصغر */
+    padding: 5px;
+}
+
+/* أنماط الأيقونات العامة وأنماط الألوان لأنواع الملفات */
+.file-entry-display {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* مسافة بين الأيقونة واسم الملف */
+    padding: 5px 0;
+}
+
+/* الألوان الخاصة بأنواع الملفات */
+.pdf-icon { color: #dc3545; /* أحمر */ }
+.doc-icon { color: #007bff; /* أزرق */ }
+.xls-icon { color: #28a745; /* أخضر */ }
+.ppt-icon { color: #ffc107; /* أصفر/برتقالي */ }
+.img-icon { color: #6f42c1; /* بنفسجي */ }
+.zip-icon { color: #6c757d; /* رمادي */ }
+.txt-icon { color: #17a2b8; /* سماوي */ }
+.default-icon { color: #343a40; /* داكن */ }
+
+
+/* تنسيق أزرار الإجراءات (تطبق على الأزرار في شريط الأدوات وعلى أزرار التمرير) */
+.btn-icon.view-file-btn,
+.btn-icon.download-file-btn,
+.btn-icon.delete-file-btn {
+    background: none;
+    border: none;
+    color: var(--main-color); /* استخدام متغير من main.css */
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.btn-icon.view-file-btn:hover { color: #0056b3; }
+.btn-icon.download-file-btn:hover { color: #28a745; }
+.btn-icon.delete-file-btn:hover { color: #dc3545; }
+
+
+/* الأنماط الخاصة بصفحة ملفات العملاء */
+.customer-files-section {
+    padding: 20px;
+    background-color: var(--light-bg); /* استخدام متغير من main.css */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.customer-name-display {
+    font-size: 1.5rem;
+    color: var(--main-dark); /* لون غامق للمساعدة في القراءة */
+    margin-left: 15px;
+    font-weight: bold;
+}
+
+/* تحديثات لشريط الأدوات - تأكد من تناسقها مع main.css */
+.icon-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px; /* مسافة أكبر بين الأزرار */
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.icon-toolbar > div {
+    display: flex;
+    gap: 8px; /* مسافة بين الأيقونات داخل المجموعة */
+}
+
+.icon-toolbar .btn-icon {
+    background-color: var(--main-dark);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; /* حجم ثابت للأزرار */
+    height: 40px;
+    flex-shrink: 0; /* منع الأزرار نفسها من التقلص */
+}
+/* أزرار شريط الأدوات للنص مع الأيقونة */
+.icon-toolbar .btn-icon span {
+    margin-left: 5px; /* مسافة بين الأيقونة والنص */
+    font-size: 0.9em; /* حجم خط أصغر قليلاً للنص */
+    white-space: nowrap; /* منع التفاف النص */
+    display: block; /* لجعل النص يظهر أسفل الأيقونة في الأزرار الصغيرة */
+}
+
+
+.icon-toolbar .btn-icon i {
+    font-size: 1.2rem;
+}
+
+.icon-toolbar .btn-icon:hover {
+    background-color: var(--main-color);
+}
+
+.icon-separator {
+    width: 1px;
+    height: 30px;
+    background-color: #ccc;
+    margin: 0 15px; /* مسافة أكبر حول الفاصل */
+    flex-shrink: 0;
+}
+
+.search-export-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-grow: 1; /* السماح لمجموعة البحث/التصدير بأن تشغل المساحة المتبقية */
+    justify-content: flex-end; /* دفعها إلى اليمين */
+}
+
+.search-export-group input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 200px; /* عرض ثابت لمدخل البحث */
+}
+
+/* الأنماط للمودال (شاشة رفع الملفات) - تم دمجها من الكود الذي قدمته */
+.modal {
+    display: none; /* مخفي افتراضياً */
+    position: fixed; /* يبقى في نفس المكان حتى عند التمرير */
+    z-index: 1000; /* أعلى من المحتوى الآخر */
+    left: 0;
+    top: 0;
+    width: 100%; /* عرض كامل */
+    height: 100%; /* ارتفاع كامل */
+    overflow: auto; /* تمكين التمرير إذا كان المحتوى كبيراً جداً */
+    background-color: var(--modal-bg); /* خلفية شبه شفافة */
+    justify-content: center; /* توسيط أفقي */
+    align-items: center; /* توسيط عمودي */
+}
+
+.modal-content {
+    background-color: var(--white);
+    margin: auto;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px; /* أقصى عرض للمودال */
+    position: relative;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+
+.modal-content h3 {
+    text-align: center;
+    color: var(--main-dark);
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+}
+
+.modal-content .close {
+    color: #aaa;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.modal-content .close:hover,
+.modal-content .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.form-group input[type="file"] {
+    width: calc(100% - 22px); /* لتعديل العرض مع الأخذ في الاعتبار البادينج */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.form-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.form-button[type="submit"] {
+    background-color: #28a745; /* أخضر للحفظ/الرفع */
+    color: white;
+}
+
+.form-button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+.form-button.cancel {
+    background-color: #6c757d; /* رمادي للإلغاء */
+    color: white;
+}
+
+.form-button.cancel:hover {
+    background-color: #5a6268;
+}
+
+/* الرسوم المتحركة للمودال */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+/* دارك مود */
+body.dark-mode .customer-files-section {
+    background-color: #1D3557; /* لون خلفية للقسم في الدارك مود */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .customer-name-display {
+    color: #A0C4FF; /* لون اسم العميل في الدارك مود */
+}
+
+body.dark-mode .icon-toolbar {
+    background-color: #0B1F3A;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .icon-toolbar .btn-icon {
+    background-color: #274b7a;
+}
+
+body.dark-mode .icon-toolbar .btn-icon:hover {
+    background-color: #4DA3FF;
+}
+
+body.dark-mode .icon-separator {
+    background-color: #444;
+}
+
+body.dark-mode .search-export-group input[type="text"] {
+    background-color: #2b4368;
+    border-color: #355f8a;
+    color: #f1f1f1;
+}
+
+body.dark-mode .file-card {
+    background-color: #1D3557;
+    border-color: #274b7a;
+    box-shadow: var(--dark-mode-shadow-sm);
+}
+
+body.dark-mode .file-card:hover {
+    box-shadow: var(--dark-mode-shadow-md);
+}
+
+body.dark-mode .file-card-name {
+    color: var(--dark-mode-heading-color); /* استخدام متغير من main.css */
+}
+
+body.dark-mode .file-card-date,
+body.dark-mode .file-card-size {
+    color: var(--dark-mode-text-color-secondary); /* استخدام متغير من main.css */
+}
+
+body.dark-mode .file-card-hover-details {
+    background-color: rgba(var(--dark-mode-secondary-bg-rgb), 0.95);
+}
+
+body.dark-mode .default-icon { color: #ccc; } /* Adjust default for dark mode */
+
+body.dark-mode .modal-content {
+    background-color: #1D3557;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .modal-content h3 {
+    color: #A0C4FF;
+}
+
+body.dark-mode .modal-content .close {
+    color: #bbb;
+}
+
+body.dark-mode .modal-content .close:hover,
+body.dark-mode .modal-content .close:focus {
+    color: white;
+}
+
+body.dark-mode .form-group label {
+    color: #f1f1f1;
+}
+
+body.dark-mode .form-group input[type="file"] {
+    background-color: #2b4368;
+    border-color: #355f8a;
+    color: #f1f1f1;
+}
+
+body.dark-mode .form-button[type="submit"] {
+    background-color: #218838;
+}
+
+body.dark-mode .form-button[type="submit"]:hover {
+    background-color: #1a742e;
+}
+
+body.dark-mode .form-button.cancel {
+    background-color: #5a6268;
+}
+
+body.dark-mode .form-button.cancel:hover {
+    background-color: #495057;
+}
+
+/* استجابة المودال */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+}
+/* customer-files.css */
+
+/* Drag and Drop Zone Styles */
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    /* تغيير لون الخلفية للرمادي الشفاف في وضع النهار */
+    background-color: rgba(240, 240, 240, 0.8); /* رمادي فاتح شفاف */
+    color: var(--text-color-secondary);
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+    /* يمكنك تعديل هذه الألوان لتعكس الشفافية أيضاً أو جعلها أكثر بروزاً عند التفاعل */
+    background-color: rgba(230, 230, 230, 0.9); /* رمادي أغمق قليلاً وشفاف عند التحويم */
+    border-color: var(--main-color);
+}
+
+.drop-zone p {
+    margin: 10px 0;
+}
+
+.drop-zone .fas {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: #c4c4c4;
+    margin-right: 10px;
+}
+
+/* Dark mode adjustments for drop zone */
+/* ستبقى هذه الأنماط كما هي للوضع الليلي */
+body.dark-mode .drop-zone {
+    background-color: #0B1F3A;
+    border-color: #274b7a;
+    color: #bbb;
+}
+
+body.dark-mode .drop-zone:hover,
+body.dark-mode .drop-zone.drag-over {
+    background-color: #1D3557;
+    border-color: #4DA3FF;
+}
+
+body.dark-mode .drop-zone .fas {
+    color: #A0C4FF;
+}
+body.dark-mode .file-icons-grid {
+    background-color: #0B1F3A; 
+}

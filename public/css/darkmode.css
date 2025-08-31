@@ -1,0 +1,136 @@
+/* ===================== زر الوضع الليلي ===================== */
+#darkModeToggle {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#darkModeToggle i {
+  font-size: 20px;
+  color: var(--main-color);
+}
+
+#darkModeToggle:hover {
+  background-color: #fff3e5;
+  box-shadow: 0 0 8px rgba(246, 144, 45, 0.4);
+}
+
+body.dark-mode #darkModeToggle {
+  background-color: #1e2b4a;
+  border-color: #355f8a;
+}
+
+body.dark-mode #darkModeToggle i {
+  color: #ffb347;
+}
+
+
+body.dark-mode {
+  background-color: #1e2b4a;
+  color: #f1f1f1;
+}
+
+body.dark-mode .main-header,
+body.dark-mode .main-menu {
+  background-color: #0B1F3A;
+  border-bottom: 1px solid #274b7a;
+}
+
+body.dark-mode .general-card {
+  background-color: #1D3557;
+  color: #A0C4FF;
+  border: 1px solid #274b7a;
+}
+
+body.dark-mode .general-card i {
+  color: #4DA3FF;
+}
+
+body.dark-mode .general-card:hover {
+  background-color: #2b4368;
+  color: #fff;
+}
+
+body.dark-mode .section-content h2 {
+  color: #4DA3FF;
+  border-bottom: 2px solid #355f8a;
+}
+
+body.dark-mode .customer-table th,
+body.dark-mode .customer-table td {
+  color: #0d47a1;
+}
+
+body.dark-mode .icon-toolbar button {
+  background-color: #274b7a;
+  color: #a0c4ff;
+}
+
+body.dark-mode .icon-toolbar button:hover {
+  background-color: #355f8a;
+}
+
+body.dark-mode .modal-content {
+  background-color: #1d2d44;
+  color: #A0C4FF;
+  border: 1px solid #355f8a;
+}
+
+body.dark-mode .form-buttons button[type="submit"] {
+  background-color: #ffb347;
+}
+
+body.dark-mode .form-buttons button.cancel {
+  background-color: #999;
+}
+
+body.dark-mode .tab-buttons button {
+  background-color: #1e2b4a;
+  color: #a0c4ff;
+}
+
+body.dark-mode .tab-buttons button.active {
+  background-color: #ffa500;
+  color: white;
+}
+
+
+
+/* تنسيقات الوضع الليلي لتبويبات الصفحات */
+body.dark-mode .page-tabs-container {
+    background-color: #1a2a47; /* خلفية داكنة */
+    border-bottom: 1px solid #274b7a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .page-tab {
+    background-color: #2b4368; /* لون رمادي داكن للتبويبة */
+    border: 1px solid #3d5a80;
+    color: #e0e0e0; /* لون نص فاتح */
+}
+
+body.dark-mode .page-tab .tab-title {
+    color: #A0C4FF; /* أزرق فاتح للنص */
+}
+
+body.dark-mode .page-tab.active-tab {
+    background-color: #1D3557; /* تبويبة نشطة بلون أغمق قليلاً */
+    border-color: #4DA3FF;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .page-tab:hover {
+    background-color: #355f8a; /* أغمق عند التحويم في الوضع الليلي */
+    border-color: #5d81b1;
+}
+
+body.dark-mode .page-tab .close-tab-btn {
+    color: #A0C4FF; /* أيقونة إغلاق فاتحة */
+}
+
+body.dark-mode .page-tab .close-tab-btn:hover {
+    color: #ff6b6b; /* أحمر فاتح عند التحويم */
+}

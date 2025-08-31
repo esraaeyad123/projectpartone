@@ -1,0 +1,368 @@
+:root {
+  --main-color: #f6902d;
+  --main-dark: #1e2b4a;
+  --light-bg: #f5f7fb;
+  --text-color: #333;
+  --white: #fff;
+  --hover-orange: #ffe0c2;
+  --modal-bg: rgba(0, 0, 0, 0.5);
+  --base-font-size: 16px;
+}
+
+/* ===================== أزرار اللغة (English/العربية) ===================== */
+.main-header > div > div {
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--white);
+  padding: 0.4rem;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+.main-header button {
+  background-color: transparent;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.875rem;
+  color: var(--text-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  white-space: nowrap;
+}
+
+.main-header button:hover {
+  background-color: #ffe6cc;
+  color: var(--main-color);
+}
+
+.main-header button.active {
+  background-color: var(--main-color);
+  color: white;
+  font-weight: bold;
+}
+
+/* Dark mode styles for language buttons */
+body.dark-mode .main-header button {
+  color: #a0c4ff;
+}
+
+body.dark-mode .main-header button:hover {
+  background-color: #2b4368;
+  color: var(--main-color);
+}
+
+body.dark-mode .main-header button.active {
+  background-color: var(--main-color);
+  color: white;
+}
+
+/* الصفحة العامة */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background-color: var(--light-bg);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+  font-size: var(--base-font-size);
+}
+
+/* الترويسة (الشعار وأزرار اللغة) */
+.main-header {
+  background-color: var(--main-dark);
+  color: white;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.main-header h1 {
+  font-size: 1.375rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.main-header > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  gap: 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.main-header > div::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===================== القائمة العلوية (Navbar - General, Geotechnical, etc.) ===================== */
+.main-menu {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; /* هذا يسمح لها بالالتفاف */
+  background-color: var(--white);
+  border-bottom: 1px solid #ccc;
+  padding: 0.625rem;
+}
+
+.main-menu button {
+  background-color: var(--main-color);
+  color: white;
+  margin: 0.3125rem;
+  border: none;
+  padding: 0.625rem 1rem;
+  border-radius: 5px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.main-menu button:hover {
+  background-color: #d5791c;
+}
+
+/* هيكل الأقسام */
+.section-content {
+  display: none;
+  padding: 1.25rem;
+}
+
+.section-content.active {
+  display: block;
+}
+
+.section-content h2 {
+  color: var(--main-dark);
+  margin-bottom: 0.625rem;
+  font-size: 1.25rem;
+  border-bottom: 2px solid #d0d0d0;
+  padding-bottom: 0.3125rem;
+}
+
+/* شريط التبويبات للصفحات */
+.page-tabs-container {
+    display: flex;
+    flex-wrap: wrap; /* للسماح بالالتفاف إذا كانت هناك تبويبات كثيرة */
+    gap: 8px; /* مسافة بين التبويبات */
+    padding: 10px 20px; /* مسافة داخلية */
+    background-color: var(--light-bg); /* خلفية خفيفة للحاوية */
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 15px; /* مسافة أسفل الشريط */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* ظل خفيف */
+}
+
+.page-tab {
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0; /* لون رمادي فاتح للأزرار */
+    border: 1px solid #ccc;
+    border-radius: 6px; /* حواف مستديرة */
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    color: var(--text-color); /* لون نص افتراضي */
+    cursor: pointer; /* للإشارة إلى أنها قابلة للتفاعل */
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.page-tab .tab-title {
+    color: var(--main-dark); /* أزرق داكن للنص */
+    font-weight: bold;
+    margin-right: 8px; /* مسافة بين النص وزر الإغلاق */
+    white-space: nowrap; /* يمنع التفاف النص */
+}
+
+.page-tab.active-tab {
+    background-color: var(--white); /* تبويبة نشطة قد تكون بلون مختلف */
+    border-color: var(--main-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.page-tab:hover {
+    background-color: #e0e0e0; /* أغمق عند التحويم */
+    border-color: #bbb;
+}
+
+.page-tab .close-tab-btn {
+    background-color: transparent;
+    border: none;
+    color: #666; /* لون أيقونة الإغلاق */
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0 5px;
+    transition: color 0.3s ease;
+}
+
+.page-tab .close-tab-btn:hover {
+    color: #c00; /* لون أحمر عند التحويم */
+}
+
+/* ===================== Media Queries للتحكم في الاستجابة العامة ===================== */
+
+@media (max-width: 768px) {
+  /* على الشاشات الأصغر من 768 بكسل */
+  .main-header > div {
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .main-header button {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .main-header h1 {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+  }
+
+  .main-header > div > div {
+    gap: 0.2rem;
+    padding: 0.2rem;
+  }
+
+  /* تحسينات الـ Navbar لـ 768px */
+  .main-menu {
+      justify-content: center;
+      padding: 0.4rem;
+  }
+  .main-menu button {
+      font-size: 0.75rem;
+      padding: 0.4rem 0.7rem;
+      margin: 0.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* على الشاشات الأصغر من 480 بكسل */
+  .main-header button {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.4rem;
+  }
+
+  .main-header h1 {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+  }
+
+  .main-header > div {
+      gap: 0.3rem;
+  }
+
+  /* تحسينات الـ Navbar لـ 480px */
+  .main-menu {
+      padding: 0.3rem;
+  }
+  .main-menu button {
+      font-size: 0.7rem;
+      padding: 0.3rem 0.6rem;
+      margin: 0.15rem;
+  }
+}
+
+/* ===================== تحسين .icon-toolbar (أزرار التحكم - Add, Edit, Delete, etc.) ===================== */
+.icon-toolbar {
+    display: flex;
+    justify-content: flex-start; /* لليسار */
+    align-items: center;
+    gap: 0.5rem; /* مسافة بين المجموعات والأيقونات */
+    padding: 10px 20px;
+    background-color: var(--white);
+    border-bottom: 1px solid #eee;
+    /* هذا هو المفتاح لمنع الالتفاف: لا يوجد flex-wrap هنا */
+    overflow-x: auto; /* السماح بالتمرير الأفقي إذا لم يكن هناك مساحة */
+    -webkit-overflow-scrolling: touch; /* تحسين التمرير على iOS */
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+
+/* لإخفاء شريط التمرير في متصفحات Webkit (Chrome, Safari) */
+.icon-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+.icon-toolbar > div {
+    display: flex;
+    gap: 0.3rem; /* مسافة أصغر بين الأيقونات داخل المجموعة الواحدة */
+    flex-shrink: 0; /* مهم لمنع المجموعات من التقلص وبالتالي إجبارها على التمرير */
+}
+
+.icon-toolbar .btn-icon {
+    background-color: var(--main-dark);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    width: 40px; /* تحديد عرض ثابت لتوحيد الحجم */
+    height: 40px; /* تحديد ارتفاع ثابت لتوحيد الحجم */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1.1rem; /* حجم الأيقونة */
+    flex-shrink: 0; /* مهم جدًا لمنع الأزرار نفسها من التقلص */
+}
+
+.icon-toolbar .btn-icon:hover {
+    background-color: var(--main-color);
+}
+
+.icon-separator {
+    width: 1px;
+    height: 30px;
+    background-color: #ccc;
+    margin: 0 0.5rem;
+    flex-shrink: 0;
+}
+
+/* Media Queries لشريط الأدوات - هذا هو الجزء الذي يغير حجم الأيقونات */
+@media (max-width: 768px) {
+    .icon-toolbar {
+        padding: 8px 10px;
+        gap: 0.3rem; /* تقليل المسافة بين المجموعات */
+    }
+    .icon-toolbar > div {
+        gap: 0.2rem; /* تقليل المسافة بين الأيقونات داخل المجموعة */
+    }
+    .icon-toolbar .btn-icon {
+        width: 36px; /* تقليل حجم الأزرار قليلاً */
+        height: 36px;
+        font-size: 1rem; /* تقليل حجم الأيقونة */
+        border-radius: 6px;
+    }
+    .icon-toolbar .icon-separator {
+        height: 25px;
+        margin: 0 0.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .icon-toolbar {
+        padding: 6px 8px;
+        gap: 0.2rem;
+    }
+    .icon-toolbar > div {
+        gap: 0.15rem;
+    }
+    .icon-toolbar .btn-icon {
+        width: 32px; /* تقليل حجم الأزرار أكثر */
+        height: 32px;
+        font-size: 0.9rem; /* تقليل حجم الأيقونة أكثر */
+        border-radius: 5px;
+    }
+    .icon-toolbar .icon-separator {
+        height: 20px;
+        margin: 0 0.2rem;
+    }
+}
+/*---------------------STAR CSS----------------*/
+label .required-star {
+    color: red !important;
+    font-weight: normal;
+    vertical-align: super;
+    font-size: 0.8em;
+}

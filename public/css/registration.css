@@ -1,0 +1,814 @@
+/* Styling for the tab header */
+.tab-header {
+    background-color: #f0f0f0;
+    padding: 8px 15px;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    font-family: sans-serif;
+    font-size: 0.9rem;
+}
+
+.tab {
+    padding: 8px 15px;
+    cursor: default;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    background-color: #fff;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-tab-btn {
+    font-size: 1.2rem;
+    font-weight: normal;
+    cursor: pointer;
+    color: #aaa;
+}
+
+/* Modal overlay and content styling */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+    width: 90%;
+    max-width: 1000px;
+}
+
+.small-modal {
+    width: 400px;
+    max-width: 90%;
+}
+
+.registration-form-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 20px;
+    max-width: 95%;
+    height: auto;
+    max-height: 70vh;
+    overflow-y: auto;
+    font-size: 0.9rem;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.modal-header {
+    background-color: #007bff;
+    color: #fff;
+    padding: 15px 25px;
+    border-bottom: 1px solid #0056b3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.close-btn {
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: #fff;
+    transition: color 0.2s ease-in-out;
+}
+
+.close-btn:hover {
+    color: #e9ecef;
+}
+
+/* Button Styling */
+.form-footer-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+    padding: 15px 20px;
+    border-top: 1px solid #ddd;
+    background-color: #f0f0f0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.form-footer-buttons button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.form-footer-buttons button i {
+    font-size: 1.2rem;
+}
+
+.form-footer-buttons button[disabled] {
+    background-color: #e9ecef;
+    color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+}
+
+.form-footer-buttons button[disabled] i {
+    color: #a0a0a0;
+}
+
+.form-footer-buttons button[disabled]:hover {
+    background-color: #e9ecef;
+    transform: none;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.btn-secondary {
+    background-color: #e2e6ea;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.btn-secondary:hover {
+    background-color: #d8dbe0;
+    transform: translateY(-2px);
+}
+
+/* Form-specific styling */
+.form-section-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 6px;
+}
+
+/* Form grid layouts */
+.form-grid-3-cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.form-grid-4-cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.span-2-cols {
+    grid-column: span 2;
+}
+
+/* Input fields and icons */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+}
+
+/*
+     ================================================
+     تعديل رئيسي للتحكم في مقاسات الأيقونات ومحاذاتها
+     ================================================
+*/
+.icon-box {
+    color: #fff !important;
+    border: none;
+    border-radius: 8px;
+    width: 30px !important;
+    height: 30px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    padding: 0;
+}
+
+/*
+     دمج الأيقونات في فئة واحدة لضمان التناسق
+*/
+.icon-btn,
+.project-code-icons .icon-btn-check,
+.project-code-icons .icon-btn-confirmation,
+.icon-btn-add,
+.input-with-icon .icon-btn.fa-calendar-alt,
+.input-with-icon.pouring-ticket-icons .icon-btn-check,
+.input-with-icon.pouring-ticket-icons .icon-btn-arrow {
+    @extend .icon-box;
+}
+
+/* Specific icon button positioning */
+.input-with-icon i.fa-calendar-alt {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.icon-btn-add {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Project code icons */
+.project-code-icons {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    display: flex;
+    color: #000 !important;
+    gap: 5px;
+}
+/*
+     ================================================
+     تنسيقات الأيقونات الفردية التي تعتمد على الفئة الجديدة
+     ================================================
+*/
+
+/* Adjust padding for input fields with multiple icons */
+.input-with-icon .form-control {
+    padding-right: 105px;
+}
+
+.input-with-icon.pouring-ticket-icons .form-control {
+    padding-right: 80px;
+}
+
+/* Sub-tabs styling */
+.sub-tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 15px;
+}
+
+.sub-tab {
+    padding: 10px 18px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    font-weight: 500;
+    color: #555;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease;
+}
+
+.sub-tab.active-sub-tab {
+    border-color: #ccc;
+    background-color: #fff;
+    border-bottom: 1px solid #fff;
+    color: #007bff;
+}
+
+.sub-tab-content {
+    display: none;
+}
+
+.sub-tab-content.active-sub-tab-content {
+    display: block;
+}
+
+/* Data Table styling */
+.test-table-container {
+    overflow-x: auto;
+}
+
+.test-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.85rem;
+}
+
+.test-data-table th,
+.test-data-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.test-data-table th {
+    background-color: #e9ecef;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+.test-data-table td .form-control {
+    border: none;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    font-size: 0.85rem;
+}
+
+.delete-row {
+    color: #dc3545;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+}
+
+.delete-row:hover {
+    color: #c82333;
+}
+
+/* Disabled form styling */
+.registration-form-container.form-disabled input:disabled,
+.registration-form-container.form-disabled select:disabled,
+.registration-form-container.form-disabled textarea:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.registration-form-container input:not(:disabled),
+.registration-form-container select:not(:disabled),
+.registration-form-container textarea:not(:disabled) {
+    background-color: #fff;
+    cursor: text;
+}
+
+/* Order number container */
+.order-no-footer {
+    display: flex;
+    align-items: center;
+    margin-right: auto;
+}
+
+.order-no-footer label {
+    font-weight: bold;
+    color: #333;
+    margin-right: 5px;
+}
+
+.footer-order-no-input {
+    width: 200px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.8rem;
+}
+
+/* Custom Dropdowns */
+.custom-autocomplete-container {
+    position: relative;
+}
+
+.custom-dropdown-project-code, .custom-dropdown-confirmation {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 500px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+
+.dropdown-header {
+    display: flex;
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f0f0f0;
+    font-weight: bold;
+    font-size: 0.8em;
+    position: sticky;
+    top: 0;
+}
+
+.dropdown-options-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown-options-list li {
+    display: flex;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dropdown-options-list li:hover {
+    background-color: #f1f1f1;
+}
+
+.header-column, .option-column {
+    flex-grow: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Confirmation modal styling */
+.modal-content.large-modal {
+    width: 90%;
+    max-width: 1200px;
+    padding: 20px;
+    position: relative;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+.modal-controls {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.table-container {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.confirmation-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.confirmation-table th, .confirmation-table td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+    white-space: nowrap;
+}
+
+.confirmation-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+.confirmation-table tbody tr:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+/*
+ ================================================
+ التعديل المطلوب: إضافة مربع أزرق وسهم أبيض للقوائم المنسدلة
+ ================================================
+*/
+.input-with-icon .fa-caret-down {
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #007bff;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.input-with-icon .fa-caret-down:hover {
+    background-color: #0056b3;
+}
+
+/* Custom Dropdowns */
+.custom-autocomplete-container {
+    position: relative;
+}
+
+.custom-dropdown-lab {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 300px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 150px;
+    overflow-y: auto;
+    display: none;
+}
+
+.confirmation-table tbody tr.selected-row {
+    background-color: #d1e7ff;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.custom-dropdown-order-no {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.custom-dropdown-order-no .dropdown-options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.custom-dropdown-order-no .dropdown-options-list li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+/* تنسيق القائمة المنسدلة لـ Payment Terms */
+.custom-dropdown-payment-terms {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #d4d4d4;
+    z-index: 1000;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border-radius: 4px;
+    margin-top: 2px;
+}
+.custom-dropdown-payment-terms .dropdown-options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.custom-dropdown-payment-terms .dropdown-options-list li {
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    color: #333;
+}
+.custom-dropdown-payment-terms .dropdown-options-list li:hover {
+    background-color: #f5f5f5;
+}
+
+/* تنسيق القائمة المنسدلة لـ Nominal Size */
+.custom-dropdown-nominal-size {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #d4d4d4;
+    z-index: 1000;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border-radius: 4px;
+    margin-top: 2px;
+}
+.custom-dropdown-nominal-size .dropdown-options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.custom-dropdown-nominal-size .dropdown-options-list li {
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    color: #333;
+}
+.custom-dropdown-nominal-size .dropdown-options-list li:hover {
+    background-color: #f5f5f5;
+}
+
+.custom-dropdown-order-no .dropdown-options-list li:hover {
+    background-color: #f0f0f0;
+}
+
+/* Add/Delete icons */
+.add-row-icon, .delete-row-icon {
+    cursor: pointer;
+    font-size: 14px;
+    color: #007bff;
+}
+.delete-row-icon {
+    color: #dc3545;
+}
+
+/* Input field styling */
+.form-control {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 12px;
+    padding: 5px 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+.form-control[disabled] {
+    background-color: #f8f8f8;
+    cursor: not-allowed;
+}
+
+/* Number input with controls */
+.number-input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+}
+.number-input-wrapper input {
+    flex-grow: 1;
+    border: none;
+    background-color: transparent;
+    padding: 3px 5px;
+    font-size: 12px;
+}
+.number-controls {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-left: 1px solid #ccc;
+}
+.number-controls button {
+    background-color: #f0f0f0;
+    border: none;
+    width: 15px;
+    height: 100%;
+    cursor: pointer;
+    font-size: 10px;
+    line-height: 1;
+    padding: 0;
+}
+
+/* New CSS for Test Method and Test Location dropdowns */
+.dropdown-container {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.dropdown-container .dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.dropdown-container .dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* Specific styling for table input fields */
+.test-data-table td .form-control {
+    box-sizing: border-box;
+    font-size: 12px;
+    padding: 5px 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.test-data-table td .input-with-icon .form-control {
+    padding-right: 30px; /* Space for the dropdown icon */
+}
+
+/* Styling for Nominal Size and report number fields */
+#nominal-size {
+    max-width: 150px;
+}
+
+.report-no-input, .rev-input {
+    width: 80px;
+}
+
+/* Enable date picker icon */
+.input-with-icon .form-control[type="datetime-local"]:enabled + .icon-btn.fa-calendar-alt {
+    color: #007bff;
+    cursor: pointer;
+}
+
+/* Disable date picker icon */
+.input-with-icon .form-control[type="datetime-local"]:disabled + .icon-btn.fa-calendar-alt {
+    color: #ccc;
+}
+
+/*
+     ================================================
+     إصلاحات إضافية
+     ================================================
+*/
+
+/* تنسيق حقول Nominal Size و Sequential */
+.nominal-size-input {
+    width: 120px;
+}
+
+.sequential-input {
+    width: 80px;
+}
+
+/* منع تكرار أيقونة التقويم */
+.input-with-icon .form-control::-webkit-calendar-picker-indicator {
+    display: none;
+}
+/* Ensure proper padding for single-icon inputs */
+.input-with-icon .form-control:not(.has-multiple-icons) {
+    padding-right: 30px;
+}
+
+.input-with-icon .fa-calendar-alt {
+    display: block;
+}

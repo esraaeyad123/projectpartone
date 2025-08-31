@@ -1,0 +1,2025 @@
+/* quotation.css - Complete CSS with Fixed Modal Width and Single Right Scroll */
+
+/* Variables - Define your color palette and sizes */
+:root {
+    --primary-color: #007BFF;
+    --primary-hover-color: #0056b3;
+    --primary-color-rgb: 0, 123, 255;
+
+    --success-color: #28a745;
+    --success-hover-color: #218838;
+    --danger-color: #dc3545;
+    --danger-hover-color: #c82333;
+
+    --bg-color: #f4f7f6; /* General page background */
+    --secondary-bg-color: #ffffff; /* Card/modal background */
+    --sidebar-bg-color: #ffffff; /* Specific sidebar background, usually same as secondary */
+    --card-bg-color: #fefefe; /* Fieldset/inner card background */
+    --input-bg-color: #ffffff; /* Input field background */
+    --header-bg-color: #e9ecef; /* Table header/dropdown header background */
+    --modal-header-bg-color: #f8f9fa; /* Modal header background (tabs area) */
+
+    --text-color: #333;
+    --text-color-light: #666;
+    --text-color-dark: #222;
+
+    --border-color: #dee2e6;
+    --hover-bg-color: #f5f5f5; /* General hover background for lists/buttons */
+
+    --button-bg-color: #007bff;
+    --button-hover-color: #0056b3;
+    --button-bg-color-light: #e0e0e0; /* Light background for normal buttons */
+    --button-border-color: #cdd4da; /* A slightly darker border for buttons */
+
+    /* New variable for darker First/Last buttons */
+    --button-darker-bg: #d0d0d0; /* Darker background for First/Last */
+    --button-darker-border: #bbbbbb; /* Darker border for First/Last */
+
+    /* Table Specific */
+    --table-alt-row-bg: #f9f9f9;
+    --table-hover-bg: #e6f7ff;
+    --filter-row-bg: #f2f2f2;
+
+    /* NEW: Selection Color - A more prominent light blue, closer to primary */
+    --selection-color: #D6ECFF; /* A lighter, but noticeable blue */
+    --selection-border-color: #007BFF; /* Primary blue for border */
+    --group-header-bg: #d9edf7; /* Light blue for group headers */
+    --group-header-text: #31708f; /* Darker blue text for group headers */
+}
+
+/* Dark Mode Variables - Adjust for dark theme */
+body.dark-mode {
+    --primary-color: #6a9eff;
+    --primary-hover-color: #4b88ff;
+    --primary-color-rgb: 106, 158, 255;
+
+    --success-color: #26a69a;
+    --success-hover-color: #1a7d70;
+    --danger-color: #ef5350;
+    --danger-hover-color: #d32f2f;
+
+    --bg-color: #2c2c2c;
+    --secondary-bg-color: #3a3a3a;
+    --sidebar-bg-color: #3a3a3a;
+    --card-bg-color: #444444;
+    --input-bg-color: #333333;
+    --header-bg-color: #4a4a4a;
+    --modal-header-bg-color: #424242;
+
+    --text-color: #e0e0e0;
+    --text-color-light: #b0b0b0;
+    --text-color-dark: #f0f0f0;
+
+    --border-color: #555555;
+    --hover-bg-color: #4a4a4a;
+
+    --button-bg-color: #6a9eff;
+    --button-hover-color: #4b88ff;
+    --button-bg-color-light: #505050; /* Dark mode light background for normal buttons */
+    --button-border-color: #6a6a6a; /* Darker border for buttons in dark mode */
+
+    /* Darker First/Last buttons in dark mode */
+    --button-darker-bg: #404040;
+    --button-darker-border: #5a5a5a;
+
+
+    /* Table Specific - Dark Mode */
+    --table-alt-row-bg: #333333;
+    --table-hover-bg: #4c4c4c;
+    --filter-row-bg: #3c3c3c;
+
+    /* NEW: Dark Mode Selection Color */
+    --selection-color: #3d5a80; /* Darker blue for selection */
+    --selection-border-color: #6a9eff; /* Primary blue for border */
+    --group-header-bg: #2a4c6a; /* Darker blue for group headers in dark mode */
+    --group-header-text: #e0e0e0; /* Lighter text for dark mode group headers */
+}
+
+/* General Modal Styling */
+.modal {
+    display: none; /* Hidden by default - JavaScript will change this to 'flex' */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: hidden; /* Prevent body scroll, modal-content handles its own scroll */
+    background-color: rgba(0, 0, 0, 0.6); /* Black w/ opacity */
+    display: flex; /* Use flexbox for centering - initial state handled by JS */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+}
+
+.modal-content {
+    background-color: var(--sidebar-bg-color);
+    margin: auto; /* Centered */
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    display: flex; /* Changed from block to flex */
+    flex-direction: column; /* Arrange children vertically */
+    /* Increased fixed size for the modal itself to fit wide tables */
+    height: 95vh; /* Increase height */
+    width: 1600px; /* Significantly increased width for tables without horizontal scroll */
+    max-width: 98vw; /* Allow shrinking on smaller screens, but prioritize large size */
+    min-height: 700px; /* Ensure a decent minimum height */
+    min-width: 900px; /* Ensure a decent minimum width */
+    overflow: hidden; /* Prevent modal content from overflowing, inner scrollable areas handle it */
+    box-sizing: border-box; /* Include padding in height/width calculation */
+}
+
+/* Close Button */
+.close {
+    color: var(--text-color);
+    font-size: 32px;
+    font-weight: bold;
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* Modal Layout Grid (for header, body, footer structure inside modal-content) */
+.quotation-modal-grid { /* This class applies to modal-content in your HTML structure */
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* Tabs (auto), Body (1fr), Footer (auto) */
+    height: 100%; /* Use 100% of parent's height (modal-content's content-box height) */
+    overflow: hidden; /* Hide overflow to allow modal-body-content to scroll */
+    min-height: 0; /* Allow grid items to shrink as needed */
+}
+
+/* Tab Navigation */
+.tab-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    background-color: var(--modal-header-bg-color, var(--secondary-bg-color));
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding-left: 15px;
+    flex-shrink: 0; /* Prevent shrinking */
+    overflow-x: auto; /* Allow horizontal scrolling for many tabs */
+    white-space: nowrap; /* Prevent tabs from wrapping */
+}
+
+.tab {
+    padding: 15px 25px;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--text-color-light);
+    border: 1px solid transparent;
+    border-bottom: none;
+    margin-bottom: -2px; /* Overlap border-bottom of tab-list */
+    transition: all 0.3s ease;
+    user-select: none;
+    font-size: 1.1em;
+}
+
+.tab:hover {
+    color: var(--primary-color);
+    background-color: var(--hover-bg-color, var(--bg-color));
+}
+
+.tab.active {
+    color: white;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    z-index: 1;
+    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal Body Content (main area below tabs) */
+.modal-body-content {
+    display: flex;
+    flex-direction: column; /* Stack tab-content */
+    gap: 25px; /* Space between tabs if more than one */
+    padding-top: 20px; /* Space from tabs */
+    flex-grow: 1; /* Allows body to take available space within grid row */
+    overflow-y: auto; /* IMPORTANT: This will now handle the main vertical scroll for the entire modal content area */
+    padding-right: 15px; /* Give space for the scrollbar on the right */
+    min-height: 0; /* Crucial for flex children to shrink */
+    box-sizing: border-box; /* Include padding in height */
+}
+
+/* Tab Content - IMPORTANT FOR HIDING/SHOWING AND INTERNAL LAYOUT */
+.tab-content {
+    display: none; /* Hidden by default */
+    padding: 0;
+    flex-grow: 1; /* Take all available space in modal-body-content */
+    height: auto; /* Allow content to define height, but not fixed height */
+    min-height: 0; /* Allow shrinking */
+    overflow: visible; /* Let parent modal-body-content handle its own scroll */
+    box-sizing: border-box; /* Crucial for consistent box model */
+}
+
+/* Specific layout for Quote Header Tab */
+#headerTab.active { /* Target headerTab explicitly */
+    display: grid;
+    grid-template-columns: 1fr 350px; /* Left form flexible, right sidebar fixed */
+    grid-template-rows: auto auto;
+    grid-template-areas:
+        "left-form right-sidebar"
+        "left-form right-sidebar"; /* Span the left form across two rows if needed */
+    gap: 25px;
+    height: auto; /* Let content define height */
+    min-height: 0;
+    overflow: visible;
+}
+
+#headerTab .left-form-section {
+    grid-area: left-form;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    overflow: visible;
+    min-height: fit-content;
+}
+
+#headerTab .right-sidebar-section {
+    grid-area: right-sidebar;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    overflow-y: auto; /* Allow sidebar to scroll if its content overflows */
+    padding-right: 5px; /* Small padding for scrollbar */
+    min-height: fit-content; /* Allow content to define height */
+}
+
+/* Generic fieldset and form grid styles (applied globally) */
+fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 0;
+    background-color: var(--card-bg-color, var(--secondary-bg-color));
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0;
+    flex-shrink: 0;
+    overflow: visible;
+    box-sizing: border-box;
+    min-height: fit-content;
+}
+
+legend {
+    font-weight: bold;
+    color: var(--primary-color);
+    padding: 0 15px;
+    margin-left: -10px;
+    font-size: 1.25em;
+    flex-shrink: 0;
+}
+
+.form-grid-2-col,
+.form-grid-3-col,
+.form-grid-2-col-sidebar {
+    display: grid;
+    grid-template-columns: minmax(120px, auto) 1fr;
+    gap: 15px 20px;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.contact-info-grid.form-grid-2-col {
+    grid-template-columns: minmax(120px, auto) 1fr;
+}
+
+label {
+    font-weight: 500;
+    color: var(--text-color);
+    text-align: right;
+    padding-right: 15px;
+    white-space: nowrap;
+    font-size: 1.05em;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--input-bg-color, #fff);
+    color: var(--text-color);
+    font-size: 1.05em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+    min-height: 40px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.25);
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+    max-height: 250px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    grid-column: span 2;
+    font-size: 1.05em;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: auto;
+    transform: scale(1.3);
+    accent-color: var(--primary-color);
+}
+
+.file-input-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.input-with-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.dropdown-toggle-btn {
+    background-color: var(--button-bg-color, #4a90e2);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    height: 100%;
+    margin-left: -1px;
+}
+
+.dropdown-toggle-btn:hover {
+    background-color: var(--button-hover-color, #357ABD);
+}
+
+.custom-dropdown-list {
+    
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--sidebar-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    max-height: 450px;
+    overflow-y: auto;
+    z-index: 1001;
+}
+
+.custom-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: var(--header-bg-color, #f0f0f0);
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    color: var(--text-color-dark);
+    font-size: 1.05em;
+}
+
+.custom-dropdown-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    color: var(--text-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+    font-size: 1em;
+}
+
+.custom-dropdown-item:hover {
+    background-color: var(--hover-bg-color, #e0e0e0);
+}
+
+.employee-fullname {
+    flex-basis: 60%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.employee-title {
+    flex-basis: 40%;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-color-light);
+    font-size: 0.95em;
+}
+
+/* Modal Footer */
+.modal-footer {
+    display: flex;
+    justify-content: space-between; /* Adjusted to space-between for left/right alignment */
+    padding: 20px 0 0;
+    border-top: 1px solid var(--border-color);
+    gap: 15px;
+    flex-shrink: 0;
+    margin-top: 25px;
+}
+
+.modal-footer .footer-spacer {
+    flex-grow: 1; /* Pushes content to the right */
+}
+
+.modal-footer .btn-group-right {
+    display: flex;
+    gap: 15px; /* Space between save buttons */
+}
+
+
+/* Generic Button Styles */
+.btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.05em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: var(--primary-color, #007bff);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover-color, #0056b3);
+}
+
+.btn-save {
+    background-color: var(--success-color, #28a745);
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: var(--success-hover-color, #218838);
+}
+
+.btn-cancel {
+    background-color: var(--danger-color, #dc3545);
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: var(--danger-hover-color, #c82333);
+}
+
+/* DataTables Specific Styling (for all tables) */
+
+/* General wrapper for all DataTables instances */
+.dataTables_wrapper {
+    display: block;
+    width: 100%;
+    overflow: visible; /* Allow content to overflow initially, handled by specific scrolls */
+    position: relative;
+}
+
+/* Ensure DataTables top bar (length and filter) are inline */
+.dataTables_wrapper .top {
+    display: flex;
+    justify-content: space-between; /* Aligns length left, filter right */
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    gap: 10px; /* Space between length and filter if they wrap */
+}
+.dataTables_wrapper .dataTables_length {
+    float: none; /* Override default float */
+    margin-bottom: 0; /* Override default margin */
+    display: flex; /* Ensure inline for its content */
+    align-items: center;
+}
+.dataTables_wrapper .dataTables_filter {
+    float: none; /* Override default float */
+    margin-bottom: 0; /* Override default margin */
+    display: flex; /* Ensure inline for its content */
+    align-items: center;
+}
+
+
+/* DataTables table body scroll adjustments */
+/* Main quotationTable will have horizontal scroll in its body */
+.quotation-table .dataTables_scrollBody {
+    overflow-x: auto !important;
+    overflow-y: hidden; /* Let the fixed-bottom-bar handle its own scroll area */
+    padding-bottom: 15px;
+}
+
+/* quotationLinesTable will have both horizontal and vertical scroll in its body */
+.quotation-lines-table .dataTables_scrollBody {
+    overflow-x: auto !important;
+    overflow-y: auto !important; /* Explicitly enable vertical scroll for the table body */
+    padding-bottom: 15px;
+}
+
+.table-container {
+    width: 90%; /* عرض الوعاء 90% من الشاشة */
+    max-width: 1400px; /* لكن لا يتجاوز 1400px */
+    margin: 20px auto; /* توسيط الوعاء في الصفحة */
+    /* يمكنك إضافة ارتفاع ثابت هنا إذا أردت التحكم في طول الجدول الكلي */
+    /* height: 600px; */
+    /* overflow: hidden; */ /* لإخفاء التمرير هنا إذا كنت تتحكم في ارتفاع الجدول بالكامل */
+}
+/* Base table styling applied to all tables with these classes */
+
+.quotation-table,
+.quotation-lines-table,
+.price-list-table { /* NEW: Include price-list-table */
+    width: 100%;
+    min-width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+    /* table-layout: fixed; MOVED THIS TO SPECIFIC TABLES BELOW */
+}
+
+/* NEW: Apply table-layout: fixed only to the tables that need it for column definitions */
+.quotation-table,
+.quotation-lines-table,
+.price-list-table {
+    table-layout: fixed;
+}
+
+
+.quotation-table th,
+.quotation-table td,
+.quotation-lines-table th,
+.quotation-lines-table td,
+.price-list-table th, /* NEW: Include price-list-table */
+.price-list-table td { /* NEW: Include price-list-table */
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    white-space: nowrap; /* Keep content on a single line */
+    font-size: 0.95em;
+    overflow: hidden; /* Hide overflowing content */
+    text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+}
+
+/* Professional Table Headers and Rows (applied to all tables) */
+.quotation-table thead th,
+.quotation-lines-table thead th,
+.price-list-table thead th { /* NEW: Include price-list-table */
+    background-color: var(--header-bg-color);
+    color: var(--text-color-dark);
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-size: 1em;
+    text-transform: capitalize; /* First letter of each word capital */
+    letter-spacing: 0.05em; /* Add slight letter spacing */
+    padding: 15px 12px; /* Increase padding for a more professional look */
+    border-bottom: 2px solid var(--primary-color); /* Stronger bottom border */
+    visibility: visible !important; /* Ensure headers are always visible */
+    height: auto !important; /* Ensure height is not collapsed */
+    min-height: 40px !important; /* Minimum height to prevent collapse */
+}
+
+/* NEW: Ensure DataTables internal header wrappers have proper width */
+.dataTables_scrollHeadInner {
+    width: 100% !important; /* Force it to take full width of its container */
+    /* table-layout: fixed; This should be inherited from the table itself if fixed */
+}
+
+/* NEW: Ensure th elements inside the scroll head are behaving */
+.dataTables_scrollHeadInner thead th {
+    min-width: 50px; /* A safe minimum width for any header */
+    box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+
+.quotation-table tbody tr:nth-child(even),
+.quotation-lines-table tbody tr:nth-child(even),
+.price-list-table tbody tr:nth-child(even) { /* NEW: Include price-list-table */
+    background-color: var(--table-alt-row-bg);
+}
+
+.quotation-table tbody tr:hover,
+.quotation-lines-table tbody tr:hover,
+.price-list-table tbody tr:hover { /* NEW: Include price-list-table */
+    background-color: var(--table-hover-bg);
+    box-shadow: inset 0 0 0 1px rgba(var(--primary-color-rgb), 0.2); /* Subtle hover border/shadow */
+}
+
+/* NEW: Style for selected rows - More prominent blue */
+.quotation-lines-table tbody tr.selected-row,
+.price-list-table tbody tr.selected-row {
+    background-color: var(--selection-color) !important; /* Use !important to override DataTables alternating row colors */
+    outline: 2px solid var(--selection-border-color); /* Add a border for stronger visual cue */
+    outline-offset: -2px; /* Pull outline inside border */
+}
+
+/* NEW: Style for group header rows */
+.quotation-lines-table tbody tr.group-header-row {
+    background-color: var(--group-header-bg) !important; /* Distinct background */
+    color: var(--group-header-text);
+    font-weight: bold;
+    font-size: 1.1em;
+    border-bottom: 2px solid var(--selection-border-color);
+    border-top: 1px solid var(--selection-border-color);
+    cursor: default; /* No pointer cursor */
+}
+
+.quotation-lines-table tbody tr.group-header-row td {
+    padding-left: 20px; /* Indent group header text */
+}
+
+.quotation-lines-table tbody tr.group-header-row:hover {
+    background-color: var(--group-header-bg) !important; /* No hover effect on group headers */
+    box-shadow: none !important;
+}
+
+
+.quotation-table .filter-row td,
+.quotation-lines-table .filter-row td {
+    padding: 8px 12px;
+    background-color: var(--filter-row-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.quotation-table .filter-row input.column-filter,
+.quotation-lines-table .filter-row input.column-filter {
+    width: calc(100% - 10px);
+    padding: 6px 10px;
+    border: 1px solid var(--input-border-color, #ccc);
+    border-radius: 4px;
+    font-size: 0.95em;
+    background-color: var(--input-bg-color, #fff);
+    color: var(--text-color);
+    box-sizing: border-box;
+}
+
+/* Generalize "Show X entries" dropdown size for all DataTables instances */
+.dataTables_wrapper .dataTables_length select {
+    width: 70px;
+    padding: 6px 8px;
+    font-size: 0.9em;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    margin-left: 8px;
+    box-sizing: border-box;
+}
+
+/* DataTables Pagination and Info Styling (Unified for all DataTables instances) */
+
+/* The combined info and pagination section */
+div.dataTables_wrapper div.dataTables_info,
+div.dataTables_wrapper div.dataTables_paginate {
+    float: none !important; /* Remove floats to allow flexbox to control layout */
+}
+
+/* The parent container for info and paginate, often .dataTables_bottom or directly inside wrapper */
+/* This ensures "Showing X entries" and pagination buttons are on the same line and aligned */
+/* For tables inside modals (e.g., lines table), DataTables generates its own 'bottom' div */
+.dataTables_wrapper .dataTables_bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Ensures vertical alignment */
+    padding-top: 0.85em; /* Standard DataTables padding */
+}
+
+/* Ensuring both .dataTables_info and .dataTables_paginate are flex items and aligned */
+/* Applying flexbox properties directly to the pagination elements for both fixed bar and internal tables */
+.fixed-bottom-bar { /* This is the specific container for the main table's info/paginate */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--secondary-bg-color);
+    padding: 15px 20px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    box-sizing: border-box;
+    padding-bottom: env(safe-area-inset-bottom, 15px);
+}
+
+
+/* Info text alignment */
+div.dataTables_wrapper div.dataTables_info,
+#quotation-pagination-fixed-bottom div.dataTables_info { /* Targeting info in fixed bar specifically */
+    color: var(--text-color-light);
+    font-size: 1em;
+    white-space: nowrap;
+    padding-top: 0; /* Reset padding as parent flex handles alignment */
+    line-height: 40px; /* Match button height for perfect vertical alignment */
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+/* Pagination container styling */
+div.dataTables_wrapper div.dataTables_paginate,
+#quotation-pagination-fixed-bottom div.dataTables_paginate { /* Targeting paginate in fixed bar specifically */
+    font-size: 1em;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px !important; /* Increased gap, important for override */
+    padding-top: 0; /* Reset padding as parent flex handles alignment */
+}
+
+/* Individual pagination button styling - FLEXIBLE WIDTH, TRANSPARENT STYLE */
+/* Applies to all DataTables pagination buttons within any wrapper or the fixed bar */
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button,
+div.dataTables_wrapper div.dataTables_paginate span.paginate_button,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button {
+    padding: 8px 14px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    background-color: var(--button-bg-color-light) !important;
+    color: var(--text-color-dark) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    text-align: center;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important; /* Remove default margin, important for override */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08) !important;
+    font-weight: 500;
+    text-decoration: none !important;
+    font-size: 0.95em;
+}
+
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button:hover,
+div.dataTables_wrapper div.dataTables_paginate span.paginate_button:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button:hover {
+    transform: translateY(-2px);
+    background-color: var(--hover-bg-color) !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button.current,
+div.dataTables_wrapper div.dataTables_paginate span.paginate_button.current,
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button.current:hover,
+div.dataTables_wrapper div.dataTables_paginate span.paginate_button.current:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.current,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.current,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.current:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.current:hover {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+    transform: none;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2) !important;
+}
+
+/* Style for First and Last buttons - Darker background */
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button.first,
+div.dataTables_wrapper div.dataTables_paginate span.paginate_button.first,
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button.last,
+div.dataTables_wrapper div.paginate_button.last,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.first,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.first,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.last,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.last {
+    background-color: var(--button-darker-bg) !important;
+    border-color: var(--button-darker-border) !important;
+    color: var(--text-color-dark) !important;
+}
+
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button.first:hover,
+div.dataTables_wrapper div.dataTables_paginate span.paginate_button.first:hover,
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button.last:hover,
+div.dataTables_wrapper div.dataTables_paginate span.paginate_button.last:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.first:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.first:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.last:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.last:hover {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Add style for disabled pagination buttons */
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button.disabled,
+div.dataTables_wrapper div.dataTables_paginate span.paginate_button.disabled,
+div.dataTables_wrapper div.dataTables_paginate a.paginate_button.disabled:hover,
+div.dataTables_wrapper div.dataTables_paginate span.paginate_button.disabled:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.disabled,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.disabled,
+#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.disabled:hover,
+#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.disabled:hover {
+    background-color: var(--button-bg-color-light) !important;
+    color: var(--text-color-light) !important;
+    cursor: not-allowed !important;
+    border-color: var(--border-color) !important;
+    transform: none !important;
+    box-shadow: none !important;
+    opacity: 0.5 !important;
+}
+
+
+/* Clear floats for DataTables elements to work better with flexbox */
+/* These are already covered by the specific selectors above */
+/* .dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    float: none !important;
+} */
+
+
+/* *******************************************************************
+ * Styles for the fixed bottom pagination bar (main table pagination)
+ ******************************************************************* */
+.fixed-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* These properties are already correct, just ensuring they are here */
+    background-color: var(--secondary-bg-color);
+    padding: 15px 20px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    box-sizing: border-box;
+    padding-bottom: env(safe-area-inset-bottom, 15px);
+}
+
+body {
+    padding-bottom: 80px; /* Adjust this value based on the height of your fixed bar */
+}
+
+body.dark-mode .fixed-bottom-bar {
+    background-color: var(--secondary-bg-color);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    border-top: 1px solid var(--border-color);
+}
+
+/* *******************************************************************
+ * Styles for Quote Lines Tab (based on the image and new requirements)
+ * Focus on horizontal toolbar layout.
+ ******************************************************************* */
+.lines-tab-layout.tab-content.active { /* Target linesTab specifically when active */
+    display: grid; /* Re-enabled grid for main content and sidebar */
+    grid-template-columns: 1fr 350px; /* Main content (table) flexible, sidebar fixed */
+    grid-template-rows: 1fr; /* One row for main content and sidebar */
+    gap: 25px; /* Space between main content and sidebar */
+    height: 100%; /* Take full height of parent */
+    min-height: 0; /* Allow content to define height */
+    overflow: hidden; /* Changed to hidden to better manage internal scrollbars */
+    box-sizing: border-box; /* Crucial for height calculations */
+}
+
+.lines-main-content {
+    grid-column: 1; /* Explicitly place in the first column */
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Fill height in grid */
+    min-height: 0; /* Allow shrinking */
+    overflow: hidden; /* Hide overflow to let table container handle its own scroll */
+    box-sizing: border-box;
+}
+
+.lines-sidebar {
+    grid-column: 2; /* Explicitly place in the second column */
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    height: 100%; /* Fill height in grid */
+    overflow-y: auto; /* Allow sidebar to scroll if its content overflows */
+    padding-right: 5px; /* Small padding for scrollbar */
+    min-height: fit-content; /* Allow content to define height */
+}
+
+.lines-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0; /* No margin here, gap in parent handles spacing */
+    flex-wrap: wrap; /* Allow wrapping of items to multiple rows if needed */
+    flex-shrink: 0; /* Prevent shrinking */
+    box-sizing: border-box;
+}
+
+.lines-toolbar .btn {
+    padding: 8px 15px;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.lines-toolbar .btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    background-color: var(--button-bg-color-light);
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.lines-toolbar .btn-icon:hover {
+    background-color: var(--hover-bg-color);
+    color: var(--primary-color);
+}
+
+.lines-toolbar .btn-add-line {
+    /* Adjusted to be an icon-only button */
+    padding: 0; /* Remove padding */
+    width: 40px; /* Fixed width */
+    height: 40px; /* Fixed height */
+    display: flex; /* Use flex to center icon */
+    justify-content: center;
+    align-items: center;
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    border-radius: 8px; /* Maintain rounded corners */
+}
+
+.lines-toolbar .btn-add-line:hover {
+    background-color: var(--primary-hover-color);
+}
+
+.lines-toolbar .icon-separator {
+    width: 1px;
+    height: 30px;
+    background-color: var(--border-color);
+    margin: 0 10px;
+}
+
+.lines-table-container { /* Renamed from .table-container for clarity */
+    width: 100%;
+    flex-grow: 1; /* Allow table container to take remaining height */
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden; /* Set to hidden so DataTables internal scrollbars manage overflow */
+    min-height: 0; /* Allow shrinking */
+    display: flex; /* To make DataTables wrapper fill height */
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Ensure DataTables wrapper inside lines-table-container takes full height */
+.lines-table-container .dataTables_wrapper {
+    flex-grow: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+.lines-table-container .dataTables_scroll {
+    flex-grow: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+/* Ensure DataTables scroll body itself can have horizontal scroll if needed */
+.lines-table-container .dataTables_scrollBody {
+    flex-grow: 1;
+    min-height: 0;
+    overflow-x: auto !important; /* Explicitly enable horizontal scroll for the table body */
+    overflow-y: auto !important; /* Explicitly enable vertical scroll for the table body */
+    padding-bottom: 15px; /* Add padding for the scrollbar */
+}
+
+
+/* Checkbox styling within the lines table */
+.quotation-lines-table input[type="checkbox"] {
+    width: auto;
+    transform: scale(1.2);
+    accent-color: var(--primary-color);
+}
+
+/* Small buttons for actions within table cells (Edit/Delete) */
+.quotation-lines-table .btn-sm {
+    padding: 5px 8px;
+    font-size: 0.85em;
+    border-radius: 4px;
+}
+
+/* Dark Mode for new elements */
+body.dark-mode .lines-toolbar .btn-icon {
+    background-color: var(--button-bg-color-light);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+body.dark-mode .lines-toolbar .btn-icon:hover {
+    background-color: var(--hover-bg-color);
+    color: var(--primary-color);
+}
+body.dark-mode .lines-toolbar .icon-separator {
+    background-color: var(--border-color);
+}
+body.dark-mode .lines-table-container {
+    border-color: var(--border-color);
+}
+body.dark-mode .quotation-lines-table th,
+body.dark-mode .quotation-lines-table td {
+    border-color: var(--border-color);
+}
+body.dark-mode .quotation-lines-table thead th {
+    background-color: var(--header-bg-color);
+    color: var(--text-color-dark);
+}
+body.dark-mode .quotation-lines-table tbody tr:nth-child(even) {
+    background-color: var(--table-alt-row-bg);
+}
+body.dark-mode .quotation-lines-table tbody tr.selected-row {
+    background-color: var(--selection-color) !important;
+    outline-color: var(--selection-border-color);
+}
+body.dark-mode .quotation-lines-table tbody tr.group-header-row {
+    background-color: var(--group-header-bg) !important;
+    color: var(--group-header-text);
+}
+body.dark-mode .quotation-lines-table tbody tr:hover {
+    background-color: var(--table-hover-bg);
+}
+body.dark-mode .quotation-lines-table .filter-row td {
+    background-color: var(--filter-row-bg);
+}
+body.dark-mode .quotation-lines-table .filter-row input.column-filter {
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+/* Price List Modal Specific Styles */
+.price-list-top-toolbar {
+    display: flex; /* Ensure flexbox for alignment */
+    align-items: center; /* Vertically align items */
+    gap: 10px; /* Space between input and button */
+    margin-bottom: 15px; /* Space below the toolbar */
+}
+
+.price-list-top-toolbar input[type="text"] {
+    flex-grow: 1; /* Allow input to take available space */
+    max-width: 300px; /* Set a max-width for the search input */
+    padding: 8px 12px; /* Adjusted padding for medium size */
+    font-size: 0.95em; /* Adjusted font size */
+    height: 38px; /* Fixed height for consistency */
+    box-sizing: border-box; /* Include padding in height */
+}
+
+.price-list-top-toolbar .btn-search-price-list {
+    padding: 8px 15px; /* Adjusted padding for medium size */
+    font-size: 0.95em; /* Adjusted font size for text */
+    height: 38px; /* Match input height */
+    display: flex; /* Use flex to align icon and text */
+    align-items: center; /* Vertically align icon and text */
+    gap: 5px; /* Space between icon and text */
+}
+
+.price-list-top-toolbar .btn-search-price-list i {
+    font-size: 1.1em; /* Adjusted icon size to be slightly larger than text */
+    margin-right: 0; /* Remove previous margin */
+}
+
+/* NEW: Reset Search Button Styling */
+.price-list-top-toolbar .btn-reset-search {
+    padding: 8px 15px;
+    font-size: 0.95em;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: var(--button-bg-color-light); /* Use a neutral color */
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.price-list-top-toolbar .btn-reset-search:hover {
+    background-color: var(--hover-bg-color);
+    color: var(--primary-color);
+}
+
+
+/* Responsive adjustments for fixed modal width and grid layout */
+@media (max-width: 1450px) {
+    .modal-content {
+        width: 1300px; /* Adjust modal width for smaller large screens */
+        min-width: 900px;
+    }
+}
+
+@media (max-width: 1350px) {
+    .modal-content {
+        width: 1200px;
+        min-width: 800px;
+    }
+    #headerTab.active,
+    .lines-tab-layout.tab-content.active { /* Apply to lines tab grid as well */
+        grid-template-columns: 1fr 300px; /* Adjust sidebar width */
+    }
+}
+
+@media (max-width: 1100px) {
+    .modal-content {
+        width: 95vw;
+        min-width: 700px;
+    }
+    #headerTab.active,
+    .lines-tab-layout.tab-content.active { /* Apply to lines tab grid as well */
+        grid-template-columns: 1fr 280px;
+        gap: 20px;
+    }
+    .modal-body-content {
+        gap: 20px;
+    }
+    .left-form-section, .right-sidebar-section,
+    .lines-main-content, .lines-sidebar { /* Common adjustments for content areas */
+        gap: 20px;
+    }
+    fieldset {
+        padding: 15px;
+    }
+    legend {
+        font-size: 1.15em;
+    }
+    input[type="text"], input[type="number"], input[type="date"], textarea, select {
+        padding: 9px 12px;
+        font-size: 1em;
+        min-height: 38px;
+    }
+    label {
+        font-size: 1em;
+    }
+    .btn {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    .custom-dropdown-list {
+        max-height: 350px;
+    }
+    /* Toolbar buttons will now wrap naturally */
+    .lines-toolbar {
+        flex-direction: row; /* Ensure it stays row direction */
+        flex-wrap: wrap; /* Allow wrapping */
+        align-items: center;
+        gap: 10px; /* Keep consistent gap */
+    }
+    .lines-toolbar .icon-separator {
+        display: block; /* Show separator again */
+    }
+    .lines-toolbar .btn-icon,
+    .lines-toolbar .btn-add-line {
+        width: 40px; /* Fixed width */
+        height: 40px; /* Fixed height */
+        padding: 0; /* No padding for icon-only buttons */
+        justify-content: center; /* Center icon */
+    }
+    .lines-toolbar .btn-icon i,
+    .lines-toolbar .btn-add-line i {
+        margin-right: 0; /* No margin for icon-only buttons */
+    }
+}
+
+@media (max-width: 992px) {
+    /* Tablet-sized screens - stack all sections vertically */
+    .modal-content {
+        width: 95vw;
+        min-width: unset;
+        height: 90vh; /* Allow height to be responsive but not full screen */
+        max-width: unset;
+        display: flex; /* Ensure flex for column layout */
+        flex-direction: column;
+    }
+    .modal-body-content {
+        flex-direction: column;
+        overflow-y: auto; /* Ensure vertical scroll for the main modal body content */
+        padding-right: 0; /* Remove padding when stacked vertically */
+        height: 100%; /* Fill available height from parent grid row */
+        flex-grow: 1; /* Allow to grow */
+        min-height: 0; /* Crucial for proper flex behavior */
+        box-sizing: border-box;
+    }
+    .tab-content.active { /* This applies to both headerTab and linesTab */
+        display: flex; /* Switch to flexbox for stacking */
+        flex-direction: column;
+        gap: 20px;
+        height: auto; /* Allow content to dictate height when stacked, crucial for scrolling */
+        overflow-y: visible; /* Let parent modal-body-content handle the scroll */
+        padding-right: 0;
+        min-height: 0; /* Crucial for flex children to shrink */
+        flex-shrink: 0; /* Prevent inner content from shrinking too much */
+    }
+    /* Specific overrides for linesTab layout to stack on smaller screens */
+    .lines-tab-layout.tab-content.active {
+        grid-template-columns: 1fr; /* Single column for stacking */
+        gap: 20px;
+        height: auto; /* Auto height, let modal-body-content scroll */
+    }
+
+    /* Force a max-height on the DataTables scroll body in Quote Lines tab when stacked */
+    #linesTab .lines-table-container .dataTables_scrollBody {
+        max-height: 250px; /* Adjusted to a reasonable fixed height for scroll to appear */
+        overflow-y: auto !important; /* Re-affirm scroll */
+    }
+
+
+    #headerTab .left-form-section,
+    #headerTab .right-sidebar-section,
+    .lines-main-content,
+    .lines-sidebar { /* Apply to lines tab sections too */
+        grid-area: unset; /* Remove grid area definitions */
+        width: 100%;
+        flex: none;
+        height: auto; /* Let content dictate height */
+        overflow-y: visible; /* Let parent handle scroll */
+        padding-right: 0;
+    }
+    fieldset {
+        flex-grow: 0;
+        height: auto; /* Allow content to dictate height */
+        overflow-y: visible; /* Let parent handle scroll */
+        padding-right: 0;
+    }
+    .form-grid-2-col,
+    .form-grid-3-col,
+    .form-grid-2-col-sidebar {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    label {
+        text-align: left;
+        padding-right: 0;
+        font-size: 1em;
+    }
+    .checkbox-container {
+        grid-column: auto / span 1;
+        font-size: 1em;
+    }
+    input[type="text"], input[type="number"], input[type="date"], textarea, select {
+        min-height: 36px;
+    }
+    .btn {
+        padding: 9px 18px;
+        font-size: 0.95em;
+    }
+    .custom-dropdown-list {
+        max-height: 300px;
+    }
+    /* Toolbar buttons will now wrap naturally */
+    .lines-toolbar {
+        flex-direction: row; /* Ensure it stays row direction */
+        flex-wrap: wrap; /* Allow wrapping */
+        align-items: center;
+        gap: 10px; /* Keep consistent gap */
+    }
+    .lines-toolbar .icon-separator {
+        display: block; /* Show separator again */
+    }
+    .lines-toolbar .btn-icon,
+    .lines-toolbar .btn-add-line {
+        width: 40px; /* Fixed width */
+        height: 40px; /* Fixed height */
+        padding: 0; /* No padding for icon-only buttons */
+        justify-content: center; /* Center icon */
+    }
+    .lines-toolbar .btn-icon i,
+    .lines-toolbar .btn-add-line i {
+        margin-right: 0; /* No margin for icon-only buttons */
+    }
+}
+
+@media (max-width: 768px) {
+    /* For smaller mobile screens */
+    .modal-content {
+        width: 100%;
+        min-width: unset;
+        border-radius: 0;
+        height: 100vh;
+        max-height: 100vh;
+    }
+    .modal-content {
+        padding: 15px;
+        min-height: unset;
+        border-radius: 0;
+    }
+    .modal-body-content {
+        gap: 15px;
+        padding-bottom: 15px;
+    }
+    .tab-list {
+        padding-left: 0;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+    .tab {
+        padding: 10px 15px;
+        font-size: 0.9em;
+        margin-bottom: 0;
+    }
+    fieldset {
+        padding: 12px;
+    }
+    legend {
+        font-size: 1.1em;
+    }
+    input[type="text"], input[type="number"], input[type="date"], textarea, select {
+        padding: 8px 10px;
+        font-size: 0.9em;
+        min-height: 34px;
+    }
+    .checkbox-container {
+        font-size: 0.9em;
+    }
+    .btn {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+    .custom-dropdown-list {
+        max-height: 250px;
+    }
+
+    /* Adjust max-height for DataTables scroll body on very small screens */
+    #linesTab .lines-table-container .dataTables_scrollBody {
+        max-height: 150px;
+    }
+
+    /* Price list modal search bar on small screens */
+    .price-list-top-toolbar input[type="text"] {
+        max-width: 100%; /* Allow full width on small screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .price-list-modal-grid {
+        padding: 10px;
+    }
+    .price-list-modal-grid .modal-header-title h2 {
+        font-size: 1.3em;
+    }
+    .price-list-top-toolbar input[type="text"],
+    .price-list-top-toolbar .btn {
+        font-size: 0.85em; /* Adjusted for very small screens */
+        padding: 5px 8px; /* Adjusted for very small screens */
+    }
+    .price-list-top-toolbar .btn-search-price-list i {
+        font-size: 1em; /* Adjusted icon size for very small screens */
+    }
+    .price-list-table-container .dataTables_scrollBody {
+        max-height: 100px;
+    }
+}
+/* في ملف CSS الخاص بك */
+
+.custom-dropdown-list {
+    /* ... existing styles ... */
+    display: none; /* Controlled by JS */
+    /* Add grid or flex for alignment if headers are used too */
+}
+
+/* For each item row */
+.custom-dropdown-item {
+    display: flex; /* Use flexbox for columns */
+    justify-content: space-between; /* Space out columns */
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee; /* Optional: for visual separation */
+}
+
+.custom-dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+
+
+.dropdown-column-name {
+    flex: 1; /* Take remaining space */
+    text-align: right; /* Or left/center as preferred */
+    padding-left: 15px; /* إضافة مسافة على اليسار ليتناسب مع الفاصل */
+}
+
+/* Optional: Styles for header row if you decide to add them */
+.custom-dropdown-header-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    font-weight: bold;
+    border-bottom: 2px solid #ccc;
+    background-color: #f8f8f8;
+}
+
+
+
+.custom-dropdown-header-row .dropdown-column-name-header {
+    padding-left: 15px;
+}
+/* --- نهاية التعديل الجديد --- */
+
+/* Style for the button next to the input field */
+#showProjectCodeListBtn {
+    /* أضف أنماط الزر هنا، مثل */
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: -1px; /* لجعل الزر ملتصقاً بحقل الإدخال */
+}
+
+#showProjectCodeListBtn:hover {
+    background-color: #0056b3;
+}
+
+/* لتنسيق الحقل نفسه، إذا كنت تستخدم نمطاً محدداً */
+#quoteProjectCodeInput {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-grow: 1; /* إذا كان ضمن flex container */
+}
+
+/* لتنسيق الحقول المرتبطة مثل Project و Customer */
+#quoteProject,
+#quoteCustomer {
+    background-color: #f8f9fa; /* لون خلفية مختلف للإشارة إلى أنها تعبأ تلقائياً */
+    border: 1px solid #e9ecef;
+    color: #495057;
+    cursor: not-allowed; /* تغيير المؤشر للإشارة إلى أنها غير قابلة للتحرير المباشر */
+    opacity: 0.8; /* جعلها باهتة قليلاً */
+}
+
+.project-code-input-group {
+    position: relative; /* ضروري لتموضع القائمة المنسدلة */
+    display: flex; /* لترتيب الحقل والزر جنباً إلى جنب */
+    /* قد تحتاج إلى width هنا إذا لم يتم تحديده من قبل */
+}
+
+/* لتنسيق الزر الملاصق لحقل الإدخال داخل input-group */
+.project-code-input-group .form-control:focus {
+    z-index: 3; /* لجعل الحقل فوق الزر عند التركيز عليه */
+}
+
+.project-code-input-group .project-code-dropdown-toggle-btn {
+    /* بعض الأنماط الإضافية إذا لزم الأمر لـ input-group */
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px; /* لجعل الزر ملتصقاً بحقل الإدخال */
+    z-index: 2; /* لضمان ظهور الزر بشكل صحيح */
+}
+
+/* تأكد أن هذه الأنماط موجودة ومحدثة كما اتفقنا سابقاً */
+.custom-dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    display: none;
+    /* ... باقي أنماط القائمة المنسدلة (الخلفية، الحدود، الظل، إلخ) ... */
+}
+
+/* تنسيق المجموعة الحاوية لحقل الإدخال والزر */
+.project-code-input-group {
+    position: relative; /* ضروري لتموضع القائمة المنسدلة بشكل مطلق بداخلها */
+    display: flex; /* لترتيب حقل الإدخال والزر جنبًا إلى جنب */
+    width: 100%; /* اجعلها تأخذ عرض الوعاء الأب */
+    /* يمكنك تحديد عرض ثابت هنا إذا لم تكن تريدها أن تأخذ 100% */
+}
+
+/* تنسيق حقل الإدخال نفسه */
+#quoteProjectCodeInput {
+    padding: 8px 12px;
+    border: 1px solid #ced4da; /* لون حدود Bootstrap الافتراضي */
+    border-radius: 0.25rem; /* زوايا مدورة */
+    border-top-right-radius: 0; /* إزالة الزاوية اليمنى العلوية ليلتصق بالزر */
+    border-bottom-right-radius: 0; /* إزالة الزاوية اليمنى السفلية ليلتصق بالزر */
+    flex-grow: 1; /* اجعله يملأ المساحة المتاحة داخل الـ flex container */
+    background-color: #f8f9fa; /* لون خلفية مختلف للإشارة إلى أنه للقراءة فقط أو يتم تعبئته */
+    color: #495057;
+    cursor: default; /* مؤشر افتراضي لأنه للقراءة فقط */
+}
+
+/* عندما يكون حقل الإدخال في حالة تركيز (focus) */
+#quoteProjectCodeInput:focus {
+    outline: 0; /* إزالة التظليل الافتراضي للمتصفح */
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* ظل تركيز أزرق فاتح (مثل Bootstrap) */
+    border-color: #86b7fe; /* تغيير لون الحدود عند التركيز */
+    z-index: 3; /* لضمان ظهوره فوق الزر عند التركيز */
+}
+
+/* تنسيق زر السهم */
+#showProjectCodeListBtn {
+    background-color: #0d6efd; /* لون أزرق أساسي (مثل btn-primary في Bootstrap) */
+    color: white;
+    border: 1px solid #0d6efd;
+    padding: 8px 12px;
+    border-radius: 0.25rem;
+    border-top-left-radius: 0; /* إزالة الزاوية اليسرى العلوية ليلتصق بالحقل */
+    border-bottom-left-radius: 0; /* إزالة الزاوية اليسرى السفلية ليلتصق بالحقل */
+    cursor: pointer;
+    margin-left: -1px; /* لجعل الزر ملتصقًا تمامًا بحقل الإدخال */
+    z-index: 2; /* لضمان ظهور الزر بشكل صحيح بجانب الحقل */
+    display: flex; /* لمركزة الأيقونة داخل الزر */
+    align-items: center; /* لمركزة الأيقونة عموديًا */
+    justify-content: center; /* لمركزة الأيقونة أفقيًا */
+}
+
+#showProjectCodeListBtn:hover {
+    background-color: #0b5ed7; /* لون أزرق أغمق عند التمرير */
+    border-color: #0a58ca;
+}
+
+#showProjectCodeListBtn i {
+    font-size: 1.1em; /* حجم الأيقونة */
+}
+
+/* تنسيق حاوية القائمة المنسدلة نفسها */
+#projectCodeDropdown.custom-dropdown-list {
+    position: absolute; /* لوضعها أسفل حقل الإدخال */
+    top: 100%; /* ضعها أسفل العنصر الأب مباشرة */
+    left: 0;
+    width: 100%; /* اجعل عرضها بنفس عرض حقل الإدخال */
+    z-index: 1000; /* لضمان ظهورها فوق كل شيء آخر */
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-top: none; /* إزالة الحدود العلوية ليلتصق بحقل الإدخال */
+    border-radius: 0 0 0.25rem 0.25rem; /* زوايا مدورة سفلية فقط */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175); /* ظل خفيف */
+    max-height: 200px; /* تحديد أقصى ارتفاع */
+    overflow-y: auto; /* إضافة شريط تمرير إذا تجاوز المحتوى الارتفاع الأقصى */
+    display: none; /* مخفية افتراضيًا، يتم التحكم بها بواسطة JavaScript */
+}
+
+/* تنسيق صفوف عناصر القائمة المنسدلة */
+.custom-dropdown-item {
+    display: flex; /* لترتيب الأعمدة داخل الصف */
+    justify-content: space-between; /* لتوزيع الأعمدة */
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee; /* فاصل خفيف بين العناصر */
+    font-size: 0.9em; /* حجم خط أصغر قليلاً */
+    color: #343a40;
+}
+
+.custom-dropdown-item:last-child {
+    border-bottom: none; /* إزالة الفاصل من آخر عنصر */
+}
+
+.custom-dropdown-item:hover {
+    background-color: #e9ecef; /* لون خلفية عند التمرير */
+}
+
+/* تنسيق أعمدة بيانات المشروع داخل كل صف */
+.dropdown-column-code {
+    flex-basis: 20%; /* أساس 20% للكود */
+    min-width: 0; /* تجنب المشاكل مع النص الطويل */
+    white-space: nowrap; /* منع التفاف النص */
+    overflow: hidden; /* إخفاء النص الزائد */
+    text-overflow: ellipsis; /* إضافة نقاط (...) للنص المخفي */
+    font-weight: bold;
+}
+
+.dropdown-column-name {
+    flex-basis: 50%; /* أساس 50% لاسم المشروع */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 15px; /* مسافة على اليسار تفصل عن الكود */
+}
+
+.dropdown-column-customer {
+    flex-basis: 30%; /* أساس 30% للعميل */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right; /* محاذاة لليمين */
+    padding-left: 15px; /* مسافة على اليسار تفصل عن الاسم */
+    color: #6c757d; /* لون رمادي فاتح */
+}
+
+/* تنسيق رسالة "لا توجد مشاريع متاحة" */
+.custom-dropdown-item.no-results {
+    font-style: italic;
+    color: #6c757d;
+    text-align: center;
+    justify-content: center;
+}
+
+/* تنسيق الحقول المرتبطة التي تُملأ تلقائياً */
+#quoteProject,
+#quoteCustomer {
+    background-color: #e9ecef; /* لون خلفية مختلف */
+    border: 1px solid #ced4da;
+    color: #495057;
+    cursor: not-allowed; /* تغيير المؤشر للإشارة إلى أنها غير قابلة للتحرير المباشر */
+    opacity: 0.9; /* جعلها باهتة قليلاً */
+    padding: 8px 12px;
+    border-radius: 0.25rem;
+    pointer-events: none; /* منع أي تفاعل بالماوس */
+}
+
+/* إذا كنت تستخدم بنية form-group حول quoteCustomer و quoteProject */
+/* تأكد من أن الـ input فيها يأخذ 100% من عرض الـ form-group */
+.form-group input.form-control {
+    width: 100%;
+}
+
+/* تنسيق المجموعة الحاوية لحقل إدخال جهة الاتصال والزر */
+.contact-person-input-group {
+    position: relative;
+    display: flex;
+    width: 100%;
+}
+
+/* تنسيق حقل إدخال جهة الاتصال نفسه */
+#quoteContactPerson {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    flex-grow: 1;
+}
+
+#quoteContactPerson:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+    z-index: 3;
+}
+
+/* تنسيق زر السهم لجهة الاتصال */
+#showContactPersonListBtn {
+    background-color: #0d6efd; /* لون أزرق أساسي */
+    color: white;
+    border: 1px solid #0d6efd;
+    padding: 8px 12px;
+    border-radius: 0.25rem;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    cursor: pointer;
+    margin-left: -1px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#showContactPersonListBtn:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+#showContactPersonListBtn i {
+    font-size: 1.1em;
+}
+
+/* تنسيق حاوية القائمة المنسدلة لجهات الاتصال */
+#contactPersonDropdown.custom-dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 0.25rem 0.25rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+    max-height: 250px;
+    overflow-y: auto;
+    display: none;
+}
+
+/* تنسيق صف الرأس لأعمدة جهات الاتصال */
+.custom-dropdown-header-row .dropdown-column-contact-name-header,
+.custom-dropdown-header-row .dropdown-column-contact-title-header,
+.custom-dropdown-header-row .dropdown-column-contact-email-header,
+.custom-dropdown-header-row .dropdown-column-contact-mobile-header,
+.custom-dropdown-header-row .dropdown-column-contact-location-header {
+    /* يمكنك تعديل التباعدات هنا للحفاظ على التناسق */
+    padding: 8px 5px; /* تباعد افتراضي لرؤوس الأعمدة */
+    font-weight: bold;
+}
+
+/* تنسيق أعمدة بيانات جهات الاتصال داخل كل صف */
+.dropdown-column-contact-name {
+    flex-basis: 20%; /* اسم جهة الاتصال */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+}
+
+.dropdown-column-contact-title {
+    flex-basis: 20%; /* الوظيفة */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
+}
+
+.dropdown-column-contact-email {
+    flex-basis: 30%; /* البريد الإلكتروني */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
+    color: #007bff;
+}
+
+.dropdown-column-contact-mobile {
+    flex-basis: 15%; /* الموبايل */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
+    text-align: right;
+    color: #28a745;
+}
+
+.dropdown-column-contact-location {
+    flex-basis: 15%; /* الموقع */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
+    text-align: right; /* يمكن تعديل المحاذاة حسب الحاجة */
+}
+
+/* Styling for selected rows in quotation lines table */
+.quotation-lines-table tbody tr.selected-row {
+    background-color: var(--selection-color, #e0f2f7) !important; /* لون أزرق فاتح جميل */
+    /* يمكنك استخدام لون أزرق أغمق قليلاً إذا أردت */
+    /* background-color: rgba(66, 135, 245, 0.2) !important; */
+    border-left: 3px solid var(--primary-color, #007bff); /* خط أزرق سميك على اليسار للتمييز */
+}
+
+/* في حال وجود Dark Mode، تأكد من وجود تعريف لهذا المتغير أو أعد تعريفه */
+body.dark-mode .quotation-lines-table tbody tr.selected-row {
+    background-color: var(--dark-selection-color, rgba(66, 135, 245, 0.2)) !important;
+    border-left-color: var(--primary-color, #007bff);
+}
+
+/* تأكد من تعريف هذه المتغيرات في ملف الأنماط الرئيسي، مثلاً: */
+:root {
+    --selection-color: #e0f2f7; /* لون التحديد الفاتح */
+    --dark-selection-color: rgba(66, 135, 245, 0.2); /* لون التحديد للوضع الداكن */
+    --primary-color: #007bff; /* لونك الأزرق الأساسي */
+}
+/* في ملف CSS الخاص بك */
+
+/* قم بتغيير هذا اللون ليناسب تصميمك */
+/* هذا سيجعل خلفية الصف رمادية داكنة قليلاً */
+#priceListTable tbody tr.selected-row-price-only {
+    background-color: #d8d8d8 !important; /* لون رمادي فاتح / داكن قليلاً ليظهر بوضوح */
+    /* يمكنك استخدام #c0c0c0 لرمادي أغمق قليلاً إذا أردت */
+}
+
+/* إذا كنت تستخدم سمة داكنة (Dark Mode) */
+body.dark-mode #priceListTable tbody tr.selected-row-price-only {
+    background-color: #4a4a4a !important; /* رمادي أغمق للوضع الليلي */
+    color: #ffffff; /* لجعل النص مرئياً بوضوح */
+}
+
+/* تأكد من أن هذه القاعدة تأتي بعد أي قواعد افتراضية لـ DataTables أو قواعد للصفوف الفردية/الزوجية. */
+/* قد تحتاج إلى ضبط الأسبقية إذا كانت لديك قواعد CSS أخرى تؤثر على لون خلفية الصفوف. *//* في ملف CSS الخاص بك (بعد الأنماط العامة للصفوف) */
+
+/* لون أزرق للصفوف المحددة بالـ Checkbox الرئيسي */
+/* يمكنك استخدام هذا كـ Variable في مكان ما: --main-selection-color: #e6f7ff; (أزرق فاتح جداً) */
+/* أو #ADD8E6 (LightBlue) أو #B0E0E6 (PowderBlue) */
+#priceListTable tbody tr.selected-row {
+    background-color: #ADD8E6 !important; /* لون أزرق فاتح */
+    /* قم بتجاوز أي ألوان صفوف بديلة أو Hover Colors */
+    /* يمكنك استخدام لون أزرق أغمق قليلاً مثل #9ACFEA إذا أردت تمييزاً أقوى */
+}
+
+/* إذا كنت تستخدم الوضع الليلي (Dark Mode) */
+body.dark-mode #priceListTable tbody tr.selected-row {
+    background-color: #214050 !important; /* لون أزرق داكن للوضع الليلي */
+    color: #ffffff !important; /* لضمان وضوح النص */
+}
+
+/* تأكد من أن هذه القاعدة تأتي بعد .selected-row-price-only إذا كانت هناك أسبقية */
+/* بشكل عام، الفئة الأكثر تحديدًا أو التي تأتي لاحقًا في CSS هي التي تفوز. */
+/* باستخدام !important يضمن تطبيق اللون. *//* في ملف CSS الخاص بك */
+
+/* القاعدة للون الأزرق (التحديد العام) */
+#priceListTable tbody tr.selected-row {
+    background-color: #E6F7FF !important; /* لون أزرق فاتح */
+    /* تأكد من أن هذه القاعدة موجودة */
+}
+
+/* القاعدة للون الرمادي (تحديد "Price Only") */
+/* يجب أن تأتي هذه القاعدة بعد القاعدة الزرقاء في ملف CSS الخاص بك */
+/* أو أن يكون المحدد لها أكثر تحديدًا (وهو ما تحقق بوجود class إضافي) */
+#priceListTable tbody tr.selected-row-price-only {
+    background-color: #d8d8d8 !important; /* لون رمادي فاتح / داكن قليلاً */
+    /* تأكد من أن هذه القاعدة موجودة */
+}
+
+/* قواعد الوضع الليلي إذا كنت تستخدمه */
+body.dark-mode #priceListTable tbody tr.selected-row {
+    background-color: #214050 !important; /* لون أزرق داكن للوضع الليلي */
+    color: #ffffff !important;
+}
+
+body.dark-mode #priceListTable tbody tr.selected-row-price-only {
+    background-color: #4a4a4a !important; /* رمادي أغمق لوضع الليل */
+    color: #ffffff !important;
+}
+/* حاوية التوست - لإبقائه في الزاوية */
+#custom-toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1080; /* تأكد أنه يظهر فوق معظم العناصر */
+    display: flex; /* لترتيب التوست إذا كان هناك أكثر من واحد */
+    flex-direction: column-reverse; /* لجعل الجديد يظهر في الأسفل */
+    gap: 10px; /* مسافة بين التوستات */
+}
+
+/* تنسيق التوست الفردي */
+#custom-toast {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    min-width: 280px;
+    max-width: 350px;
+    opacity: 0; /* مخفي مبدئيًا */
+    visibility: hidden; /* مخفي تمامًا */
+    transform: translateY(20px); /* يبدأ من الأسفل قليلاً */
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s ease-out; /* حركة ناعمة */
+}
+
+/* عند ظهور التوست */
+#custom-toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* رأس التوست (العنوان وزر الإغلاق) */
+.custom-toast-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.custom-toast-header button {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: #666;
+    padding: 0 5px;
+}
+.custom-toast-header button:hover {
+    color: #333;
+}
+
+/* جسم التوست (نص الرسالة) */
+.custom-toast-body {
+    font-size: 0.95em;
+    color: #555;
+}
+
+/* تنسيقات حسب نوع الرسالة */
+#custom-toast.success {
+    border-left: 5px solid #28a745; /* أخضر */
+    background-color: #d4edda;
+}
+#custom-toast.success .custom-toast-header {
+    color: #155724;
+    border-bottom-color: #c3e6cb;
+}
+#custom-toast.success .custom-toast-body {
+    color: #155724;
+}
+
+#custom-toast.error {
+    border-left: 5px solid #dc3545; /* أحمر */
+    background-color: #f8d7da;
+}
+#custom-toast.error .custom-toast-header {
+    color: #721c24;
+    border-bottom-color: #f5c6cb;
+}
+#custom-toast.error .custom-toast-body {
+    color: #721c24;
+}
+
+#custom-toast.warning {
+    border-left: 5px solid #ffc107; /* أصفر */
+    background-color: #fff3cd;
+}
+#custom-toast.warning .custom-toast-header {
+    color: #856404;
+    border-bottom-color: #ffeeba;
+}
+#custom-toast.warning .custom-toast-body {
+    color: #856404;
+}
+
+#custom-toast.info {
+    border-left: 5px solid #007bff; /* أزرق */
+    background-color: #e0f0ff; /* Light blue */
+}
+#custom-toast.info .custom-toast-header {
+    color: #004085;
+    border-bottom-color: #b8daff;
+}
+#custom-toast.info .custom-toast-body {
+    color: #004085;
+}
+#quotationTable tbody tr.selected-row {
+    background-color: #f1f7fe; /* خلفية باللون الأزرق الفاتح */
+    border-left: 5px solid #007bff; /* خط أزرق على اليسار للتمييز */
+    /* أضف أنماطًا أخرى حسب الحاجة، مثل خط سميك أو ظل */
+} /* هذا الكود يجب أن يكون في ملف CSS أو في وسم <style> */
+
+/*
+   - #quotationTable: لتحديد أن هذا النمط ينطبق فقط على الجدول الخاص بك.
+   - tbody tr.selected-row: لتحديد أن النمط ينطبق على عناصر <tr>
+     التي داخل <tbody> ولها فئة 'selected-row'.
+   - !important: قد تحتاج إلى استخدامها لضمان أن هذا النمط
+     يتجاوز أي أنماط أخرى قد تفرضها DataTables أو مكتبات أخرى.
+*/
+#quotationTable tbody tr.selected-row {
+    background-color: #e6f7ff !important;
+}
+
+/*
+   - يمكنك أيضاً إضافة لون أغمق عند تمرير الماوس لتحسين تجربة المستخدم
+   - هذا يجعل الصف المحدد يظل بارزًا حتى عند تمرير الماوس فوقه.
+*/
+#quotationTable tbody tr.selected-row:hover {
+    background-color: #a4d2f0 !important;
+}

@@ -1,0 +1,570 @@
+/* الجدول */
+.project-table {
+  width: 60%;
+  border-collapse: collapse;
+  direction: ltr;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.project-table th, .project-table td {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.project-table thead {
+  background-color: #f8f9fa;
+}
+
+.project-table input[type="text"],
+.project-table input[type="date"] {
+  width: 60%;
+  padding: 4px 6px;
+  margin-top: 5px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.project-table input[type="checkbox"] {
+  transform: scale(1.2);
+}
+
+/* شريط أدوات الأيقونات */
+.icon-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.icon-toolbar button {
+  background-color: var(--main-dark);
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.icon-toolbar button:hover {
+  background-color: #274b7a;
+  transform: scale(1.05);
+}
+
+.icon-separator {
+  width: 1px;
+  height: 24px;
+  background-color: #ccc;
+  margin: 0 8px;
+}
+
+/* المودال الأساسي */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: var(--modal-bg);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* محتوى المودال الجديد (ألوان النافذة القديمة مع التقسيمات الجديدة) */
+.modal-content.new-project-modal-design {
+    background: #f0f0f0; /* لون خلفية أفتح وأكثر حيادية */
+    padding: 10px 20px 20px 20px;
+    width: 95%;
+    max-width: 900px;
+    max-height: 95vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* ظل أخف */
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ccc; /* إضافة حدود خفيفة للمودال نفسه */
+}
+
+.modal-content .close-btn {
+  position: absolute;
+  top: 8px;
+  inset-inline-end: 12px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #888; /* لون رمادي أخف لزر الإغلاق */
+  font-weight: bold;
+}
+
+.modal-content .close-btn:hover {
+    color: #555;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #444; /* لون عنوان أغمق قليلاً */
+    margin-top: 5px;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd; /* خط فاصل أفتح */
+    text-align: center; /* توسيط العنوان */
+}
+
+
+/* النماذج */
+form label {
+  display: block;
+  margin-top: 5px; /* Reduced margin */
+  font-weight: normal; /* Lighter font weight for labels */
+  color: #666; /* لون ليبل رمادي أفتح */
+  font-size: 14px;
+}
+
+/* جعل تسميات الحقول الإلزامية بخط عريض */
+form .form-group label[for="projectName"],
+form .form-group label[for="projectType"],
+form .form-group label[for="projectCity"],
+form .form-group label[for="vatProfile"],
+form .form-group label[for="projectId"] {
+    font-weight: bold;
+}
+
+/* إضافة نجمة حمراء للحقول الإلزامية */
+form .form-group label[for="projectName"]::after,
+form .form-group label[for="projectType"]::after,
+form .form-group label[for="projectCity"]::after,
+form .form-group label[for="vatProfile"]::after,
+form .form-group label[for="projectId"]::after {
+    content: " *";
+    color: red;
+    margin-inline-start: 4px; /* مسافة صغيرة بعد النص */
+}
+
+
+form input,
+form select,
+form textarea {
+  width: 100%;
+  padding: 5px; /* Reduced padding */
+  margin-top: 2px; /* Reduced margin */
+  margin-bottom: 8px; /* Reduced margin */
+  border: 1px solid #bbb; /* حدود حقول الإدخال أكثر وضوحاً */
+  border-radius: 3px; /* Slightly smaller border radius */
+  box-sizing: border-box;
+  font-size: 13px; /* Smaller font size */
+  background-color: #fff; /* خلفية بيضاء لحقول الإدخال */
+  color: #333;
+}
+
+/* Fieldset and legend styling for sections */
+.form-section-fieldset {
+    border: 1px solid #ddd; /* حدود الفيلد سيت */
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background-color: #fcfcfc; /* خلفية أفتح قليلاً للفيلد سيت */
+}
+
+.form-section-fieldset legend {
+    font-size: 15px;
+    font-weight: bold;
+    color: #007bff; /* لون أزرق قياسي للـ legend */
+    padding: 0 8px;
+    background-color: #f0f0f0; /* خلفية الـ legend مطابقة لخلفية المودال */
+    border: 1px solid #ddd; /* حدود حول الـ legend */
+    border-radius: 3px;
+    width: auto;
+    margin-inline-start: 10px; /* مسافة من اليسار */
+}
+
+/* Form layout for two columns per row */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 5px;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+/* Checkbox specific styling */
+.form-group-checkbox {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.form-group-checkbox input[type="checkbox"] {
+    width: auto;
+    margin-inline-end: 8px;
+    transform: scale(1.1);
+}
+
+.form-group-checkbox label {
+    margin-top: 0;
+    font-weight: normal;
+    color: #333;
+}
+
+/* Input with button styling (for VAT Profile) */
+.input-with-button {
+    display: flex;
+    align-items: center;
+}
+
+.input-with-button input {
+    flex-grow: 1;
+    border-inline-end: none;
+    border-top-inline-end-radius: 0;
+    border-bottom-inline-end-radius: 0;
+}
+
+.input-with-button .form-field-button {
+    background-color: #e0e0e0; /* لون رمادي فاتح للزر */
+    border: 1px solid #bbb;
+    padding: 5px 8px;
+    border-top-inline-start-radius: 0;
+    border-bottom-inline-start-radius: 0;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #555;
+    transition: background-color 0.2s;
+}
+
+.input-with-button .form-field-button:hover {
+    background-color: #d0d0d0;
+}
+
+/* Checkboxes in a row (Restrict Deliveries etc.) */
+.form-row-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.form-row-checkboxes .form-group-checkbox {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+
+/* الأزرار في أسفل المودال */
+.modal-bottom-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.modal-bottom-buttons button {
+    padding: 8px 15px;
+    border: 1px solid #ccc; /* إضافة حدود للأزرار */
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: normal;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.modal-bottom-buttons .btn-primary { /* Close button */
+    background-color: #f0f0f0; /* رمادي فاتح */
+    color: #444;
+}
+.modal-bottom-buttons .btn-primary:hover {
+    background-color: #e0e0e0;
+}
+
+.modal-bottom-buttons .btn-secondary { /* Integration button */
+    background-color: #e0e0e0; /* رمادي فاتح */
+    color: #007bff; /* أزرق للنص */
+}
+.modal-bottom-buttons .btn-secondary:hover {
+    background-color: #d0d0d0;
+}
+
+.modal-bottom-buttons .btn-success { /* Save & Close, Save buttons */
+    background-color: #007bff; /* أزرق قياسي */
+    color: white;
+    border-color: #007bff; /* حدود مطابقة */
+}
+.modal-bottom-buttons .btn-success:hover {
+    background-color: #0056b3;
+}
+
+
+/* التبويبات */
+.tab-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab-buttons button {
+  padding: 8px 14px;
+  background-color: #e9ecef; /* لون خلفية أفتح للتبويبات غير النشطة */
+  border: 1px solid #ccc;
+  color: #555;
+  border-radius: 4px 4px 0 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: none;
+}
+
+.tab-buttons button i {
+  font-size: 16px;
+  color: #777;
+}
+
+.tab-buttons button.active {
+  background-color: #f0f0f0; /* خلفية نشطة مطابقة للمودال */
+  color: #333; /* نص أغمق للتبويبة النشطة */
+  font-weight: bold;
+  border-color: #ccc;
+  border-bottom: 2px solid #007bff; /* خط أزرق للتمييز */
+  box-shadow: none; /* إزالة الظل */
+}
+
+.tab-buttons button.active i {
+  color: #333;
+}
+
+/* Style for tab content */
+.form-tab-content {
+    padding-top: 10px;
+    border: 1px solid #ccc; /* حدود أفتح للمحتوى */
+    border-top: none;
+    padding: 15px;
+    border-radius: 0 0 8px 8px;
+    background-color: #ffffff; /* خلفية بيضاء لمحتوى التبويبات */
+}
+
+/* Dark Mode styles */
+body.dark-mode .modal-content.new-project-modal-design {
+    background: #333; /* خلفية داكنة للمودال */
+    border-color: #555;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .modal-content .close-btn {
+    color: #ccc;
+}
+body.dark-mode .modal-content .close-btn:hover {
+    color: #f1f1f1;
+}
+
+body.dark-mode .modal-title {
+    color: #e0e0e0;
+    border-bottom-color: #555;
+}
+
+body.dark-mode form label {
+    color: #ccc;
+}
+
+/* جعل تسميات الحقول الإلزامية بخط عريض في الوضع الداكن */
+body.dark-mode form .form-group label[for="projectName"],
+body.dark-mode form .form-group label[for="projectType"],
+body.dark-mode form .form-group label[for="projectCity"],
+body.dark-mode form .form-group label[for="vatProfile"],
+body.dark-mode form .form-group label[for="projectId"] {
+    font-weight: bold;
+}
+
+/* إضافة نجمة حمراء للحقول الإلزامية في الوضع الداكن */
+body.dark-mode form .form-group label[for="projectName"]::after,
+body.dark-mode form .form-group label[for="projectType"]::after,
+body.dark-mode form .form-group label[for="projectCity"]::after,
+body.dark-mode form .form-group label[for="vatProfile"]::after,
+body.dark-mode form .form-group label[for="projectId"]::after {
+    color: #ff6b6b; /* لون أحمر أفتح للوضع الداكن */
+}
+
+body.dark-mode form input,
+body.dark-mode form select,
+body.dark-mode form textarea {
+    background-color: #4a4a4a;
+    color: #f1f1f1;
+    border-color: #666;
+}
+
+body.dark-mode .form-section-fieldset {
+    border-color: #555;
+    background-color: #3a3a3a;
+}
+
+body.dark-mode .form-section-fieldset legend {
+    color: #8ab4f8;
+    background-color: #333;
+    border-color: #555;
+}
+
+body.dark-mode .input-with-button .form-field-button {
+    background-color: #5a5a5a;
+    border-color: #666;
+    color: #f1f1f1;
+}
+
+body.dark-mode .input-with-button .form-field-button:hover {
+    background-color: #6a6a6a;
+}
+
+body.dark-mode .modal-bottom-buttons {
+    border-top-color: #555;
+}
+
+body.dark-mode .modal-bottom-buttons button {
+    border-color: #666;
+    color: #f1f1f1;
+}
+
+body.dark-mode .modal-bottom-buttons .btn-primary {
+    background-color: #5a6268;
+    color: #f1f1f1;
+}
+
+body.dark-mode .modal-bottom-buttons .btn-primary:hover {
+    background-color: #4a5055;
+}
+
+body.dark-mode .modal-bottom-buttons .btn-secondary {
+    background-color: #4a4a4a; /* خلفية أغمق قليلاً */
+    color: #8ab4f8; /* لون أزرق فاتح للنص */
+}
+body.dark-mode .modal-bottom-buttons .btn-secondary:hover {
+    background-color: #5a5a5a;
+}
+
+body.dark-mode .modal-bottom-buttons .btn-success {
+    background-color: #0056b3; /* أزرق داكن في الوضع الداكن */
+    border-color: #0056b3;
+}
+body.dark-mode .modal-bottom-buttons .btn-success:hover {
+    background-color: #004085;
+}
+
+body.dark-mode .tab-buttons button {
+    background-color: #3a3a3a;
+    border-color: #555;
+    color: #ccc;
+}
+
+body.dark-mode .tab-buttons button i {
+    color: #aaa;
+}
+
+body.dark-mode .tab-buttons button.active {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #555;
+    border-bottom-color: #8ab4f8; /* لون أزرق فاتح للتمييز */
+}
+
+body.dark-mode .tab-buttons button.active i {
+    color: #e0e0e0;
+}
+
+body.dark-mode .form-tab-content {
+    background-color: #2f2f2f;
+    border-color: #555;
+}
+
+
+/* Other existing styles... */
+
+/* Contact Toolbar within the Project Modal */
+.contact-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #ddd; /* Dotted line to separate from table */
+}
+
+.contact-toolbar button {
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.contact-toolbar .btn-primary {
+    background-color: #28a745; /* Green for Add */
+    color: white;
+    border: 1px solid #28a745;
+}
+.contact-toolbar .btn-primary:hover {
+    background-color: #218838;
+}
+
+.contact-toolbar .btn-secondary {
+    background-color: #ffc107; /* Yellow for Edit */
+    color: #333;
+    border: 1px solid #ffc107;
+}
+.contact-toolbar .btn-secondary:hover {
+    background-color: #e0a800;
+}
+
+.contact-toolbar .btn-danger {
+    background-color: #dc3545; /* Red for Delete */
+    color: white;
+    border: 1px solid #dc3545;
+}
+.contact-toolbar .btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* Contacts Table within the modal (REVISED for better visibility) */
+.contacts-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.contacts-table th, .contacts-table td {
+    border: 1px solid #ddd; /* --- CHANGED: Darker border for visibility --- */
+    padding: 8px;
+    text-align: left;
+    font-size: 13px;
+}
+
+.contacts-table thead {
+    background-color: #e9ecef; /* --- CHANGED: Darker header background --- */
+    font-weight: bold; /* Make header text bold */
+}
+
+.contacts-table input[type="checkbox"] {
+  transform: scale(1.1);
+}
+
+/* Dark Mode Adjustments should still work correctly */
+body.dark-mode .contacts-table th, body.dark-mode .contacts-table td {
+    border-color: #444;
+}
+body.dark-mode .contacts-table thead {
+    background-color: #3a3a3a;
+}

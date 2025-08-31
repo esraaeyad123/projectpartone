@@ -1,0 +1,385 @@
+/* تنسيقات الجدول الخاص بقسم الاختبارات */
+.testing-table {
+    width: 60%;
+    border-collapse: collapse;
+    direction: ltr; /* يمكنك تغييرها إلى rtl إذا كان المحتوى عربي */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.testing-table th, .testing-table td {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.testing-table thead {
+    background-color: #f8f9fa;
+}
+
+.testing-table input[type="text"],
+.testing-table input[type="date"] {
+    width: 60%;
+    padding: 4px 6px;
+    margin-top: 5px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.testing-table input[type="checkbox"] {
+    transform: scale(1.2);
+}
+
+/* شريط أدوات الأيقونات */
+.testing-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.testing-toolbar button {
+    background-color: var(--main-dark);
+    color: white;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.testing-toolbar button:hover {
+    background-color: #274b7a;
+    transform: scale(1.05);
+}
+
+.testing-separator {
+    width: 1px;
+    height: 24px;
+    background-color: #ccc;
+    margin: 0 8px;
+}
+
+/* المودال (نافذة منبثقة) */
+.testing-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: var(--modal-bg);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.testing-modal-content {
+    background: var(--white);
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    position: relative;
+}
+
+.testing-close {
+    position: absolute;
+    top: 10px;
+    inset-inline-end: 20px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* النماذج */
+.testing-form label,
+.testing-form-section label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.testing-form input,
+.testing-form select,
+.testing-form textarea,
+.testing-form-section input {
+    width: 100%;
+    padding: 6px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.testing-form-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: flex-end;
+}
+
+.testing-form-buttons button {
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.testing-form-buttons button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+}
+
+.testing-form-buttons button.cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* التبويبات */
+.testing-tab-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.testing-tab-buttons button {
+    padding: 10px 16px;
+    background-color: #fff;
+    border: 2px solid #ffa500;
+    color: #333;
+    border-radius: 6px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.testing-tab-buttons button i {
+    font-size: 18px;
+    color: #ffa500;
+}
+
+.testing-tab-buttons button.active {
+    background-color: #ffa500;
+    color: white;
+    font-weight: bold;
+}
+
+.testing-tab-buttons button.active i {
+    color: white;
+}
+
+.testing-form-buttons button.reset {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* دارك مود */
+body.dark-mode .testing-table {
+    background-color: #1D3557;
+    border-color: #274b7a;
+}
+
+body.dark-mode .testing-table th,
+body.dark-mode .testing-table td {
+    color: #f1f1f1;
+    border-color: #274b7a;
+}
+
+body.dark-mode .testing-table thead {
+    background-color: #0B1F3A;
+}
+
+body.dark-mode .testing-table input[type="text"],
+body.dark-mode .testing-table input[type="date"] {
+    background-color: #2b4368;
+    border-color: #355f8a;
+    color: #f1f1f1;
+}
+
+body.dark-mode .testing-toolbar button {
+    background-color: #274b7a;
+    color: #A0C4FF;
+}
+
+body.dark-mode .testing-toolbar button:hover {
+    background-color: #4DA3FF;
+}
+
+body.dark-mode .testing-separator {
+    background-color: #444;
+}
+
+body.dark-mode .testing-modal-content {
+    background: #1D3557;
+}
+
+body.dark-mode .testing-form input,
+body.dark-mode .testing-form select,
+body.dark-mode .testing-form textarea {
+    background-color: #2b4368;
+    border-color: #355f8a;
+    color: #f1f1f1;
+}
+
+body.dark-mode .testing-form label {
+    color: #f1f1f1;
+}
+
+body.dark-mode .testing-tab-buttons button {
+    background-color: #2b4368;
+    border-color: #FFA500;
+    color: #FFA500;
+}
+
+body.dark-mode .testing-tab-buttons button i {
+    color: #FFA500;
+}
+
+body.dark-mode .testing-tab-buttons button.active {
+    background-color: #FFA500;
+    color: #2b4368;
+}/* ... Modal styling from previous response ... */
+
+/* Styling for the tab header (similar to image_6dc644.png) */
+
+/* Styling for the tab header */
+.tab-header {
+    background-color: #f0f0f0;
+    padding: 10px 20px;
+    border-bottom: 2px solid #ccc;
+    display: flex;
+    font-family: sans-serif;
+}
+
+.tab {
+    padding: 8px 15px;
+    cursor: default;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    background-color: #fff;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-tab-btn {
+    font-size: 1.2rem;
+    font-weight: normal;
+    cursor: pointer;
+    color: #aaa;
+}
+
+/* Modal overlay and content styling */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.small-modal {
+    width: 400px;
+}
+
+.large-modal {
+    width: 90%;
+    max-width: 1200px;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.close-btn {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Form-specific styling */
+.form-section-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.modal-footer-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+body.dark-mode .testing-tab-buttons button.active i {
+    color: #2b4368;
+}
