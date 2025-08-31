@@ -435,31 +435,6 @@ function populateContactsTableEdit(contacts) {
             }
         });
     });
-// 🔹 التبديل بين تبويبات المودال (Customer / Contacts)
-
-   function switchEditTab(tab) {
-    // أخفي كل التابات
-    $(".form-tab-content").hide();
-    $(".tab-buttons button").removeClass("active");
-
-    if (tab === "customer") {
-        $("#editCustomerTab").show();
-        $("#edit-customer-btn").addClass("active");
-    } else if (tab === "contact") {
-        $("#editContactTab").show();
-        $("#edit-contact-btn").addClass("active");
-    }
-}
-
-window.switchEditTab = switchEditTab;
-
-
-
-
-
-
-
-
 
 
 window.saveCustomer = function(event, closeModal = true) {

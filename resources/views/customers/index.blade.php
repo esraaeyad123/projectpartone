@@ -180,28 +180,6 @@ $(document).ready(function () {
 
     var contactsTable;
 
-    // ==========================
-    // فتح مودال العميل (إضافة / تعديل)
-    // ==========================
-    function openCustomerModal(customer = null) {
-        $('#customerForm')[0].reset();
-
-        if (customer) {
-            Object.keys(customer).forEach(key => {
-                let el = $(`#${key}`);
-                if(el.length){
-                    if(el.is(':checkbox')) el.prop('checked', customer[key] == 1);
-                    else el.val(customer[key]);
-                }
-            });
-        } else {
-            $('#customerId').val(''); // إضافة جديد
-        }
-
-        $('#customerModal').show();
-    }
-    window.openCustomerModal = openCustomerModal;
-
     function closeCustomerModal() { $('#customerModal').hide(); }
     window.closeCustomerModal = closeCustomerModal;
 
@@ -254,10 +232,23 @@ $(document).ready(function () {
     window.switchTab = switchTab;
 
 
-// إغلاق المودال
-function closeEditCustomerModal() {
-  $('#editCustomerModal').hide();
+   function switchEditTab(tab) {
+    // أخفي كل التابات
+    $(".form-tab-content").hide();
+    $(".tab-buttons button").removeClass("active");
+
+    if (tab === "customer") {
+        $("#editCustomerTab").show();
+        $("#edit-customer-btn").addClass("active");
+    } else if (tab === "contact") {
+        $("#editContactTab").show();
+        $("#edit-contact-btn").addClass("active");
+    }
 }
+
+window.switchEditTab = switchEditTab;
+
+
 
 // 🔹 عند الضغط على Select All
 $('#selectAllCustomers').on('change', function() {
@@ -405,13 +396,6 @@ function populateContactsTableEdit(contacts) {
 
 
 
-
-
-    window.closeEditCustomerModal = function() {
-        $('#editCustomerModal').hide();
-    };
-
-
     // ==========================
     // حفظ التعديل أو إضافة جديد
     // ==========================
@@ -450,22 +434,6 @@ function populateContactsTableEdit(contacts) {
         });
     });
 // 🔹 التبديل بين تبويبات المودال (Customer / Contacts)
-
-   function switchEditTab(tab) {
-    // أخفي كل التابات
-    $(".form-tab-content").hide();
-    $(".tab-buttons button").removeClass("active");
-
-    if (tab === "customer") {
-        $("#editCustomerTab").show();
-        $("#edit-customer-btn").addClass("active");
-    } else if (tab === "contact") {
-        $("#editContactTab").show();
-        $("#edit-contact-btn").addClass("active");
-    }
-}
-
-window.switchEditTab = switchEditTab;
 
 
 
@@ -544,42 +512,17 @@ $('#customerId').val(response.customer.id);
     });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
     // ------------------------- مسح نموذج جهة الاتصال -------------------------
     window.clearContactForm = function() {
-        $('#contactName').val('');
-        $('#contactEmail').val('');
-        $('#contactPhone').val('');
-        $('#contactMobile').val('');
-        $('#contactPosition').val('');
+        $('#contactNameAdd').val('');
+        $('#contactEmailAdd').val('');
+        $('#contactPhoneAdd').val('');
+        $('#contactMobileAdd').val('');
+        $('#contactPositionAdd').val('');
         $('#isPrimaryContact').prop('checked', false);
     };
 
-    // ------------------------- فتح / إغلاق المودال -------------------------
-    window.openCustomerModal = function(){
-        $('#customerForm')[0].reset();
-        $('#customerId').val('');
-        $('#customerModal').show();
-    };
-    window.closeCustomerModal = function(){
-        $('#customerModal').hide();
-    };
-
-
-
-
-
+// لجدول اتصال خاصة لكل العمي
     $(document).ready(function() {
 
     // تعريف الجدول مرة واحدة
@@ -594,10 +537,10 @@ $('#customerId').val(response.customer.id);
             { data: 'position' },
             { data: 'is_primary', render: d => d ? 'Yes' : 'No' }
         ]
+
     });
 
-    // تعريف الدالة **مرة واحدة وواضحة**
-
+// حفظ جهة اتصال
    window.saveContactForCustomer = function() {
     let customerId = $('#customerId').val();
 
@@ -653,15 +596,6 @@ $('#customerId').val(response.customer.id);
         window.contactsTable.row.add(contact).draw(false);
     };
 
-    // ------------------------- مسح نموذج جهة الاتصال -------------------------
-    window.clearContactForm = function() {
-        $('#contactName').val('');
-        $('#contactEmail').val('');
-        $('#contactPhone').val('');
-        $('#contactMobile').val('');
-        $('#contactPosition').val('');
-        $('#isPrimaryContact').prop('checked', false);
-    };
 
     // ------------------------- فتح / إغلاق المودال -------------------------
     window.openCustomerModal = function(){
@@ -674,6 +608,9 @@ $('#customerId').val(response.customer.id);
     };
 
 });
+ window.closeEditCustomerModal = function(){
+  $('#editCustomerModal').hide();
+}
 
 
 // 🔹 التبديل بين تبويبات المودال (Customer / Contacts)
@@ -692,7 +629,16 @@ $('#customerId').val(response.customer.id);
     }
 }
 
+// ملء الفورم
+function populateContactFormForEdit() {
+    let selectedRow = $('#contactsTableEdit tbody input.contact-select:checked').closest('tr');
+    if(!selectedRow.length) return alert('Please select a contact first!');
+    let contactId = selectedRow.find('td:eq(1)').text(); // عمود ID
+        console.log('Contact ID:', contactId); // للتحقق أثناء التطوير
 
+    window.populateContactFormForEdit(contactId);
+
+}
 
 window.populateContactFormForEdit = function() {
     let selectedCheckbox = $('#contactsTableEdit tbody input.contact-select:checked');
@@ -710,6 +656,7 @@ window.populateContactFormForEdit = function() {
     $('#isPrimaryContact').prop('checked', rowData.is_primary);
 };
 
+//تعديل جهة اتصال
 window.saveContactForCustomerEdit = function() {
     // 1️⃣ جلب رقم العميل
     let customerId = $('#editCustomerId').val();
@@ -765,23 +712,11 @@ window.saveContactForCustomerEdit = function() {
     });
 };
 
-
-
-
-
-function populateContactFormForEdit() {
-    let selectedRow = $('#contactsTableEdit tbody input.contact-select:checked').closest('tr');
-    if(!selectedRow.length) return alert('Please select a contact first!');
-    let contactId = selectedRow.find('td:eq(1)').text(); // عمود ID
-        console.log('Contact ID:', contactId); // للتحقق أثناء التطوير
-
-    window.populateContactFormForEdit(contactId);
-
-}
-
-
-
-
+//فلتر جهات اتصال
+$('#contactsTable thead .column-filter').on('keyup change', function(){
+    let index = $(this).parent().index();
+    contactsTable.column(index).search(this.value).draw();
+});
 
 // تنظيف فورم جهة الاتصال بعد الحفظ
 window.clearContactFormEdit = function() {
@@ -795,6 +730,8 @@ window.clearContactFormEdit = function() {
 };
 
 
+
+// حذف جهة اتصال
 window.deleteSelectedContacts = function() {
     // اجمع كل الشيكبوكسات اللي متعلم عليها
     let ids = [];

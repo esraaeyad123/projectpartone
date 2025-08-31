@@ -210,7 +210,7 @@
                                 <legend>Contact List</legend>
                                 <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
                                     <button type="button" class="btn-secondary" onclick="populateContactFormForEdit()"><i class="fas fa-pen"></i> Edit Selected</button>
-                                    <button type="button" class="btn-danger" onclick="deleteSelectedContacts()"><i class="fas fa-trash"></i> Delete Selected</button>
+            <button type="button" class="btn-danger" onclick="deleteSelectedContacts()"><i class="fas fa-trash"></i> Delete Selected</button>
                                     <button type="button" class="btn-icon" id="exportContactsModalExcelBtn" title="Export to Excel"><i class="fa-solid fa-table"></i></button>
                                     <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print"><i class="fas fa-print"></i></button>
                                 </div>
@@ -244,6 +244,8 @@
     <legend>Add Contact Person</legend>
     <div class="form-row">
         <div class="form-group">
+                        <input type="text" id="editContactId"  hidden>
+
             <label for="contactNameAdd">Contact Name:</label>
             <input type="text" id="contactNameAdd" placeholder="Enter contact name">
 
@@ -602,7 +604,7 @@
             <button type="button" class="btn btn-primary" onclick="saveContactForCustomerEdit()">
               حفظ / تحديث جهة الاتصال
             </button>
-            <button type="button" class="btn-secondary" onclick="clearContactForm()">
+            <button type="button" class="btn-secondary" onclick="clearContactFormEdit()">
               <i class="fas fa-eraser"></i> Clear Form
             </button>
           </div>
@@ -612,9 +614,10 @@
 
       <!-- 🔹 Modal Footer -->
       <div class="form-buttons modal-bottom-buttons">
-        <button type="button" class="btn-primary" onclick="closeEditCustomerModal()"><i class="fas fa-times"></i> Close</button>
+            <button type="button" class="btn-primary" onclick="closeEditCustomerModal()"><i class="fas fa-times"></i> Close</button>
         <button type="submit" class="btn-success"><i class="fas fa-save"></i> Update & Close</button>
         <button type="button" class="btn-success" onclick="updateCustomer(event, false)"><i class="fas fa-save"></i> Update</button>
+
       </div>
     </form>
   </div>
