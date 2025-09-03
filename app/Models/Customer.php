@@ -39,6 +39,13 @@ class Customer extends Model
         'restrict_orders',
         'restrict_quotations',
     ];
+
+
+public function files()
+{
+    return $this->hasMany(CustomerFile::class);
+}
+
 public function contacts() {
     return $this->hasMany(Contact::class);
 }

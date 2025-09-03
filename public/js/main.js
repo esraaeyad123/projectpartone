@@ -27,43 +27,6 @@ function showSection(sectionId) {
 
 
 // استدعاء الدالة عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', loadSharedContent);
-
-
-// =================== لتحميل الأجزاء المشتركة للصفحات ===================
-async function loadSharedContent() {
-    try {
-        // تحميل الرأس
-        const headerResponse = await fetch('header.html');
-        const headerHtml = await headerResponse.text();
-        const headerContainer = document.createElement('div');
-        headerContainer.innerHTML = headerHtml;
-        document.body.prepend(headerContainer);
-
-        // تحميل قائمة التنقل
-        const navbarResponse = await fetch('navbar.html');
-        const navbarHtml = await navbarResponse.text();
-        const navbarContainer = document.createElement('div');
-        navbarContainer.innerHTML = navbarHtml;
-        document.querySelector('.main-header').insertAdjacentElement('afterend', navbarContainer.querySelector('.main-menu'));
-
-        // بعد تحميل المحتوى، طبق اللغة والوضع الليلي إذا كانت مفعّلة
-        const savedLang = localStorage.getItem('language');
-        if (savedLang) {
-            setLanguage(savedLang);
-        }
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-        }
-
-        // هنا نقوم باستدعاء updateCurrentPageTab بعد تحميل كل المحتوى المشترك
-        // للتأكد من أن كل عناصر الـ DOM اللازمة متوفرة.
-        updateCurrentPageTab();
-
-    } catch (error) {
-        console.error('Failed to load shared content:', error);
-    }
-}
 
 
 // =================== الوضع الليلي ===================

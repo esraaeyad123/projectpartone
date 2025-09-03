@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Exports\CustomersExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 
@@ -157,6 +158,20 @@ public function bulkDelete(Request $request)
     Customer::whereIn('id', $ids)->delete(); // حذف من قاعدة البيانات
 
     return response()->json(['success' => true, 'message' => 'Customers deleted successfully!']);
+}
+
+
+
+public function exportSelected(Request $request)
+{
+
+    
+    $data = $request->all();
+    $all = $data['all'] ?? false;
+    $ids = $data['ids'] ?? [];
+
+
+    return Excel::download(new CustomersExport($all, $ids), 'customers.xlsx');
 }
 
 

@@ -211,7 +211,7 @@
                                 <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
                                     <button type="button" class="btn-secondary" onclick="populateContactFormForEdit()"><i class="fas fa-pen"></i> Edit Selected</button>
             <button type="button" class="btn-danger" onclick="deleteSelectedContacts()"><i class="fas fa-trash"></i> Delete Selected</button>
-                                    <button type="button" class="btn-icon" id="exportContactsModalExcelBtn" title="Export to Excel"><i class="fa-solid fa-table"></i></button>
+                                    <button type="button" class="btn-icon" id="exportContactsModalExcelBtn24" title="Export to Excel"><i class="fa-solid fa-table"></i></button>
                                     <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print"><i class="fas fa-print"></i></button>
                                 </div>
                                 <div class="table-responsive-container">

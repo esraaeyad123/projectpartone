@@ -91,4 +91,15 @@ class ContactController extends Controller
     ]);
 }
 
+
+
+// Controller
+public function exportAll()
+{
+    $contacts = Contact::all(['name','email','phone','mobile','position','is_primary']);
+    return response()->json($contacts);
+}
+
+
+
 }

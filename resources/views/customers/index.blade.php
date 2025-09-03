@@ -19,8 +19,19 @@
             </div>
             <div class="icon-separator"></div>
             <div>
-                <button title="Export to Excel" class="btn-icon" id="exportCustomersExcelBtn"><i class="fa-solid fa-table"></i></button>
+               <button title="File Manager"
+        class="btn-icon"
+        data-url="{{ route('customer-files.index', ['customerId' => ':id']) }}"
+        onclick="goToCustomerFiles(this)">
+    <i class="fas fa-folder-open"></i>
+</button>
+
+<!-- زر التصدير الموجود عندك -->
+<button title="Export to Excel" class="btn-icon" id="exportCustomersExcelBtn" onclick="exportCustomersExcelBtn()">
+  <i class="fa-solid fa-table"></i>
+</button>
                 <button title="Print" class="btn-icon" onclick="printCustomersTable()"><i class="fas fa-print"></i></button>
+
             </div>
         </div>
 
@@ -134,6 +145,8 @@
 <!-- ================== JS ================== -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 
 
 <script>
@@ -153,11 +166,6 @@ $(document).ready(function () {
         processing: true,
         serverSide: false,
         ajax: "{{ route('customers.data') }}",
-        dom: 'Bfrtip',
-        buttons: [
-            { extend: 'excelHtml5', text: 'Export Excel', title: 'Customers Export', exportOptions: { columns: ':visible' } },
-            { extend: 'print', text: 'Print', title: 'Customers List', exportOptions: { columns: ':visible' } }
-        ],
         columns: [
             { data: null, render: data => `<input type="checkbox" class="customerCheckbox" value="${data.id}">`, orderable: false },
             { data: 'customer_id' },
@@ -184,7 +192,7 @@ $(document).ready(function () {
     window.closeCustomerModal = closeCustomerModal;
 
 
-    function deleteSelectedCustomers() {
+     function deleteSelectedCustomers() {
         const selected = Array.from($('.customerCheckbox:checked')).map(cb => cb.value);
         if(selected.length === 0) { alert('⚠️ اختر عميل واحد على الأقل'); return; }
         if(!confirm('هل أنت متأكد من حذف العملاء المحددين؟')) return;
@@ -690,12 +698,24 @@ window.saveContactForCustomerEdit = function() {
             if(res.contact){
                 alert('✔️ تم تحديث جهة الاتصال');
 
-                // 🔹 تحديث الصف داخل الجدول مباشرة (بدون reload)
-                let rowSelector = `#contactRow_${contactId}`;
-                let tableRow = window.contactsTableEdit.row(rowSelector);
+                // 🔹 تحديث صف DataTable مباشرة
+                let table = window.contactsTableEdit; // افترضنا أن DataTable مخزن هنا
+                let rowIndex = table.rows().eq(0).filter(function(idx) {
+                    return table.cell(idx, 0).data() == contactId; // 0: عمود الـ checkbox أو ID
+                });
+                                console.log(rowIndex);
 
-                if(tableRow.node()){
-                    tableRow.data(res.contact).draw(false);
+
+                if(rowIndex.length) {
+                    table.row(rowIndex[0]).data([
+                        `<input type="checkbox" class="selectContact" value="${res.contact.id}">`, // checkbox
+                        res.contact.name,
+                        res.contact.email,
+                        res.contact.phone,
+                        res.contact.mobile,
+                        res.contact.position,
+                        res.contact.is_primary ? 'Yes' : 'No'
+                    ]).draw(false);
                 }
 
                 clearContactForm(); // مسح الفورم بعد الحفظ
@@ -711,6 +731,7 @@ window.saveContactForCustomerEdit = function() {
         }
     });
 };
+
 
 //فلتر جهات اتصال
 $('#contactsTable thead .column-filter').on('keyup change', function(){
@@ -770,6 +791,156 @@ window.deleteSelectedContacts = function() {
     });
 };
 
+
+
+
+function exportCustomersExcelBtn() {
+            const ids = Array.from($('.customerCheckbox:checked')).map(cb => cb.value);
+
+    const selectAll = document.getElementById('selectAllCustomers');
+    const table = $('#customersTable').DataTable();
+
+    // التحقق إذا لم يتم اختيار أي عميل ولم يتم تفعيل Select All
+    if (!selectAll.checked && ids.length === 0) {
+        alert('❌ الرجاء اختيار عميل واحد على الأقل أو تفعيل "Select All"');
+        return;
+    }
+
+    // تجهيز البيانات للإرسال
+    const payload = selectAll.checked ? { all: true, ids: [] } : { all: false, ids: ids };
+
+    fetch("{{ route('customers.export.selected') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'customers.xlsx'; // اسم الملف
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+        console.error(err);
+        alert('❌ فشل التصدير');
+    });
+}
+
+
+
+// الدالة الأصلية
+// عرف الجداول مرة وحدة عند التحميل
+function printCustomersTable() {
+    const table = $('#customersTable').DataTable();
+
+    if (!table) {
+        alert("❌ لم يتم العثور على الجدول.");
+        return;
+    }
+
+    let printContents = `
+        <style>
+            body { font-family: Arial, sans-serif; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+            th { background-color: #f2f2f2; }
+            h2 { text-align: center; margin-bottom: 20px; }
+        </style>
+        <h2>Customers Table</h2>
+        <table>
+            <thead>
+                <tr>`;
+
+    // عناوين الأعمدة (تجاهل أول عمود checkbox)
+    $('#customersTable thead th').each(function (index) {
+        if (index === 0) return;
+        printContents += `<th>${$(this).text().split('\n')[0].trim()}</th>`;
+    });
+
+    printContents += `</tr></thead><tbody>`;
+
+    // الصفوف (فقط المعروضة حالياً بالبحث/الفلترة)
+    table.rows({ search: 'applied' }).every(function () {
+        const rowData = this.data();
+        printContents += `<tr>`;
+
+        // rowData ممكن يكون Array أو Object -> نحوله Array بالطريقة الصحيحة
+        if (Array.isArray(rowData)) {
+            rowData.forEach((cell, i) => {
+                if (i === 0) return; // تجاهل checkbox
+                printContents += `<td>${cell || ''}</td>`;
+            });
+        } else {
+            // إذا كان Object (في حالة Ajax sources)
+            let i = 0;
+            for (let key in rowData) {
+                if (i === 0) { i++; continue; } // skip checkbox
+                printContents += `<td>${rowData[key] || ''}</td>`;
+                i++;
+            }
+        }
+
+        printContents += `</tr>`;
+    });
+
+    printContents += `</tbody></table>`;
+
+     const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContents);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+    showAlert("تم إعداد الجدول للطباعة!", "success");
+}
+
+// خليها global
+window.printCustomersTable = function() {
+    printTable('customersTable', 'قائمة العملاء');
+};
+window.printContactsTable = function() {
+    printTable('contactsTable', 'قائمة جهات الاتصال');
+};
+
+
+
+// تأكد أنها global
+window.printCustomersTable = printCustomersTable;
+window.printContactsTable = printContactsTable;
+
+
+function goToCustomerFiles(button) {
+    let selected = $('.customerCheckbox:checked');
+
+    if (selected.length === 0) {
+        alert('⚠️ الرجاء اختيار عميل أولاً');
+        return;
+    }
+
+    if (selected.length > 1) {
+        alert('⚠️ الرجاء اختيار عميل واحد فقط');
+        return;
+    }
+
+    let customerId = selected.val();
+
+    // استبدال الـ :id في الرابط بالـ customerId الحقيقي
+    let urlTemplate = $(button).data('url');
+    let url = urlTemplate.replace(':id', customerId);
+
+    // توجه للصفحة مباشرة
+    window.location.href = url;
+}
+
+window.goToCustomerFiles = goToCustomerFiles;
 
 
 

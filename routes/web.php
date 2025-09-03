@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CustomerFileController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -29,4 +32,29 @@ Route::resource('customers.contacts', ContactController::class);
 
 
 Route::delete('/contacts/delete-multiple', [ContactController::class, 'deleteMultiple']);
+
+// Route
+Route::get('/contacts/export', [ContactController::class, 'exportAll'])->name('contacts.export');
+// routes/web.php
+
+Route::post('/customers/export-selected', [CustomerController::class, 'exportSelected'])
+     ->name('customers.export.selected');
+
+
+
+
+
+// Route مخصص للصفحة
+Route::get('/customer-files/{customerId}', [CustomerFileController::class, 'index'])
+    ->name('customer-files.index');
+// بعده فقط تضيف resource
+Route::resource('customer-files', CustomerFileController::class)
+    ->except(['index']); // استثناء index لأنه لدينا route مخصص
+
+Route::get('customer-files/{customer}/files-json', [CustomerFileController::class, 'filesJson']);
+// عرض ملف
+Route::get('/customer-files/{id}/view', [CustomerFileController::class, 'view'])->name('customer-files.view');
+
+Route::get('customer-files/{id}/download', [CustomerFileController::class, 'download'])->name('customer-files.download');
+
 
