@@ -11,7 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 
 
 <!-- ملفاتك المحلية -->
@@ -24,8 +25,9 @@
                 <div class="icon-toolbar">
                     <div>
                         <button title="Add" onclick="openProjectModal()" class="btn-icon"><i class="fas fa-file"></i></button>
-                        <button title="Edit" onclick="handleEditProject()" class="btn-icon"><i class="fas fa-pen"></i></button>
-                        <button title="Delete" onclick="deleteSelectedProjects()" class="btn-icon"><i class="fas fa-trash"></i></button>
+<button onclick="editSelectedProject()" class="btn btn-warning">
+    <i class="fas fa-pen"></i>
+</button>                        <button title="Delete" onclick="deleteSelectedProjects()" class="btn-icon"><i class="fas fa-trash"></i></button>
                     </div>
                     <div class="icon-separator"></div>
                     <div>
@@ -36,10 +38,9 @@
 </button>
 
                        <!-- زر التصدير -->
-<button onclick="exportTableToExcel('projectsTable', 'Projects')" class="btn-icon">
+<button onclick="exportTableToExcel('projectsTable', 'ProjectsExport')" class="btn-icon">
     <i class="fa-solid fa-file-excel"></i>
 </button>
-
 <button title="Print" id="printProjectsTableBtn" onclick="printProjectTable()" class="btn-icon">
     <i class="fas fa-print"></i>
 </button>
@@ -204,8 +205,8 @@
                                     <table id="contactsTable" class="contacts-table display responsive nowrap" data-ignore-lang>
                                         <thead>
                                             <tr>
-                                                <th><input type="checkbox" id="selectAllContacts"  onclick="toggleAllContacts(this)"></th>
-                                                <th class="d-none">Contact ID</th>
+                                                <th>
+                                                    <input type="checkbox" id="selectAllContacts"  onclick="toggleAllContacts(this)"></th>
                                                 <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                                 <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                                 <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
@@ -233,7 +234,6 @@
                                         <input type="hidden" id="editingContactId">
                                         <label for="contactName">Contact Name:</label>
                                         <input type="text" id="contactName" placeholder="Enter contact name">
-                                        <input type="hidden" id="editingContactId">
                                     </div>
                                     <div class="form-group">
                                         <label for="contactEmail">Contact Email:</label>
@@ -333,48 +333,72 @@ function showConfirm(message, callback, title = 'Confirm', confirmButtonText = '
 
 // ================== تحميل المشاريع ==================
 
+let projectsTable; // تعريف عالمي
 
+$(document).ready(function() {
+    // تهيئة الجدول مرة واحدة
+    projectsTable = $('#projectsTable').DataTable({
+        responsive: true,
+        autoWidth: false,
+        columnDefs: [
+            { orderable: false, targets: [0, 10] } // عمود الشيكبوكس وعمود الأزرار
+        ]
+    });
 
+    // تحميل البيانات للمرة الأولى
+    loadProjects();
+});
 
 function loadProjects() {
     $.get('/projects', function(projects) {
+        // تنظيف الجدول
+        projectsTable.clear();
 
-        let tbody = $('#projectsTable tbody');
-        tbody.empty();
-
+        // إضافة البيانات الجديدة
         projects.forEach(p => {
-            tbody.append(`
-                <tr>
-                    <td><input type="checkbox" class="project-checkbox" value="${p.id}"></td>
-                    <td>${p.reference || ''}</td>
-                    <td>${p.name || ''}</td>
-                                        <td>${p.arabic_name || ''}</td>
-
-                                       <td>${p.registration_date || ''}</td>
-                                                          <td>${p.region || ''}</td>
-<td>${p.customer ? p.customer.customer_name : ''}</td>
-
-
-
-                    <td>${p.owner || ''}</td>
-                    <td>${p.consultant || ''}</td>
-
-                    <td>${p.contractor || ''}</td>
-                    <td>
-                        <button class="btn-icon" onclick="editProject(${p.id})"><i class="fas fa-pen"></i></button>
-                        <button class="btn-icon" onclick="deleteProject(${p.id})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `);
+            projectsTable.row.add([
+                `<input type="checkbox" class="project-checkbox" value="${p.id}">`,
+                p.reference || '',
+                p.name || '',
+                p.arabic_name || '',
+                p.registration_date || '',
+                p.region || '',
+                p.customer ? p.customer.customer_name : '',
+                p.owner || '',
+                p.consultant || '',
+                p.contractor || '',
+                `<button class="btn-icon" onclick="editProject(${p.id})"><i class="fas fa-pen"></i></button>
+                 <button class="btn-icon" onclick="deleteProject(${p.id})"><i class="fas fa-trash"></i></button>`
+            ]);
         });
 
-
-        // 🟢 Checkbox تحديد الكل
-        $('#selectAllProjects').off('change').on('change', function() {
-            $('.project-checkbox').prop('checked', $(this).is(':checked'));
-        });
+        projectsTable.draw();
     });
 }
+// ربط checkbox العلوي
+$('#selectAllProjects').off('change').on('change', function() {
+    let isChecked = $(this).is(':checked');
+    $('#projectsTable .project-checkbox').prop('checked', isChecked);
+});
+
+
+
+function toggleAllContacts(masterCheckbox) {
+    // اجمع كل الصفوف في جدول جهات الاتصال
+    let rows = $('#contactsTable tbody tr');
+
+    // ضع قيمة masterCheckbox (محدد أم لا) لكل checkbox في الصفوف
+    rows.each(function() {
+        $(this).find('input.contact-select').prop('checked', masterCheckbox.checked);
+    });
+}
+
+// ربط checkbox العلوي مع checkboxes المشاريع
+$('#selectAllProjects').off('change').on('change', function() {
+    let isChecked = $(this).is(':checked');
+    $('#projectsTable tbody .project-checkbox').prop('checked', isChecked);
+});
+
 
 
 // إرجاع IDs المشاريع المحددة
@@ -506,8 +530,9 @@ function editProject(id) {
             return;
         }
 
-        // تعبئة الفورم
+        // ✅ خزن الـ id للمشروع
         $('#projectId').val(project.id);
+
         $('#projectName').val(project.name);
         $('#projectArabicName').val(project.arabic_name || '');
         $('#registrationDate').val(project.registration_date || '');
@@ -517,10 +542,9 @@ function editProject(id) {
         $('#contractor').val(project.contractor || '');
         $('#projectArabicLocation').val(project.projectArabicLocation || '');
 
-        // فتح المودال
         $('#projectModal').show();
 
-        // تحميل جهات الاتصال الخاصة بالمشروع
+        // تحميل جهات الاتصال
         loadContactsTable(project.id);
     }).fail(function(err) {
         console.error("Error fetching project:", err);
@@ -559,7 +583,9 @@ function saveProject(closeAfterSave) {
                 showConfirmButton: false
             });
 
+            // 🔹 ضروري نخزن الـ projectId بعد الحفظ
             $('#projectId').val(response.id);
+
             loadProjects();
             if (closeAfterSave) closeProjectModal();
         },
@@ -576,11 +602,13 @@ function saveProject(closeAfterSave) {
 }
 
 
+
 // ================== تحميل جهات الاتصال للمشروع ==================
 function loadContactsTable(projectId) {
+     let tbody = $('#contactsTable tbody');
+    tbody.empty(); // ✅ تنظيف الجدول قبل التحميل الجديد
 $.get(`/projects/${projectId}/contacts`, function(contacts) {
         let tbody = $('#contactsTable tbody');
-        tbody.empty();
 
         if (contacts.length === 0) {
             tbody.append('<tr><td colspan="8">No contacts found</td></tr>');
@@ -603,7 +631,6 @@ $.get(`/projects/${projectId}/contacts`, function(contacts) {
     });
 }
 
-// ================== حفظ جهة اتصال ==================
 function saveContact() {
     let projectId = $('#projectId').val();
     if (!projectId) {
@@ -616,8 +643,7 @@ function saveContact() {
         return;
     }
 
-    // التحقق إذا كانت العملية تعديل أو إضافة جديدة
-    let contactId = $('#editingContactId').val();
+    let contactId = $('#editingContactId').val(); // إذا موجود → تعديل
     let url = contactId ? `/project-contacts/${contactId}` : '/project-contacts';
     let method = contactId ? 'PUT' : 'POST';
 
@@ -645,10 +671,35 @@ function saveContact() {
                 showConfirmButton: false
             });
 
-            // تحديث جدول جهات الاتصال
-            loadContactsTable(projectId);
+            let table = $('#contactsTable').DataTable();
 
-            // تفريغ الفورم بعد الحفظ أو التعديل
+            if(contactId){
+                // تعديل صف موجود
+                let row = table.row($(`#contactsTable tbody input.contact-checkbox[value="${contactId}"]`).closest('tr'));
+                if(row){
+                    row.data([
+                        `<input type="checkbox" class="contact-checkbox" value="${response.id}">`, // checkbox
+                        response.name,
+                        response.email,
+                        response.phone,
+                        response.mobile,
+                        response.position,
+                        response.is_primary ? 'Yes' : 'No'
+                    ]).draw(false);
+                }
+            } else {
+                // إضافة صف جديد
+                table.row.add([
+                    `<input type="checkbox" class="contact-checkbox" value="${response.id}">`, // checkbox
+                    response.name,
+                    response.email,
+                    response.phone,
+                    response.mobile,
+                    response.position,
+                    response.is_primary ? 'Yes' : 'No'
+                ]).draw(false);
+            }
+
             clearContactForm();
         },
         error: function(xhr) {
@@ -662,7 +713,6 @@ function saveContact() {
         }
     });
 }
-
 
 
 // ================== تعديل جهة اتصال ==================
@@ -703,22 +753,7 @@ function switchTab(tabName) {
     }
 }
 
-// ================== عند تحميل الصفحة ==================
-$(document).ready(function() {
-    loadProjects();
 
-    // تهيئة الجدول الرئيسي
-    $('#projectsTable').DataTable({
-        responsive: true,
-        autoWidth: false
-    });
-
-    // تهيئة جدول جهات الاتصال
-    $('#contactsTable').DataTable({
-        responsive: true,
-        autoWidth: false
-    });
-});
 
 function populateContactFormForEdit() {
 const selectedCheckboxes = document.querySelectorAll('#contactsTable .contact-checkbox:checked');
@@ -826,8 +861,6 @@ function deleteSelectedContacts() {
 
 // ✅ تصدير إلى إكسل
 function exportTableToExcel(tableId, fileName) {
-
-
     const table = document.getElementById(tableId);
     if (!table) {
         Swal.fire("خطأ", `الجدول ${tableId} غير موجود`, "error");
@@ -840,25 +873,25 @@ function exportTableToExcel(tableId, fileName) {
     } else if (tableId === 'contactsTable' && window.contactsDataTable) {
         dataTableInstance = window.contactsDataTable;
     } else {
-        Swal.fire("خطأ", `DataTables للجدول ${tableId} غير موجود`, "error");
+        Swal.fire("خطأ", `DataTable للجدول ${tableId} غير موجود`, "error");
         return;
     }
 
     const ws_data = [];
 
-    // العناوين
+    // الصف العلوي: العناوين
     const headerRow = [];
-    $(table).find('thead tr:first th').each(function (index) {
-        if (index === 0) return; // تجاهل أول عمود (checkbox مثلاً)
+    $(table).find('thead tr:first th').each(function(index) {
+        if (index === 0) return; // تجاهل أول عمود (مثلاً checkbox)
         headerRow.push($(this).text().trim());
     });
     ws_data.push(headerRow);
 
-    // البيانات
-    dataTableInstance.rows({ search: 'applied' }).every(function () {
+    // البيانات: فقط الصفوف المفلترة (البحث)
+    dataTableInstance.rows({ search: 'applied' }).every(function() {
         const rowData = this.data();
         const exportRow = [];
-        for (let i = 1; i < rowData.length; i++) {
+        for (let i = 1; i < rowData.length; i++) { // تجاهل أول عمود
             exportRow.push(rowData[i]);
         }
         ws_data.push(exportRow);
@@ -868,7 +901,12 @@ function exportTableToExcel(tableId, fileName) {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
     XLSX.writeFile(wb, `${fileName}.xlsx`);
+
+    Swal.fire("نجاح", `تم تصدير الجدول "${tableId}" بنجاح كملف Excel.`, "success");
 }
+
+// تأكد أن الدالة متاحة عالميًا
+window.exportTableToExcel = exportTableToExcel;
 
 
 
@@ -919,6 +957,21 @@ function printProjectTable(tableId = 'projectsTable', title = '') {
 }
 
 
+function editSelectedProject() {
+    let selected = $('.project-checkbox:checked'); // افترض أن كل checkbox لديه class projectCheckbox
+
+    if (selected.length === 0) {
+        Swal.fire('⚠️', 'الرجاء اختيار مشروع واحد للتعديل', 'warning');
+        return;
+    }
+    if (selected.length > 1) {
+        Swal.fire('⚠️', 'الرجاء اختيار مشروع واحد فقط', 'warning');
+        return;
+    }
+
+    let projectId = selected.val(); // جلب id المشروع
+    editProject(projectId);         // استدعاء دالة التعديل الموجودة
+}
 
 function goToProjectFiles() {
     let selectedIds = getSelectedProjectIds();

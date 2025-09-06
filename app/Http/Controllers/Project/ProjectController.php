@@ -61,22 +61,25 @@ return response()->json([
 
 public function update(Request $request, Project $project)
 {
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'arabic_name' => 'nullable|string|max:255',
-        'registration_date' => 'nullable|date',
-        'region' => 'nullable|string|max:255',
-        'customer_id' => 'nullable|exists:customers,id',
-        'owner' => 'nullable|string|max:255',
-        'consultant' => 'nullable|string|max:255',
-        'contractor' => 'nullable|string|max:255',
-        'projectArabicLocation' => 'nullable|string|max:255',
+    $project->update([
+        'name' => $request->name,
+        'arabic_name' => $request->arabic_name,
+        'registration_date' => $request->registration_date,
+        'customer_id' => $request->customer_id,
+        'owner' => $request->owner,
+        'consultant' => $request->consultant,
+        'contractor' => $request->contractor,
+        'projectArabicLocation' => $request->projectArabicLocation,
     ]);
 
-    $project->update($validated);
-
-    return response()->json(['project' => $project]);
+    // 👇 رجّع JSON مع ID
+    return response()->json([
+        'id' => $project->id,
+        'project' => $project,
+        'arabic_name' => $project->arabic_name
+    ]);
 }
+
 
 
 

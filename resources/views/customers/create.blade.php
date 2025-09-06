@@ -209,8 +209,12 @@
                             <fieldset class="form-section-fieldset">
                                 <legend>Contact List</legend>
                                 <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
-                                    <button type="button" class="btn-secondary" onclick="populateContactFormForEdit()"><i class="fas fa-pen"></i> Edit Selected</button>
-            <button type="button" class="btn-danger" onclick="deleteSelectedContacts()"><i class="fas fa-trash"></i> Delete Selected</button>
+                                 <button type="button" class="btn-secondary" onclick="populateContactFormForEdit('add')">
+    <i class="fas fa-pen"></i> Edit Selected
+</button>
+<button type="button" class="btn-danger" onclick="deleteSelectedContacts('#contactsTable')">
+    <i class="fas fa-trash"></i> Delete Selected
+</button>
                                     <button type="button" class="btn-icon" id="exportContactsModalExcelBtn24" title="Export to Excel"><i class="fa-solid fa-table"></i></button>
                                     <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print"><i class="fas fa-print"></i></button>
                                 </div>
@@ -244,7 +248,8 @@
     <legend>Add Contact Person</legend>
     <div class="form-row">
         <div class="form-group">
-                        <input type="text" id="editContactId"  hidden>
+
+                        <input type="hidden" id="editContactIdAdd">
 
             <label for="contactNameAdd">Contact Name:</label>
             <input type="text" id="contactNameAdd" placeholder="Enter contact name">
@@ -276,9 +281,10 @@
         </div>
     </div>
     <div class="contact-toolbar">
-        <button type="button" class="btn btn-success" onclick="saveContactForCustomer('add')">
-    <i class="fas fa-save"></i> Save Contact
+       <button type="button" class="btn btn-primary" onclick="saveContactForCustomer('add')">
+    💾 حفظ / تحديث جهة الاتصال
 </button>
+
 
 
         <button type="button" class="btn-secondary" onclick="clearContactForm()">
@@ -535,8 +541,13 @@
         <fieldset class="form-section-fieldset">
           <legend>Contact List</legend>
           <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
-            <button type="button" class="btn-secondary" onclick="populateContactFormForEdit()"><i class="fas fa-pen"></i> Edit Selected</button>
-            <button type="button" class="btn-danger" onclick="deleteSelectedContacts()"><i class="fas fa-trash"></i> Delete Selected</button>
+           <button type="button" class="btn-secondary" onclick="populateContactFormForEdit('edit')">
+    <i class="fas fa-pen"></i> Edit Selected
+</button>
+
+<button type="button" class="btn-danger" onclick="deleteSelectedContacts('#contactsTableEdit')">
+    <i class="fas fa-trash"></i> Delete Selected
+</button>
             <button type="button" class="btn-icon" id="exportContactsModalExcelBtn" title="Export to Excel"><i class="fa-solid fa-table"></i></button>
             <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print"><i class="fas fa-print"></i></button>
           </div>
@@ -566,7 +577,8 @@
         <fieldset class="form-section-fieldset">
           <legend>Add/Edit Contact Person</legend>
           <div class="form-row">
-            <input type="text" id="editContactId"  hidden>
+            <input type="hidden" id="editContactId">
+
 
             <div class="form-group">
               <label for="contactNameedit">Contact Name:</label>
@@ -601,9 +613,9 @@
           </div>
 
           <div class="contact-toolbar">
-            <button type="button" class="btn btn-primary" onclick="saveContactForCustomerEdit()">
-              حفظ / تحديث جهة الاتصال
-            </button>
+            <button type="button" class="btn btn-primary" onclick="saveContactForCustomer('edit')">
+    💾 حفظ / تحديث جهة الاتصال
+</button>
             <button type="button" class="btn-secondary" onclick="clearContactFormEdit()">
               <i class="fas fa-eraser"></i> Clear Form
             </button>
