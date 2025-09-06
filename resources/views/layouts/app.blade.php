@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
     <link rel="stylesheet" href="{{ asset('css/darkmode.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customers.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/customer-files.css') }}">
+
 
     {{-- Font Awesome محلي --}}
     <link rel="stylesheet" href="{{ asset('fontawesome/css/all.min.css') }}">

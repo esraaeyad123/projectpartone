@@ -1,5 +1,8 @@
 <nav class="main-menu">
-    <button onclick="window.location.href = 'index.html'"><i class="fas fa-layer-group"></i> <span data-key="General">General</span></button>
+<button onclick="window.location.href='/'">
+    <i class="fas fa-layer-group"></i>
+    <span data-key="General">General</span>
+</button>
     <button onclick="window.location.href = 'testing.html'">
     <i class="fas fa-bug"></i>
     <span data-key="Testing">Testing</span>

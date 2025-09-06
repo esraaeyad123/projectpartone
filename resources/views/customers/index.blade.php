@@ -452,45 +452,26 @@ function populateContactsTableEdit(contacts) {
 
 
 
-window.saveCustomer = function(event, closeModal = true) {
+window.saveProjectData = function(event, closeModal = true) {
     event.preventDefault();
 
-    let customerId = $('#customerId').val(); // لو فاضي معناها عميل جديد
-    let url = customerId
-        ? `/customers/${customerId}`   // تحديث
-        : `/customers`;                // إضافة جديد
-
-    let method = customerId ? "PUT" : "POST";
+    let projectId = $('#projectId').val(); // لو فاضي معناها مشروع جديد
+    let url = projectId
+        ? `/projects/${projectId}`   // تحديث
+        : `/projects`;               // إضافة جديد
+    let method = projectId ? "PUT" : "POST";
 
     let formData = {
-        customer_name: $('#customerName').val(),
-        arabic_name: $('#customerArabicName').val(),
-        customer_legal_name: $('#customerLegalName').val(),
-        customer_type: $('#customerType').val(),
-        potential: $('#potentialCustomer').is(':checked') ? 1 : 0,
-        legacy_acc_no: $('#legacyAccNo').val(),
-        date_registered: $('#registrationDate').val(),
-        phone: $('#customerPhone').val(),
-        country: $('#customerCountry').val(),
-        arabic_location: $('#customerArabicLocation').val(),
-        city: $('#customerCity').val(),
-        district: $('#customerDistrict').val(),
-        street: $('#customerStreet').val(),
-        post_code: $('#customerPostCode').val(),
-        address_block: $('#customerAddressBlock').val(),
-        po_box: $('#customerPoBox').val(),
-        building_no: $('#customerBuildingNo').val(),
-        payment_terms: $('#paymentTerms').val(),
-        discount: $('#discount').val(),
-        cash: $('#isCash').is(':checked') ? 1 : 0,
-        credit_limit: $('#creditLimit').val(),
-        vat_profile: $('#vatProfile').val(),
-        trn_tin: $('#trnTin').val(),
-        registration_no: $('#registrationNo').val(),
-        restrict_deliveries: $('#restrictDeliveries').is(':checked') ? 1 : 0,
-        restrict_orders: $('#restrictOrders').is(':checked') ? 1 : 0,
-        restrict_quotations: $('#restrictQuotations').is(':checked') ? 1 : 0,
-        _token: $('meta[name="csrf-token"]').attr('content') // تأكد إنك ضايف meta csrf
+        name: $('#projectName').val(),
+        arabic_name: $('#projectArabicName').val(),
+        registration_date: $('#registrationDate').val(),
+        region: $('#region').val() || null,
+        customer_id: $('#customer').val(),
+        owner: $('#owner').val(),
+        consultant: $('#consultant').val(),
+        contractor: $('#contractor').val(),
+        projectArabicLocation: $('#projectArabicLocation').val(),
+        _token: $('meta[name="csrf-token"]').attr('content')
     };
 
     $.ajax({
@@ -498,16 +479,13 @@ window.saveCustomer = function(event, closeModal = true) {
         type: method,
         data: formData,
         success: function(response) {
-            alert('✅ Customer saved successfully!');
-$('#customerId').val(response.customer.id);
- // ✅ ملء جدول جهات الاتصال تلقائيًا
-        populateContactsTable(response.customer.contacts || []);
+            alert('✅ Project saved successfully!');
 
+            if(closeModal) closeProjectModal();
+            loadProjects(); // تحديث جدول المشاريع
 
-            if(closeModal) closeCustomerModal();
-            if (typeof table !== 'undefined') {
-                table.ajax.reload(null, false);
-            }
+            // إذا أردت تحديث الفورم أو أي شيء آخر
+            $('#projectId').val(response.project.id);
         },
         error: function(xhr) {
             let errors = xhr.responseJSON?.errors || {};
@@ -515,10 +493,12 @@ $('#customerId').val(response.customer.id);
             for(let field in errors){
                 errorMsg += errors[field] + '\n';
             }
-            alert(errorMsg || '❌ Error saving customer');
+            alert(errorMsg || '❌ Error saving project');
+            console.error(xhr.responseText);
         }
     });
 }
+
 
     // ------------------------- مسح نموذج جهة الاتصال -------------------------
     window.clearContactForm = function() {

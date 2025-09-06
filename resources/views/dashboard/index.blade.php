@@ -14,7 +14,7 @@
   <i class="fas fa-hard-hat"></i>
   <span data-key="Customers">Customers</span>
 </div>
-      <div class="general-card" >
+      <div class="general-card" onclick="window.location.href='{{ route('projects.index') }}'">
         <i class="fas fa-diagram-project"></i>
         <span data-key="Projects">Projects</span>
       </div>
