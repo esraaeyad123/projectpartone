@@ -40,10 +40,12 @@ public function index($projectId)
 {
     $contact = ProjectContact::create($request->all());
 
+  
     return response()->json([
-        'id' => $contact->id,
-        'message' => 'Contact saved successfully'
-    ]);
+            'success' => true,
+            'message' => '✅ Contact created successfully',
+            'contact' => $contact
+        ]);
 }
 
 
@@ -81,7 +83,11 @@ public function update(Request $request, $id) {
     $contact->is_primary = $request->is_primary;
     $contact->save();
 
-    return response()->json($contact);
+      return response()->json([
+        'success' => true,
+        'message' => '✅ Contact updated successfully',
+        'contact' => $contact
+    ]);
 }
 
     /**

@@ -646,11 +646,6 @@ window.saveCustomer = function(
             { data: 'position' },
             { data: 'is_primary', render: d => d ? 'Yes' : 'No' }
         ]
-        ,
-    createdRow: function(row, data) {
-        // 👈 يحط الـ id على الصف
-        $(row).attr('data-contact-id', data.id);
-    }
 
     });
 
@@ -829,7 +824,6 @@ window.populateContactFormForEdit = function(modalType = 'add') {
 };
 
 
-//تعديل جهة اتصال
 
 
 
@@ -852,7 +846,6 @@ window.clearContactFormEdit = function() {
 
 
 
-
 // تعريف الدالة على النافذة لتكون متاحة في أي مكان
 window.deleteSelectedContacts = function(tableSelector) {
     if (!tableSelector) {
@@ -861,14 +854,12 @@ window.deleteSelectedContacts = function(tableSelector) {
     }
 
     let ids = [];
+    console.log(ids);
     $(`${tableSelector} tbody input.contact-select:checked`).each(function() {
         let row = $(this).closest('tr');
         let id = row.attr('data-contact-id'); // ✅ هنا الحل
         if (id) ids.push(id);
     });
-    console.log(ids);
-
-
 
     if (ids.length === 0) {
         Swal.fire("تحذير", "⚠️ الرجاء اختيار جهة اتصال واحدة على الأقل للحذف", "warning");

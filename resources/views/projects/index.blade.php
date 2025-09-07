@@ -604,46 +604,61 @@ function saveProject(closeAfterSave) {
 
 
 // ================== تحميل جهات الاتصال للمشروع ==================
+
+let contactsDataTable;
+
+$(document).ready(function() {
+    // ================== تهيئة جدول جهات الاتصال ==================
+    contactsDataTable = $('#contactsTable').DataTable({
+        responsive: true,
+        autoWidth: false,
+        columnDefs: [{ orderable: false, targets: [0] }],
+        columns: [
+            { title: "" },      // checkbox
+            { title: "Name" },
+            { title: "Email" },
+            { title: "Phone" },
+            { title: "Mobile" },
+            { title: "Position" },
+            { title: "Is Primary" }
+        ]
+    });
+
+    window.contactsDataTable = contactsDataTable;
+
+    // checkbox تحديد الكل
+    $('#selectAllContacts').on('change', function() {
+        let isChecked = $(this).is(':checked');
+        $('#contactsTable tbody input.contact-checkbox').prop('checked', isChecked);
+    });
+});
+
+// ================== تحميل جهات الاتصال ==================
 function loadContactsTable(projectId) {
-     let tbody = $('#contactsTable tbody');
-    tbody.empty(); // ✅ تنظيف الجدول قبل التحميل الجديد
-$.get(`/projects/${projectId}/contacts`, function(contacts) {
-        let tbody = $('#contactsTable tbody');
-
-        if (contacts.length === 0) {
-            tbody.append('<tr><td colspan="8">No contacts found</td></tr>');
-            return;
-        }
-
+    contactsDataTable.clear(); // تنظيف الجدول
+    $.get(`/projects/${projectId}/contacts`, function(contacts) {
         contacts.forEach(c => {
-            tbody.append(`
-                <tr >
-                    <td><input type="checkbox" class="contact-checkbox" value="${c.id}"></td>
-                    <td>${c.name}</td>
-                    <td>${c.email}</td>
-                    <td>${c.phone}</td>
-                    <td>${c.mobile}</td>
-                    <td>${c.position}</td>
-                    <td>${c.is_primary ? 'Yes' : 'No'}</td>
-                </tr>
-            `);
+            let rowNode = contactsDataTable.row.add([
+                `<input type="checkbox" class="contact-checkbox" value="${c.id}">`,
+                c.name,
+                c.email,
+                c.phone,
+                c.mobile,
+                c.position,
+                c.is_primary ? 'Yes' : 'No'
+            ]).draw(false).node();
+
+            $(rowNode).data('contact', c); // تخزين البيانات في الـ DOM
         });
     });
 }
 
+// ================== حفظ جهة الاتصال ==================
 function saveContact() {
     let projectId = $('#projectId').val();
-    if (!projectId) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'تنبيه ⚠️',
-            text: 'يرجى حفظ المشروع أولاً قبل حفظ جهة الاتصال!',
-            confirmButtonText: 'حسناً'
-        });
-        return;
-    }
+    if (!projectId) return;
 
-    let contactId = $('#editingContactId').val(); // إذا موجود → تعديل
+    let contactId = $('#editingContactId').val();
     let url = contactId ? `/project-contacts/${contactId}` : '/project-contacts';
     let method = contactId ? 'PUT' : 'POST';
 
@@ -663,81 +678,131 @@ function saveContact() {
         method: method,
         data: contactData,
         success: function(response) {
-            Swal.fire({
-                icon: 'success',
-                title: contactId ? 'تم التعديل ✅' : 'تم الحفظ ✅',
-                text: contactId ? 'تم تعديل جهة الاتصال بنجاح!' : 'تم حفظ جهة الاتصال بنجاح!',
-                timer: 2000,
-                showConfirmButton: false
-            });
+            let contact = response.contact; // بيانات من الباك
+            let rowData = [
+                `<input type="checkbox" class="contact-checkbox" value="${contact.id}">`,
+                contact.name || '',
+                contact.email || '',
+                contact.phone || '',
+                contact.mobile || '',
+                contact.position || '',
+                contact.is_primary ? 'Yes' : 'No'
+            ];
 
-            let table = $('#contactsTable').DataTable();
-
-            if(contactId){
+            if(contactId) {
                 // تعديل صف موجود
-                let row = table.row($(`#contactsTable tbody input.contact-checkbox[value="${contactId}"]`).closest('tr'));
-                if(row){
-                    row.data([
-                        `<input type="checkbox" class="contact-checkbox" value="${response.id}">`, // checkbox
-                        response.name,
-                        response.email,
-                        response.phone,
-                        response.mobile,
-                        response.position,
-                        response.is_primary ? 'Yes' : 'No'
-                    ]).draw(false);
+                let row = contactsDataTable.row($(`#contactsTable tbody input.contact-checkbox[value="${contactId}"]`).closest('tr'));
+                if(row.any()){
+                    row.data(rowData).draw(false);
+                    $(row.node()).data('contact', contact); // تحديث البيانات المخزنة
                 }
             } else {
                 // إضافة صف جديد
-                table.row.add([
-                    `<input type="checkbox" class="contact-checkbox" value="${response.id}">`, // checkbox
-                    response.name,
-                    response.email,
-                    response.phone,
-                    response.mobile,
-                    response.position,
-                    response.is_primary ? 'Yes' : 'No'
-                ]).draw(false);
+                let rowNode = contactsDataTable.row.add(rowData).draw(false).node();
+                $(rowNode).data('contact', contact); // تخزين البيانات
             }
 
             clearContactForm();
+            Swal.fire({ icon: 'success', title: 'تم الحفظ ✅', timer: 1500, showConfirmButton: false });
         },
         error: function(xhr) {
-            console.error(xhr.responseText);
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ ❌',
-                text: contactId ? 'فشل في تعديل جهة الاتصال!' : 'فشل في حفظ جهة الاتصال!',
-                confirmButtonText: 'حسناً'
-            });
+            Swal.fire({ icon: 'error', title: 'خطأ ❌', text: 'حدث خطأ أثناء حفظ جهة الاتصال', confirmButtonText: 'حسناً' });
         }
     });
 }
 
+// ================== ملء الفورم للتعديل ==================
+function populateContactFormForEdit() {
+    const selectedCheckboxes = $('#contactsTable .contact-checkbox:checked');
+    if(selectedCheckboxes.length !== 1){
+        Swal.fire("⚠️", "الرجاء تحديد جهة اتصال واحدة فقط للتعديل.", "warning");
+        return;
+    }
 
-// ================== تعديل جهة اتصال ==================
-function editContact(id, name, email, phone, mobile, position, isPrimary) {
-    $('#editingContactId').val(id);
-    $('#contactName').val(name);
-    $('#contactEmail').val(email);
-    $('#contactPhone').val(phone);
-    $('#contactMobile').val(mobile);
-    $('#contactPosition').val(position);
-    $('#isPrimaryContact').prop('checked', isPrimary);
+    const contactId = selectedCheckboxes.val();
+    const rowNode = $(`#contactsTable tbody input.contact-checkbox[value="${contactId}"]`).closest('tr');
+    const contact = $(rowNode).data('contact');
+
+    if(contact){
+        // ملء الفورم مباشرة
+        $('#editingContactId').val(contact.id);
+        $('#contactName').val(contact.name || '');
+        $('#contactEmail').val(contact.email || '');
+        $('#contactPhone').val(contact.phone || '');
+        $('#contactMobile').val(contact.mobile || '');
+        $('#contactPosition').val(contact.position || '');
+        $('#isPrimaryContact').prop('checked', contact.is_primary == 1);
+    } else {
+        // جلب البيانات من السيرفر إذا لم تتوفر
+        $.get(`/project-contacts/${contactId}`, function(contact){
+            $('#editingContactId').val(contact.id);
+            $('#contactName').val(contact.name || '');
+            $('#contactEmail').val(contact.email || '');
+            $('#contactPhone').val(contact.phone || '');
+            $('#contactMobile').val(contact.mobile || '');
+            $('#contactPosition').val(contact.position || '');
+            $('#isPrimaryContact').prop('checked', contact.is_primary == 1);
+            $(rowNode).data('contact', contact);
+        }).fail(function(){
+            Swal.fire("❌", "حدث خطأ أثناء جلب بيانات جهة الاتصال.", "error");
+        });
+    }
 }
 
-
-
-// ================== Helpers ==================
-function clearContactForm() {
+// ================== مسح الفورم ==================
+function clearContactForm(){
+    $('#editingContactId').val('');
     $('#contactName').val('');
     $('#contactEmail').val('');
     $('#contactPhone').val('');
     $('#contactMobile').val('');
     $('#contactPosition').val('');
     $('#isPrimaryContact').prop('checked', false);
-    $('#editingContactId').val('');
 }
+
+
+// ================== حذف جهات الاتصال ==================
+function deleteSelectedContacts() {
+    let ids = [];
+    $('#contactsTable tbody input.contact-checkbox:checked').each(function() {
+        ids.push($(this).val());
+    });
+
+    if(ids.length === 0){
+        Swal.fire("⚠️", "الرجاء تحديد جهة اتصال واحدة على الأقل للحذف.", "warning");
+        return;
+    }
+
+    Swal.fire({
+        title: "هل أنت متأكد؟",
+        text: `سيتم حذف ${ids.length} جهة اتصال ولا يمكن التراجع عن هذا الإجراء.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "نعم، احذف!",
+        cancelButtonText: "إلغاء"
+    }).then((result) => {
+        if(result.isConfirmed){
+            $.ajax({
+                url: '/project-contacts/delete-multiple',
+                type: 'POST',
+                data: { _token: $('meta[name="csrf-token"]').attr('content'), ids: ids },
+                success: function(){
+                    ids.forEach(id => {
+                        let row = contactsDataTable.row($(`#contactsTable tbody input.contact-checkbox[value="${id}"]`).closest('tr'));
+                        row.remove();
+                    });
+                    contactsDataTable.draw(false);
+                    Swal.fire("✅", "تم حذف جهات الاتصال بنجاح.", "success");
+                },
+                error: function(xhr){
+                    console.error(xhr.responseText);
+                    Swal.fire("❌", "حدث خطأ أثناء الحذف.", "error");
+                }
+            });
+        }
+    });
+}
+
 
 // ================== تبويبات المودال ==================
 function switchTab(tabName) {
@@ -755,108 +820,11 @@ function switchTab(tabName) {
 
 
 
-function populateContactFormForEdit() {
-const selectedCheckboxes = document.querySelectorAll('#contactsTable .contact-checkbox:checked');
-
-    if (selectedCheckboxes.length !== 1) {
-        showAlert("الرجاء تحديد جهة اتصال واحدة فقط للتعديل.", "warning");
-        return;
-    }
-
-    // 🔹 خذ الـ contactId من قيمة الـ checkbox
-    const contactId = selectedCheckboxes[0].value;
-    console.log('Editing contact with ID:', contactId);
-
-    // 🔹 جلب بيانات جهة الاتصال من Laravel API
-    $.ajax({
-        url: `/project-contacts/${contactId}`, // Laravel route
-        type: "GET",
-        success: function(contact) {
-            if (!contact || !contact.id) {
-                showAlert("❌ لم يتم العثور على بيانات جهة الاتصال.", "error");
-                return;
-            }
-
-            // ✅ تعبئة الحقول بالفورم
-            $('#editingContactId').val(contact.id);
-            $('#contactName').val(contact.name || '');
-            $('#contactEmail').val(contact.email || '');
-            $('#contactPhone').val(contact.phone || '');
-            $('#contactMobile').val(contact.mobile || '');
-            $('#contactPosition').val(contact.position || '');
-            $('#isPrimaryContact').prop('checked', contact.is_primary == 1);
-        },
-        error: function(xhr) {
-            console.error("Error fetching contact:", xhr.responseText);
-            showAlert("❌ حدث خطأ أثناء جلب بيانات جهة الاتصال.", "error");
-        }
-    });
-}
 
 
 // حذف جهات الاتصال المحددة من قاعدة البيانات
 
 
-
-function deleteSelectedContacts() {
-    let ids = [];
-
-    // اجمع كل IDs من الشيكبوكسات المحددة
-    $('#contactsTable tbody input.contact-checkbox:checked').each(function() {
-        ids.push($(this).val());
-    });
-
-    if (ids.length === 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "تنبيه",
-            text: "⚠️ الرجاء تحديد جهة اتصال واحدة على الأقل للحذف."
-        });
-        return;
-    }
-
-    // نافذة تأكيد باستخدام SweetAlert2
-    Swal.fire({
-        title: "هل أنت متأكد؟",
-        text: `سيتم حذف ${ids.length} جهة اتصال ولا يمكن التراجع عن هذا الإجراء.`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "نعم، احذف!",
-        cancelButtonText: "إلغاء"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // طلب AJAX للحذف
-            $.ajax({
-                url: '/project-contacts/delete-multiple',
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content'),
-                    ids: ids
-                },
-                success: function(response) {
-                    // إزالة الصفوف من الجدول بعد نجاح الحذف
-                    $('#contactsTable tbody input.contact-checkbox:checked').each(function() {
-                        $(this).closest('tr').remove();
-                    });
-
-                    Swal.fire({
-                        icon: "success",
-                        title: "تم الحذف!",
-                        text: "✅ تم حذف جهات الاتصال بنجاح."
-                    });
-                },
-                error: function(xhr) {
-                    console.error("Error deleting contacts:", xhr.responseText);
-                    Swal.fire({
-                        icon: "error",
-                        title: "خطأ",
-                        text: "❌ حدث خطأ أثناء الحذف."
-                    });
-                }
-            });
-        }
-    });
-}
 
 
 // ✅ تصدير إلى إكسل

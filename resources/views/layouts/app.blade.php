@@ -44,16 +44,11 @@
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
-    {{-- Font Awesome JS محلي --}}
-    <script src="{{ asset('fontawesome/js/all.min.js') }}"></script>
 
-    {{--     <script src="{{ asset('js/customers.js') }}"></script>
---}}
-
-        {{-- ملف JS الخاص بك --}}
-
-
-    <script src="{{ asset('js/main.js') }}"></script>
+        <script src="{{ asset('fontawesome/js/all.min.js') }}"></script>
+        <script src="{{ asset('js/customer_types.js') }}"></script>
+        <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+        <script src="{{ asset('js/main.js') }}"></script>
 
 </body>
 </html>
