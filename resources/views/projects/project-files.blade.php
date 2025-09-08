@@ -43,11 +43,9 @@
                 <input type="text" id="fileSearchInput" placeholder="Search files..." data-key="Search files...">
             </div>
         </div>
-  <div id="dropZone" class="drop-zone">
-    <p><i class="fas fa-cloud-upload-alt"></i> اسحب الملفات هنا لإرسالها</p>
-    <input type="file" id="fileInput" multiple style="display:none">
-</div>
-
+   <div id="dropZone" class="drop-zone">
+                    <p><i class="fas fa-cloud-upload-alt"></i> Drag and drop files here to upload</p>
+                </div>
                 <div id="fileIconsContainer" class="file-icons-grid">
                     <p class="no-files-message" data-key="Loading files...">Loading files...</p>
                 </div>
@@ -61,7 +59,7 @@
         <form id="fileUploadForm">
             <div class="form-group">
                 <label for="fileInput"><span data-key="Select File">Select File:</span></label>
-                <input type="file" id="fileInput" name="fileInput" required>
+<input type="file" id="fileInput" name="fileInput" required multiple>
             </div>
             <div class="form-buttons">
                 <button type="submit" class="form-button" data-key="Upload">Upload</button>
@@ -116,10 +114,12 @@
             .catch(err => console.error(err));
     }
 
-    function renderFileIcon(file) {
+   function renderFileIcon(file) {
     const container = document.getElementById('fileIconsContainer');
     const fileCard = document.createElement('div');
     fileCard.className = 'file-card';
+    fileCard.setAttribute('data-file-id', file.id); // ✅ هنا
+
     fileCard.innerHTML = `
         <div class="file-card-content">
             <input type="checkbox" class="selectFile" data-file-id="${file.id}">
@@ -131,7 +131,6 @@
     `;
     container.appendChild(fileCard);
 }
-
 
     function getFileIcon(name) {
         const ext = name.split('.').pop().toLowerCase();
@@ -146,28 +145,37 @@
     }
 
     // =================== رفع الملف ===================
+
     document.getElementById('fileUploadForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const fileInput = document.getElementById('fileInput');
-        const file = fileInput.files[0];
-        if (!file) return Swal.fire('خطأ', 'اختر ملفاً أولاً', 'error');
+    e.preventDefault();
 
-        const formData = new FormData();
-        formData.append('file', file);
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
 
-        fetch(`/projects/${currentProjectId}/files`, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
-        })
-        .then(res => res.json())
-        .then(data => {
-            renderFileIcon(data);
-            fileInput.value = '';
-            Swal.fire('نجاح', 'تم رفع الملف بنجاح', 'success');
-        })
-        .catch(err => Swal.fire('خطأ', 'حدث خطأ أثناء رفع الملف', 'error'));
-    });
+    if (!file) {
+        Swal.fire('خطأ', 'اختر ملفاً أولاً', 'error');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch(`/projects/${currentProjectId}/files`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        renderFileIcon(data); // ترسم الأيقونة
+        fileInput.value = ''; // تفضي الانبوت
+        Swal.fire('نجاح', 'تم رفع الملف بنجاح', 'success');
+    })
+    .catch(err => Swal.fire('خطأ', 'حدث خطأ أثناء رفع الملف', 'error'));
+});
+
 
     // =================== تنزيل وحذف الملفات ===================
 
@@ -318,6 +326,7 @@ function deleteSelectedFiles() {
         }
     });
 }
+
 
 
 function downloadSelectedFilesAsZip() {

@@ -353,17 +353,28 @@ $('#customersTable tbody').on('change', 'input.customerCheckbox', function() {
     // ==========================
 // تعريف الدالة بشكل واضح على نافذة window
 window.openEditCustomerModal = function() {
+    let selected = $('.customerCheckbox:checked');
 
-    let selected = $('.customerCheckbox:checked'); if(selected.length !== 1)
-     { alert('⚠️ اختر عميل واحد للتعديل'); return; }
+    if (selected.length !== 1) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه',
+            text: '⚠️ اختر عميل واحد للتعديل'
+        });
+        return;
+    }
 
-        let customerId = selected.val();
+    let customerId = selected.val();
     $.ajax({
         url: `/customers/${customerId}/edit`,
         method: 'GET',
         success: function(res) {
             if (res.status !== 'success') {
-                alert('❌ لم يتم العثور على بيانات العميل');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: '❌ لم يتم العثور على بيانات العميل'
+                });
                 return;
             }
 
@@ -409,16 +420,21 @@ window.openEditCustomerModal = function() {
             $('#editCustomerModal').show();
         },
         error: function() {
-            alert('❌ حدث خطأ أثناء تحميل بيانات العميل');
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: '❌ حدث خطأ أثناء تحميل بيانات العميل'
+            });
         }
     });
 }
+
 function populateContactsTable(contacts = []) {
     if (!window.contactsTable) {
         // إنشاء الجدول لو مش موجود
         window.contactsTable = $('#contactsTable').DataTable({
             columns: [
-                { data: null, render: () => `<input type="checkbox" class="contact-select" value="${data.id}">>`, orderable: false },
+                { data: null, render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`, orderable: false },
                 { data: 'id', visible: false },
                 { data: 'name' },
                 { data: 'email' },
@@ -438,6 +454,7 @@ function populateContactsTable(contacts = []) {
 
     window.contactsTable.draw();
 }
+
 
 // بعد تحميل الصفحة
 window.contactsTableEdit = $('#contactsTableEdit').DataTable({

@@ -68,7 +68,7 @@
             <form id="fileUploadForm" onsubmit="uploadFile(event)">
                 <div class="form-group">
                     <label for="fileInput"><span data-key="Select File">Select File:</span></label>
-                    <input type="file" id="fileInput" name="fileInput" required>
+                    <input type="file" id="fileInput" name="fileInput" required multiple>
                 </div>
                 <div class="form-buttons">
                     <button type="submit" class="form-button" data-key="Upload">Upload</button>
@@ -104,6 +104,30 @@
     // =================== تعريف المتغيرات ===================
     const currentCustomerId = {{ $customer->id }};
     const currentCustomerName = "{{ $customer->customer_name }}";
+    const fileInput = document.getElementById('fileInput');
+
+    // ================= Drag & Drop =================
+
+    // ================= File Input =================
+    if (fileInput) {
+        fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    }
+
+    // ================= Handle Files =================
+    function handleFiles(files) {
+        if (!currentCustomerId) {
+            Swal.fire("خطأ", "⚠️ لا يوجد عميل محدد.", "error");
+            return;
+        }
+
+        if (!files.length) {
+            Swal.fire("تنبيه", "⚠️ لم يتم اختيار أي ملف.", "warning");
+            return;
+        }
+
+        Array.from(files).forEach(file => uploadFile(file));
+    }
+
 
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('customer-name-display').textContent =
@@ -181,56 +205,101 @@
     }
 
     // =================== رفع الملفات ===================
-    function uploadFile(event) {
-        event.preventDefault();
-        const fileInput = document.getElementById('fileInput');
-        const file = fileInput.files[0];
-        if (!file) return alert("الرجاء اختيار ملف.");
+function uploadFile(event) {
+    event.preventDefault();
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('customer_id', currentCustomerId);
-        formData.append('_token', '{{ csrf_token() }}');
-
-        fetch('/customer-files', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(file => {
-            renderFileIcon(file);
-            alert(`تم رفع ملف "${file.name}" بنجاح`);
-            document.getElementById('fileUploadForm').reset();
-            closeUploadModal();
-        })
-        .catch(err => {
-            console.error(err);
-            alert("فشل رفع الملف.");
+    if (!file) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'خطأ',
+            text: '⚠️ الرجاء اختيار ملف أولاً.'
         });
+        return;
     }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('customer_id', currentCustomerId);
+    formData.append('_token', '{{ csrf_token() }}');
+
+    fetch('/customer-files', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        return res.json();
+    })
+    .then(file => {
+        renderFileIcon(file); // عرض الملف
+        Swal.fire({
+            icon: 'success',
+            title: 'نجاح',
+            text: `✔️ تم رفع ملف "${file.name}" بنجاح`
+        });
+        document.getElementById('fileUploadForm').reset();
+        closeUploadModal();
+    })
+    .catch(err => {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: '❌ فشل رفع الملف.'
+        });
+    });
+}
 
     // =================== حذف الملفات ===================
-    function deleteFile(fileId) {
-        if (!confirm("هل أنت متأكد من حذف الملف؟")) return;
+function deleteFile(fileId) {
+    Swal.fire({
+        title: 'هل أنت متأكد؟',
+        text: "سيتم حذف الملف نهائيًا!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'نعم، احذف!',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/customer-files/${fileId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP error " + res.status);
+                return res.json();
+            })
+            .then(resp => {
+                const fileCard = document.querySelector(`.file-card[data-file-id="${fileId}"]`);
+                if (fileCard) fileCard.remove();
 
-        fetch(`/customer-files/${fileId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(res => res.json())
-        .then(resp => {
-            document.querySelector(`.file-card[data-file-id="${fileId}"]`).remove();
-            alert(resp.message);
-        })
-        .catch(err => {
-            console.error(err);
-            alert("فشل حذف الملف.");
-        });
-    }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم الحذف',
+                    text: resp.message
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: '❌ فشل حذف الملف.'
+                });
+            });
+        }
+    });
+}
+
 window.deleteFile = deleteFile;
+
 
     // =================== عرض الملفات ===================
     function viewFile(fileId) {
@@ -333,24 +402,45 @@ function deleteSelectedFiles() {
     const selected = Array.from(document.querySelectorAll('.file-card-checkbox:checked'))
                           .map(cb => cb.value);
 
-    if (!selected.length) return alert("الرجاء تحديد ملفات للحذف.");
+    if (!selected.length) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه',
+            text: 'الرجاء تحديد ملفات للحذف.'
+        });
+        return;
+    }
 
-    if (!confirm(`هل أنت متأكد من حذف ${selected.length} ملف(ملفات)؟`)) return;
+    Swal.fire({
+        title: `هل أنت متأكد من حذف ${selected.length} ملف(ملفات)؟`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، احذفها',
+        cancelButtonText: 'إلغاء',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            selected.forEach(fileId => {
+                fetch(`/customer-files/${fileId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(resp => {
+                    const card = document.querySelector(`.file-card[data-file-id="${fileId}"]`);
+                    if (card) card.remove();
+                })
+                .catch(err => console.error(err));
+            });
 
-    selected.forEach(fileId => {
-        fetch(`/customer-files/${fileId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(res => res.json())
-        .then(resp => {
-            const card = document.querySelector(`.file-card[data-file-id="${fileId}"]`);
-            if (card) card.remove();
-        })
-        .catch(err => console.error(err));
+            Swal.fire({
+                icon: 'success',
+                title: 'تم الحذف',
+                text: `${selected.length} ملف(ملفات) تم حذفها بنجاح.`
+            });
+        }
     });
 }
 
@@ -359,21 +449,43 @@ function downloadSelectedFiles() {
     const selected = Array.from(document.querySelectorAll('.file-card-checkbox:checked'))
                           .map(cb => cb.value);
 
-    if (!selected.length) return alert("الرجاء تحديد ملفات للتنزيل.");
+    if (!selected.length) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه',
+            text: 'الرجاء تحديد ملفات للتنزيل.'
+        });
+        return;
+    }
 
     selected.forEach(fileId => {
         window.open(`/customer-files/${fileId}/download`, '_blank');
     });
+
+    Swal.fire({
+        icon: 'success',
+        title: 'تم التنزيل',
+        text: 'تم فتح الملفات المحددة للتنزيل.'
+    });
 }
+
 
 // =================== تنزيل الملفات المحددة كـ ZIP ===================
 async function downloadSelectedFilesAsZip() {
     const selected = Array.from(document.querySelectorAll('.file-card-checkbox:checked'))
                           .map(cb => cb.value);
 
-    if (!selected.length) return alert("الرجاء تحديد ملفات لتنزيلها كملف ZIP.");
+    if (!selected.length) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه',
+            text: 'الرجاء تحديد ملفات لتنزيلها كملف ZIP.'
+        });
+        return;
+    }
 
     const zip = new JSZip();
+    let failedFiles = [];
 
     for (const fileId of selected) {
         try {
@@ -387,15 +499,93 @@ async function downloadSelectedFilesAsZip() {
             zip.file(filename, blob);
         } catch (err) {
             console.error(err);
-            alert("حدث خطأ أثناء تحميل بعض الملفات.");
+            failedFiles.push(fileId);
         }
+    }
+
+    if (failedFiles.length > 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            html: `فشل تحميل بعض الملفات: <br>${failedFiles.join(', ')}`
+        });
     }
 
     zip.generateAsync({ type: "blob" })
        .then(content => {
            saveAs(content, `customer_files_${Date.now()}.zip`);
+           Swal.fire({
+               icon: 'success',
+               title: 'تم التحميل',
+               text: 'تم تنزيل الملفات المحددة كملف ZIP بنجاح.'
+           });
        });
 }
+
+
+function setupDropZone() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+    if (!dropZone) return;
+
+    ['dragenter','dragover','dragleave','drop'].forEach(evt => {
+        dropZone.addEventListener(evt, e => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+
+    ['dragenter','dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, () => dropZone.classList.add('drag-over'));
+    });
+
+    ['dragleave','drop'].forEach(evt => {
+        dropZone.addEventListener(evt, () => dropZone.classList.remove('drag-over'));
+    });
+
+    dropZone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        handleDroppedFiles(files);
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', function() {
+        handleDroppedFiles(this.files);
+        this.value = '';
+    });
+}
+
+// =================== رفع الملفات ===================
+function handleDroppedFiles(files) {
+    if (!currentCustomerId) {
+        Swal.fire("خطأ", "لا يوجد عميل محدد.", "error");
+        return;
+    }
+
+    Array.from(files).forEach(file => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('customer_id', currentCustomerId);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+        fetch('/customer-files', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(file => {
+            renderFileIcon(file);
+            Swal.fire("نجاح", `✔️ تم رفع ملف "${file.name}" بنجاح`, "success");
+        })
+        .catch(err => {
+            console.error(err);
+            Swal.fire("خطأ", "❌ فشل رفع الملف.", "error");
+        });
+    });
+}
+
 
 
 </script>
