@@ -315,7 +315,7 @@
 
             <!-- Modal Buttons -->
             <div class="form-buttons modal-bottom-buttons">
-                <button type="button" class="btn-primary" onclick="closeCustomerModal()">
+                <button type="button" class="btn-primary" >
                     <i class="fas fa-times"></i> Close
                 </button>
                 <button type="button" class="btn-secondary" id="integrationBtn">
@@ -324,7 +324,7 @@
                 <button type="submit" class="btn-success">
                     <i class="fas fa-save"></i> Save & Close
                 </button>
-                <button type="button" class="btn-success" onclick="saveCustomer(event, false)">
+                <button type="button" class="btn-success">
                     <i class="fas fa-save"></i> Save
                 </button>
             </div>
@@ -660,7 +660,7 @@
       <div class="form-buttons modal-bottom-buttons">
             <button type="button" class="btn-primary" onclick="closeEditCustomerModal()"><i class="fas fa-times"></i> Close</button>
         <button type="submit" class="btn-success"><i class="fas fa-save"></i> Update & Close</button>
-        <button type="button" class="btn-success" onclick="updateCustomer(event, false)"><i class="fas fa-save"></i> Update</button>
+        <button type="button" class="btn-success"><i class="fas fa-save"></i> Update</button>
 
       </div>
     </form>

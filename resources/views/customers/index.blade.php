@@ -500,7 +500,7 @@ function populateContactsTableEdit(contacts) {
     // ==========================
     // حفظ التعديل أو إضافة جديد
     // ==========================
-    $('#editCustomerForm').on('submit', function(e){
+     $('#editCustomerForm').on('submit', function(e){
     e.preventDefault();
 
     let formData = {};
@@ -548,18 +548,11 @@ function populateContactsTableEdit(contacts) {
     });
 });
 
-// 🔹 التبديل بين تبويبات المودال (Customer / Contacts)
+ window.saveCustomer = function(e) {
+    e.preventDefault();
 
-window.saveCustomer = function(
-
-) {
-    event.preventDefault();
-
-    let customerId = $('#customerId').val(); // لو فاضي معناها عميل جديد
-    let url = customerId
-        ? `/customers/${customerId}`   // تحديث
-        : `/customers`;                // إضافة جديد
-
+    let customerId = $('#customerId').val(); // لو موجود = تعديل
+    let url = customerId ? `/customers/${customerId}` : `/customers`;
     let method = customerId ? "PUT" : "POST";
 
     let formData = {
@@ -598,39 +591,47 @@ window.saveCustomer = function(
         type: method,
         data: formData,
         success: function(response) {
+            // 🟢 اطبع الرد كامل في الـ console
+            console.log("🚀 Full Response:", response);
+            console.log("📌 JSON Stringified:", JSON.stringify(response, null, 2));
+
+            // تحقق من الـ ID
+            let cid = response.customer?.id || response.customer?.customer_id;
+            console.log("🔑 Customer ID:", cid);
+
             Swal.fire({
                 title: "نجاح",
                 text: "✅ تم حفظ العميل بنجاح!",
                 icon: "success",
                 confirmButtonText: "حسناً"
+            }).then(() => {
+                // إغلاق المودال
+                closeCustomerModal();
+                closeEditCustomerModal();
+
+                if (typeof table !== 'undefined') {
+                    let rowIndex = table.rows().indexes().filter(idx => {
+                        let rowData = table.row(idx).data();
+                        return rowData.id == cid || rowData.customer_id == cid;
+                    });
+
+                    if (rowIndex.length) {
+                        // تحديث عميل موجود
+                        table.row(rowIndex[0]).data(response.customer).draw(false);
+                    } else {
+                        // إضافة عميل جديد
+                        table.row.add(response.customer).draw(false);
+                    }
+                }
             });
-
-            // تحديث hidden input بـ customerId الجديد
-            $('#customerId').val(response.customer.id);
-
-            // ملء جدول جهات الاتصال تلقائيًا
-            populateContactsTable(response.customer.contacts || []);
-
-            if(closeModal) closeCustomerModal();
-
-            // إعادة تحميل جدول DataTable إن وجد
-            if (typeof table !== 'undefined') {
-                table.ajax.reload(null, false);
-            }
         },
         error: function(xhr) {
             let errors = xhr.responseJSON?.errors || {};
             let errorMsg = '';
-            for(let field in errors){
+            for (let field in errors) {
                 errorMsg += errors[field] + '\n';
             }
-
-            Swal.fire({
-                title: "خطأ",
-                text: errorMsg || '❌ حدث خطأ أثناء حفظ العميل',
-                icon: "error",
-                confirmButtonText: "حسناً"
-            });
+            Swal.fire("خطأ", errorMsg || '❌ حدث خطأ أثناء الحفظ', "error");
         }
     });
 };
@@ -1052,17 +1053,24 @@ window.printContactsTable = function() {
 window.printCustomersTable = printCustomersTable;
 window.printContactsTable = printContactsTable;
 
-
 function goToCustomerFiles(button) {
     let selected = $('.customerCheckbox:checked');
 
     if (selected.length === 0) {
-        alert('⚠️ الرجاء اختيار عميل أولاً');
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه',
+            text: '⚠️ الرجاء اختيار عميل أولاً'
+        });
         return;
     }
 
     if (selected.length > 1) {
-        alert('⚠️ الرجاء اختيار عميل واحد فقط');
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه',
+            text: '⚠️ الرجاء اختيار عميل واحد فقط'
+        });
         return;
     }
 
