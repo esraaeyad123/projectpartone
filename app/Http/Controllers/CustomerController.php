@@ -85,8 +85,10 @@ public function store(Request $request)
             'restrict_deliveries' => $request->restrict_deliveries ?? false,
             'restrict_orders'     => $request->restrict_orders ?? false,
             'restrict_quotations' => $request->restrict_quotations ?? false,
+              'date_registered' => $request->date_registered ?? now(), // ← إذا لم يُرسل، ضع تاريخ اليوم
         ])
     );
+
 
 
     return response()->json([
@@ -165,7 +167,7 @@ public function bulkDelete(Request $request)
 public function exportSelected(Request $request)
 {
 
-    
+
     $data = $request->all();
     $all = $data['all'] ?? false;
     $ids = $data['ids'] ?? [];

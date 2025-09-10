@@ -78,7 +78,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="registrationDate">Date Registered:</label>
-                            <input type="date" id="registrationDate" value="2024-07-22">
+                            <input type="date" id="registrationDate" value="">
                         </div>
                         <div class="form-group">
                             <label for="customerPhone">Phone:</label>
@@ -245,7 +245,6 @@
                             <thead>
                                 <tr data-contact-id="">
                                     <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this)"></th>
-                                    <th class="d-none">Contact ID</th>
                                     <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
@@ -315,19 +314,10 @@
 
             <!-- Modal Buttons -->
             <div class="form-buttons modal-bottom-buttons">
-                <button type="button" class="btn-primary" >
-                    <i class="fas fa-times"></i> Close
-                </button>
-                <button type="button" class="btn-secondary" id="integrationBtn">
-                    <i class="fas fa-cogs"></i> Integration..
-                </button>
-                <button type="submit" class="btn-success">
-                    <i class="fas fa-save"></i> Save & Close
-                </button>
-                <button type="button" class="btn-success">
-                    <i class="fas fa-save"></i> Save
-                </button>
-            </div>
+              <button type="button" class="btn-primary" onclick="closeCustomerModal()"><i class="fas fa-times"></i> Close</button>
+              <button type="button" class="btn-success" onclick="saveCustomer(event, true)"><i class="fas fa-save"></i> Save & Close</button>
+              <button type="button" class="btn-success" onclick="saveCustomer(event, false)"><i class="fas fa-save"></i> Save</button>
+          </div>
         </form>
         <!-- Form End -->
     </div>
@@ -666,13 +656,3 @@
     </form>
   </div>
 </div>
-
-
-
-
-
-
-
-
-
-

@@ -140,27 +140,30 @@
     });
 
     // =================== جلب الملفات من السيرفر ===================
-    function loadAndRenderCustomerFiles() {
-        const container = document.getElementById('fileIconsContainer');
-        container.innerHTML = '<p class="no-files-message">Loading files...</p>';
+  function loadAndRenderCustomerFiles() {
+    if (!currentCustomerId) return; // 🔹 شرط التحقق
 
-        fetch(`/customer-files/${currentCustomerId}/files-json`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(res => res.json())
-        .then(files => {
-            container.innerHTML = '';
-            if (!files.length) {
-                container.innerHTML = '<p class="no-files-message">لا توجد ملفات متاحة. الرجاء رفع ملفات جديدة.</p>';
-            } else {
-                files.forEach(file => renderFileIcon(file));
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            container.innerHTML = '<p class="no-files-message">فشل تحميل الملفات.</p>';
-        });
-    }
+    const container = document.getElementById('fileIconsContainer');
+    container.innerHTML = '<p class="no-files-message">Loading files...</p>';
+
+    fetch(`/customer-files/${currentCustomerId}/files-json`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(files => {
+        container.innerHTML = '';
+        if (!files.length) {
+            container.innerHTML = '<p class="no-files-message">لا توجد ملفات متاحة. الرجاء رفع ملفات جديدة.</p>';
+        } else {
+            files.forEach(file => renderFileIcon(file));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        container.innerHTML = '<p class="no-files-message">فشل تحميل الملفات.</p>';
+    });
+}
+
 
     // =================== دوال مساعدة ===================
     function getFileIcon(fileName) {

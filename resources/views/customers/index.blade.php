@@ -196,6 +196,7 @@ $(document).ready(function () {
     var table = $('#customersTable').DataTable({
         responsive: true,
         processing: true,
+        scrollX:true,
         serverSide: false,
         ajax: "{{ route('customers.data') }}",
         columns: [
@@ -220,8 +221,8 @@ $(document).ready(function () {
 
     var contactsTable;
 
-    function closeCustomerModal() { $('#customerModal').hide(); }
-    window.closeCustomerModal = closeCustomerModal;
+    // function closeCustomerModal() { $('#customerModal').hide(); }
+    // window.closeCustomerModal = closeCustomerModal;
 
 
     function deleteSelectedCustomers() {
@@ -463,9 +464,7 @@ window.contactsTableEdit = $('#contactsTableEdit').DataTable({
         {
             data: null,
             orderable: false,
-            render: function() {
-                return '<input type="checkbox" class="contact-select">';
-            }
+            data: null, render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`, orderable: false
         },
         { data: 'id', visible: false },
         { data: 'name' },
@@ -473,9 +472,7 @@ window.contactsTableEdit = $('#contactsTableEdit').DataTable({
         { data: 'phone' },
         { data: 'mobile' },
         { data: 'position' },
-        {
-            data: 'is_primary',
-            render: function(data){ return data ? 'Yes' : 'No'; }
+        {data: 'is_primary', render: d => (d == 1 || d === true || d === '1') ? 'Yes' : 'No'
         }
     ],
     createdRow: function(row, data, dataIndex){
@@ -500,7 +497,7 @@ function populateContactsTableEdit(contacts) {
     // ==========================
     // حفظ التعديل أو إضافة جديد
     // ==========================
-     $('#editCustomerForm').on('submit', function(e){
+$('#editCustomerForm').on('submit', function(e, closeAfterUpdate = false){
     e.preventDefault();
 
     let formData = {};
@@ -509,7 +506,18 @@ function populateContactsTableEdit(contacts) {
         if($(this).is(':checkbox')) formData[name] = $(this).is(':checked') ? 1 : 0;
         else formData[name] = $(this).val();
     });
+
     formData['_token'] = $('input[name="_token"]').val();
+
+    // تاريخ اليوم إذا فارغ
+    if(!formData['date_registered']){
+        formData['date_registered'] = new Date().toISOString().split('T')[0];
+    }
+
+    // قيم افتراضية
+    formData['discount'] = formData['discount'] || 0;
+    formData['cash'] = formData['cash'] || 0;
+    formData['potential'] = formData['potential'] || 0;
 
     $.ajax({
         url: "{{ route('customers.store') }}",
@@ -522,9 +530,15 @@ function populateContactsTableEdit(contacts) {
                 icon: "success",
                 confirmButtonText: "حسناً"
             }).then(() => {
-                closeEditCustomerModal();
+                if (closeAfterUpdate) {
+                    closeEditCustomerModal();
+                    closeCustomerModal();
+                }
 
-                // تحديث الصف مباشرة بدون إعادة تحميل كامل الجدول
+                if(typeof table !== 'undefined'){
+                    table.ajax.reload(null, false); // تحديث الجدول بدون ريفرش
+                }
+
                 let rowIndex = table.rows().indexes().filter(idx => table.row(idx).data().id == response.customer.id);
                 if(rowIndex.length){
                     table.row(rowIndex[0]).data(response.customer).draw(false);
@@ -537,21 +551,16 @@ function populateContactsTableEdit(contacts) {
             let errors = xhr.responseJSON?.errors || {};
             let errorMsg = '';
             for(let field in errors) errorMsg += errors[field] + '\n';
-
-            Swal.fire({
-                title: "خطأ",
-                text: errorMsg || '❌ حدث خطأ أثناء الحفظ',
-                icon: "error",
-                confirmButtonText: "حسناً"
-            });
+            Swal.fire({ title: "خطأ", text: errorMsg || '❌ حدث خطأ أثناء الحفظ', icon: "error", confirmButtonText: "حسناً" });
         }
     });
 });
 
- window.saveCustomer = function(e) {
+
+window.saveCustomer = function(e, closeAfterSave = false) {
     e.preventDefault();
 
-    let customerId = $('#customerId').val(); // لو موجود = تعديل
+    let customerId = $('#customerId').val();
     let url = customerId ? `/customers/${customerId}` : `/customers`;
     let method = customerId ? "PUT" : "POST";
 
@@ -591,12 +600,12 @@ function populateContactsTableEdit(contacts) {
         type: method,
         data: formData,
         success: function(response) {
-            // 🟢 اطبع الرد كامل في الـ console
             console.log("🚀 Full Response:", response);
             console.log("📌 JSON Stringified:", JSON.stringify(response, null, 2));
 
-            // تحقق من الـ ID
             let cid = response.customer?.id || response.customer?.customer_id;
+               $('#customer_Id').val(response.customer.id);      // الحقل المخفي
+                $('#customerId').val(response.customer.id);      // حقل العرض
             console.log("🔑 Customer ID:", cid);
 
             Swal.fire({
@@ -605,10 +614,15 @@ function populateContactsTableEdit(contacts) {
                 icon: "success",
                 confirmButtonText: "حسناً"
             }).then(() => {
-                // إغلاق المودال
-                closeCustomerModal();
-                closeEditCustomerModal();
-
+                // 🚨 هذا هو الجزء الذي تم تعديله ليصبح أكثر ذكاءً 🚨
+                // يقوم بالإغلاق فقط إذا كان زر "Save & Close" هو الذي تم الضغط عليه
+                if (closeAfterSave) {
+                    closeEditCustomerModal(); // للتحقق من أنك في وضع التعديل
+                    closeCustomerModal(); // للتحقق من أنك في وضع الإضافة
+                }
+     if (typeof table !== 'undefined') {
+            table.ajax.reload(null, false); // false = يبقى في نفس الصفحة
+        }
                 if (typeof table !== 'undefined') {
                     let rowIndex = table.rows().indexes().filter(idx => {
                         let rowData = table.row(idx).data();
@@ -616,13 +630,13 @@ function populateContactsTableEdit(contacts) {
                     });
 
                     if (rowIndex.length) {
-                        // تحديث عميل موجود
                         table.row(rowIndex[0]).data(response.customer).draw(false);
                     } else {
-                        // إضافة عميل جديد
                         table.row.add(response.customer).draw(false);
                     }
                 }
+
+
             });
         },
         error: function(xhr) {
@@ -635,7 +649,6 @@ function populateContactsTableEdit(contacts) {
         }
     });
 };
-
 
 
     // ------------------------- مسح نموذج جهة الاتصال -------------------------
@@ -652,40 +665,40 @@ function populateContactsTableEdit(contacts) {
     $(document).ready(function() {
 
     // تعريف الجدول مرة واحدة
-    window.contactsTable = $('#contactsTable').DataTable({
-        columns: [
-            { data: null,
-               render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`,
-            orderable: false  }, // رقم الاتصال مخفي
-            { data: 'name' },
-            { data: 'email' },
-            { data: 'phone' },
-            { data: 'mobile' },
-            { data: 'position' },
-            { data: 'is_primary', render: d => d ? 'Yes' : 'No' }
-        ]
-        ,
+   window.contactsTable = $('#contactsTable').DataTable({
+    columns: [
+        { data: null,
+          render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`,
+          orderable: false },
+        { data: 'name' },
+        { data: 'email' },
+        { data: 'phone' },
+        { data: 'mobile' },
+        { data: 'position' },
+        {
+          data: 'is_primary',
+          render: function(d) {
+              // d ممكن يكون 0, "0", 1, "1"
+              return (d === 1 || d === "1") ? 'Yes' : 'No';
+          }
+        }
+    ],
     createdRow: function(row, data) {
-        // 👈 يحط الـ id على الصف
         $(row).attr('data-contact-id', data.id);
     }
+});
 
-    });
+
 
 window.saveContactForCustomer = function(modalType = 'add') {
-    // 1️⃣ جلب رقم العميل
     let customerId = (modalType === 'edit') ? $('#editCustomerId').val() : $('#customerId').val();
     if (!customerId) {
         Swal.fire("خطأ", "❌ الرجاء حفظ العميل أولًا قبل تعديل جهة الاتصال", "error");
         return;
     }
 
-    // 2️⃣ جلب contactId
-    let contactId = (modalType === 'edit')
-        ? $('#editContactId').val().trim()
-        : $('#editContactIdAdd').val().trim();
+    let contactId = (modalType === 'edit') ? $('#editContactId').val().trim() : $('#editContactIdAdd').val().trim();
 
-    // 3️⃣ تحضير البيانات
     let formData = {
         name: (modalType === 'edit') ? $('#contactNameedit').val() : $('#contactNameAdd').val(),
         email: (modalType === 'edit') ? $('#contactEmailedit').val() : $('#contactEmailAdd').val(),
@@ -701,48 +714,40 @@ window.saveContactForCustomer = function(modalType = 'add') {
         return;
     }
 
-    // 4️⃣ إرسال الطلب
     $.ajax({
         url: contactId ? `/customers/${customerId}/contacts/${contactId}` : `/customers/${customerId}/contacts`,
         type: contactId ? 'PUT' : 'POST',
         data: formData,
         success: function(res) {
-            if (res.contact) {
-                Swal.fire(
-                    contactId ? "نجاح" : "نجاح",
-                    contactId ? "✔️ تم تحديث جهة الاتصال" : "✔️ تم إضافة جهة اتصال جديدة",
-                    "success"
-                );
-
-                // تحديث الجدول الصحيح
-                let table = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
-
-                if (contactId) {
-                    // تحديث صف موجود
-                    let rowIndex = table.rows().eq(0).filter(function(idx) {
-                        return table.row(idx).data().id == contactId;
-                    });
-                    if (rowIndex.length) {
-                        table.row(rowIndex[0]).data(res.contact).draw(false);
-                    }
-                } else {
-                    // إضافة صف جديد
-                    table.row.add(res.contact).draw(false);
-                }
-
-                // مسح الحقول بعد الحفظ
-                if (modalType === 'edit') {
-                    $('#editContactId').val('');
-                    $('#contactNameedit, #contactEmailedit, #contactPhoneedit, #contactMobileedit, #contactPositionedit').val('');
-                    $('#isPrimaryContact').prop('checked', false);
-                } else {
-                    $('#editContactIdAdd').val('');
-                    $('#contactNameAdd, #contactEmailAdd, #contactPhoneAdd, #contactMobileAdd, #contactPositionAdd').val('');
-                    $('#isPrimaryContactAdd').prop('checked', false);
-                }
-
-            } else {
+            if (!res.contact) {
                 Swal.fire("خطأ", "❌ الرد من السيرفر لا يحتوي على بيانات جهة الاتصال", "error");
+                return;
+            }
+
+            // تأكد من القيمة الصحيحة للـ is_primary
+            res.contact.is_primary = (res.contact.is_primary == 1 || res.contact.is_primary === true || res.contact.is_primary === '1') ? 1 : 0;
+
+            Swal.fire(contactId ? "نجاح" : "نجاح", contactId ? "✔️ تم تحديث جهة الاتصال" : "✔️ تم إضافة جهة اتصال جديدة", "success");
+
+            // تحديث الجدول الصحيح
+            let table = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
+
+            if (contactId) {
+                let rowIndex = table.rows().eq(0).filter(idx => table.row(idx).data().id == contactId);
+                if (rowIndex.length) table.row(rowIndex[0]).data(res.contact).draw(false);
+            } else {
+                table.row.add(res.contact).draw(false);
+            }
+
+            // مسح الحقول بعد الحفظ
+            if (modalType === 'edit') {
+                $('#editContactId').val('');
+                $('#contactNameedit, #contactEmailedit, #contactPhoneedit, #contactMobileedit, #contactPositionedit').val('');
+                $('#isPrimaryContact').prop('checked', false);
+            } else {
+                $('#editContactIdAdd').val('');
+                $('#contactNameAdd, #contactEmailAdd, #contactPhoneAdd, #contactMobileAdd, #contactPositionAdd').val('');
+                $('#isPrimaryContactAdd').prop('checked', false);
             }
         },
         error: function(xhr) {
@@ -753,6 +758,8 @@ window.saveContactForCustomer = function(modalType = 'add') {
         }
     });
 };
+
+
 
 
 
@@ -769,9 +776,9 @@ window.saveContactForCustomer = function(modalType = 'add') {
         $('#customerId').val('');
         $('#customerModal').show();
     };
-    window.closeCustomerModal = function(){
-        $('#customerModal').hide();
-    };
+    // window.closeCustomerModal = function(){
+    //     $('#customerModal').hide();
+    // };
 
 });
  window.closeEditCustomerModal = function(){
@@ -970,6 +977,7 @@ function exportCustomersExcelBtn() {
         alert('❌ فشل التصدير');
     });
 }
+window.exportCustomersExcelBtn = exportCustomersExcelBtn;
 
 
 
@@ -1087,13 +1095,38 @@ function goToCustomerFiles(button) {
 window.goToCustomerFiles = goToCustomerFiles;
 
 
-
-
-
-
 });
 
 
+
+/**
+ * هذه الدالة مسؤولة عن إغلاق النافذة المنبثقة لإضافة عميل جديد
+ * وإعادة تهيئة النموذج.
+ */
+/**
+ * هذه الدالة مسؤولة عن إغلاق النافذة المنبثقة لإضافة عميل جديد
+ * وإعادة تهيئة النموذج.
+ */
+window.closeCustomerModal = function() {
+    // 1. إخفاء النافذة المنبثقة.
+    // 💡 نستخدم كلتا الطريقتين لضمان الإخفاء بغض النظر عن طريقة العرض في CSS
+    $('#customerModal').removeClass('active').hide();
+
+    // 2. إعادة تعيين النموذج (مسح جميع الحقول)
+    $('#customerForm')[0].reset();
+
+    // 3. إعادة تعيين الحقول المخفية أو الـ ID
+    $('#customerId').val('');
+
+    // 4. إعادة تعيين التبويبات إلى التبويب الأول (Customer Tab)
+    $('#customer-btn').addClass('active');
+    $('#contact-btn').removeClass('active');
+
+    // 5. مسح جدول جهات الاتصال إذا كان يظهر
+    if (window.contactsTable) {
+        window.contactsTable.clear().draw();
+    }
+};
 
 
 

@@ -339,6 +339,7 @@ $(document).ready(function() {
     // تهيئة الجدول مرة واحدة
     projectsTable = $('#projectsTable').DataTable({
         responsive: true,
+        scrollX:true,
         autoWidth: false,
         columnDefs: [
             { orderable: false, targets: [0, 10] } // عمود الشيكبوكس وعمود الأزرار
@@ -614,14 +615,26 @@ $(document).ready(function() {
         autoWidth: false,
         columnDefs: [{ orderable: false, targets: [0] }],
         columns: [
-            { title: "" },      // checkbox
-            { title: "Name" },
-            { title: "Email" },
-            { title: "Phone" },
-            { title: "Mobile" },
-            { title: "Position" },
-            { title: "Is Primary" }
-        ]
+        {
+            title: "",
+            data: 'id',
+            render: function(data) {
+                return `<input type="checkbox" class="contact-checkbox" value="${data}">`;
+            }
+        },
+        { title: "Name", data: 'name' },
+        { title: "Email", data: 'email' },
+        { title: "Phone", data: 'phone' },
+        { title: "Mobile", data: 'mobile' },
+        { title: "Position", data: 'position' },
+        {
+            title: "Is Primary",
+            data: 'is_primary',
+            render: function(data) {
+                return data == 1 ? 'Yes' : 'No';
+            }
+        }
+    ]
     });
 
     window.contactsDataTable = contactsDataTable;
@@ -638,22 +651,15 @@ function loadContactsTable(projectId) {
     contactsDataTable.clear(); // تنظيف الجدول
     $.get(`/projects/${projectId}/contacts`, function(contacts) {
         contacts.forEach(c => {
-            let rowNode = contactsDataTable.row.add([
-                `<input type="checkbox" class="contact-checkbox" value="${c.id}">`,
-                c.name,
-                c.email,
-                c.phone,
-                c.mobile,
-                c.position,
-                c.is_primary ? 'Yes' : 'No'
-            ]).draw(false).node();
-
-            $(rowNode).data('contact', c); // تخزين البيانات في الـ DOM
+            contactsDataTable.row.add(c).draw(false); // إضافة البيانات كما هي
         });
     });
 }
 
-// ================== حفظ جهة الاتصال ==================
+
+
+
+// ================== حفظ جهة اتصال ==================
 function saveContact() {
     let projectId = $('#projectId').val();
     if (!projectId) return;
@@ -678,28 +684,17 @@ function saveContact() {
         method: method,
         data: contactData,
         success: function(response) {
-            let contact = response.contact; // بيانات من الباك
-            let rowData = [
-                `<input type="checkbox" class="contact-checkbox" value="${contact.id}">`,
-                contact.name || '',
-                contact.email || '',
-                contact.phone || '',
-                contact.mobile || '',
-                contact.position || '',
-                contact.is_primary ? 'Yes' : 'No'
-            ];
+            let contact = response.contact; // البيانات كما هي من السيرفر
 
             if(contactId) {
-                // تعديل صف موجود
-                let row = contactsDataTable.row($(`#contactsTable tbody input.contact-checkbox[value="${contactId}"]`).closest('tr'));
-                if(row.any()){
-                    row.data(rowData).draw(false);
-                    $(row.node()).data('contact', contact); // تحديث البيانات المخزنة
+                // تحديث صف موجود
+                let row = contactsDataTable.rows().indexes().filter(idx => contactsDataTable.row(idx).data().id == contactId);
+                if(row.length) {
+                    contactsDataTable.row(row[0]).data(contact).draw(false);
                 }
             } else {
                 // إضافة صف جديد
-                let rowNode = contactsDataTable.row.add(rowData).draw(false).node();
-                $(rowNode).data('contact', contact); // تخزين البيانات
+                contactsDataTable.row.add(contact).draw(false);
             }
 
             clearContactForm();
