@@ -115,7 +115,7 @@
                                 <div class="form-row">
                                      <div class="form-group">
                                         <label for="registrationDate">Date Registered:</label>
-                                        <input type="date" id="registrationDate">
+                                        <input type="date" id="registrationDate" value="{{ date('Y-m-d') }}">
                                     </div>
 
                                 </div>
@@ -966,6 +966,11 @@ function goToProjectFiles() {
 
 window.goToProjectFiles = goToProjectFiles;
 
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("registrationDate").value = today;
+    });
 
 
 </script>

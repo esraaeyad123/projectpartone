@@ -20,7 +20,7 @@
       </div>
       <div class="general-card" >
         <i class="fas fa-file-signature"></i>
-        <span data-key="Quotations">Quotations</span>
+        <span data-key="Quotations" onclick="window.location.href='{{ route('quotation.index') }}'">Quotations</span>
       </div>
       <div class="general-card"><i class="fas fa-file-invoice-dollar"></i><span>Invoices</span></div>
       <div class="general-card"><i class="fas fa-truck"></i><span>Deliveries</span></div>

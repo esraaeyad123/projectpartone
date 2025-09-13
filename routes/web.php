@@ -7,7 +7,9 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CustomerFileController;
 use App\Http\Controllers\Project\ProjectController;
 use App\Http\Controllers\Project\ProjectContactController;
+use App\Http\Controllers\Quotation\QuotationHeaderController;
 use App\Http\Controllers\ProjectFileController;
+
 
 
 
@@ -105,3 +107,13 @@ Route::post('/projects/files/delete-multiple', [ProjectFileController::class, 'd
 // routes/web.php
 Route::post('/projects/files/download-multiple', [ProjectFileController::class, 'downloadMultipleFiles'])->name('files.downloadMultiple');
 Route::get('/projects/files/{id}/download', [ProjectFileController::class, 'download'])->name('projects.files.download');
+
+Route::get('/quotation', [QuotationHeaderController::class, 'index'])->name('quotation.index');
+Route::get('/quotation/projects', [QuotationHeaderController::class, 'getProjects']);
+Route::get('/quotation/contacts', [QuotationHeaderController::class, 'getContacts']);
+Route::post('/quotation/save-header', [QuotationHeaderController::class, 'saveHeader']);
+Route::post('/quotations/delete', [QuotationHeaderController::class, 'deleteSelected'])->name('quotations.delete');
+Route::get('/quotations/list', [QuotationHeaderController::class, 'list']);
+Route::get('/quotations/{id}', [QuotationHeaderController::class, 'show']);
+Route::put('/quotations/{id}', [QuotationHeaderController::class, 'update']);
+Route::post('/quotations/{id}/generate-pdf', [QuotationHeaderController::class, 'generatePdf'])->name('quotations.generatePdf');

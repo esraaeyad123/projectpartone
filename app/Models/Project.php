@@ -51,4 +51,10 @@ public function files()
             $project->registration_date = now()->toDateString();
         });
     }
+
+    public function quotations()
+{
+    return $this->hasMany(QuotationHeader::class, 'project_id', 'id');
+}
+
 }
