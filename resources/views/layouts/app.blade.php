@@ -9,46 +9,46 @@
     {{-- أيقونة الموقع --}}
     <link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
 
-    {{-- مكتبات خارجية --}}
+    {{-- مكتبات خارجية عبر HTTPS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     {{-- ملفات المشروع --}}
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
     <link rel="stylesheet" href="{{ asset('css/darkmode.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customers.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/projects.css') }}">
-                <link rel="stylesheet" href="{{ asset('css/project-files.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/customer-files.css') }}">
-    {{-- Font Awesome محلي --}}
-    <link rel="stylesheet" href="{{ asset('fontawesome/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/projects.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/project-files.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-files.css') }}">
 </head>
 <body>
 
    @include('layouts.header')
    @include('layouts.navbar')
-    <main>
 
-          @yield('content')
-    </main>
+   <main>
+       @yield('content')
+   </main>
 
-    {{-- مكتبات JS --}}
- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   {{-- مكتبات JS --}}
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- DataTables -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+   {{-- DataTables --}}
+   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+   <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+   <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+   <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
-<!-- DataTables Buttons -->
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+   {{-- Font Awesome --}}
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
 
-
-        <script src="{{ asset('fontawesome/js/all.min.js') }}"></script>
-        <script src="{{ asset('js/customer_types.js') }}"></script>
-        <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-        <script src="{{ asset('js/main.js') }}"></script>
+   {{-- ملفات JS للمشروع --}}
+   <script src="{{ asset('js/customer_types.js') }}"></script>
+   <script src="{{ asset('js/main.js') }}"></script>
 
 </body>
+</html>
+
 </html>
