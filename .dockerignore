@@ -1,24 +1,15 @@
-# مجلدات كبيرة ما نحتاجها
 /vendor
 /node_modules
-
-# ملفات البيئة والحساسيات
 .env
 .env.*
 storage/*.key
-
-# ملفات Git
 .git
 .gitignore
 .gitattributes
-
-# ملفات النظام
 *.log
 *.cache
 *.DS_Store
 *.idea
 *.vscode
-
-# أشياء خاصة بالبناء
 npm-debug.log
 yarn-error.log
