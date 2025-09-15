@@ -1,18 +1,14 @@
-FROM php:8.2-cli
-
-# تحديث النظام وتثبيت الأدوات الأساسية
-RUN apt-get update && apt-get install -y \
-    unzip git zip curl \
-    libpng-dev libjpeg-dev libfreetype6-dev \
-    libonig-dev libzip-dev libpq-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql mbstring bcmath tokenizer xml fileinfo ctype zip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# استخدم صورة PHP مع Apache و GD و Zip مثبتة مسبقًا
+FROM php:8.2-apache
 
 # تثبيت Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app
+# تمكين بعض الـ PHP extensions المطلوبة
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring bcmath tokenizer xml fileinfo ctype zip gd
+
+# نسخ ملفات المشروع
+WORKDIR /var/www/html
 COPY . .
 
 # تثبيت حزم المشروع
@@ -24,4 +20,5 @@ RUN php artisan key:generate \
  && php artisan route:cache \
  && php artisan view:cache
 
-CMD php artisan serve --host 0.0.0.0 --port $PORT
+# إعادة تشغيل Apache عند تشغيل الحاوية
+CMD ["apache2-foreground"]
