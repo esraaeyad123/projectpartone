@@ -15,13 +15,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     {{-- ملفات المشروع --}}
-    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+<link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
     <link rel="stylesheet" href="{{ asset('css/darkmode.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customers.css') }}">
     <link rel="stylesheet" href="{{ asset('css/projects.css') }}">
     <link rel="stylesheet" href="{{ asset('css/project-files.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customer-files.css') }}">
+
 </head>
 <body>
 
