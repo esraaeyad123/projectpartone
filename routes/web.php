@@ -9,6 +9,10 @@ use App\Http\Controllers\Project\ProjectController;
 use App\Http\Controllers\Project\ProjectContactController;
 use App\Http\Controllers\Quotation\QuotationHeaderController;
 use App\Http\Controllers\ProjectFileController;
+use App\Http\Controllers\Quotation\QuotationLineController;
+use App\Http\Controllers\Quotation\PriceListController;
+
+
 
 
 
@@ -113,7 +117,11 @@ Route::get('/quotation/projects', [QuotationHeaderController::class, 'getProject
 Route::get('/quotation/contacts', [QuotationHeaderController::class, 'getContacts']);
 Route::post('/quotation/save-header', [QuotationHeaderController::class, 'saveHeader']);
 Route::post('/quotations/delete', [QuotationHeaderController::class, 'deleteSelected'])->name('quotations.delete');
-Route::get('/quotations/list', [QuotationHeaderController::class, 'list']);
-Route::get('/quotations/{id}', [QuotationHeaderController::class, 'show']);
-Route::put('/quotations/{id}', [QuotationHeaderController::class, 'update']);
+Route::get('/quotations/list',    [QuotationHeaderController::class, 'list']);
+Route::get('/quotations/{id}',    [QuotationHeaderController::class, 'show']);
+Route::put('/quotations/{id}',    [QuotationHeaderController::class, 'update']);
 Route::post('/quotations/{id}/generate-pdf', [QuotationHeaderController::class, 'generatePdf'])->name('quotations.generatePdf');
+Route::get('/quotations/lines/data',   [QuotationLineController::class, 'getLines']);
+Route::post('/quotations/lines/store', [QuotationLineController::class, 'storeLine'])->name('quotations.lines.store');
+Route::get('/price-lists', [PriceListController::class, 'index']); // لجلب البيانات في DataTable
+Route::post('/price-lists', [PriceListController::class, 'store']); // لحفظ السعر الجديد

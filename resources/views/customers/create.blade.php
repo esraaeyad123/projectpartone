@@ -233,11 +233,11 @@
                         <button type="button" class="btn-danger" onclick="deleteSelectedContacts('#contactsTable')">
                             <i class="fas fa-trash"></i> Delete Selected
                         </button>
-                        <button type="button" class="btn-icon" id="exportContactsModalExcelBtn24" title="Export to Excel">
+                        <button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelBtn()">
                             <i class="fa-solid fa-table"></i>
                         </button>
-                        <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print">
-                            <i class="fas fa-print"></i>
+                        <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTable()">
+                          <i class="fas fa-print"></i>
                         </button>
                     </div>
                     <div class="table-responsive-container">
@@ -303,7 +303,7 @@
 
                     <div class="contact-toolbar">
                         <button type="button" class="btn btn-primary" onclick="saveContactForCustomer('add')">
-                            💾 حفظ / تحديث جهة الاتصال
+                            💾 Save / Update
                         </button>
                         <button type="button" class="btn-secondary" onclick="clearContactForm()">
                             <i class="fas fa-eraser"></i> Clear Form
@@ -323,25 +323,26 @@
     </div>
 </div>
 
+<!------------------------------------------------------------------->
+<!------------------------------------------------------------------->
+<!------------------------------------------------------------------->
 
+<div id="modal-container"></div>
+<div id="dynamicContent"></div>
+<div id="customDialogModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeCustomDialog()">&times;</span>
+        <h3 id="customDialogTitle"></h3>
+        <p id="customDialogMessage"></p>
+        <div class="form-buttons" id="customDialogButtons"></div>
+    </div>
+</div>
+<!------------------------------------------------------------------->
+<!------------------------------------------------------------------->
+<!------------------------------------------------------------------->
 
+<!-- Edit Customer Modal -->
 
-            <div id="modal-container"></div>
-            <div id="dynamicContent"></div>
-            <div id="customDialogModal" class="modal">
-                <div class="modal-content">
-                    <span class="close" onclick="closeCustomDialog()">&times;</span>
-                    <h3 id="customDialogTitle"></h3>
-                    <p id="customDialogMessage"></p>
-                    <div class="form-buttons" id="customDialogButtons">
-                    </div>
-                </div>
-            </div>
-
-
-
-<!-- 🔹 Edit Customer Modal -->
-<!-- 🔹 Edit Customer Modal -->
 <div id="editCustomerModal" class="modal">
   <div class="modal-content new-customer-modal-design">
     <span class="close-btn" onclick="closeEditCustomerModal()">
@@ -570,8 +571,15 @@
 <button type="button" class="btn-danger" onclick="deleteSelectedContacts('#contactsTableEdit')">
     <i class="fas fa-trash"></i> Delete Selected
 </button>
-            <button type="button" class="btn-icon" id="exportContactsModalExcelBtn" title="Export to Excel"><i class="fa-solid fa-table"></i></button>
-            <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print"><i class="fas fa-print"></i></button>
+
+<button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelBtn()">
+  <i class="fa-solid fa-table"></i>
+</button>
+
+
+<button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTableEdit()">
+    <i class="fas fa-print"></i>
+</button>
           </div>
           <div class="table-responsive-container">
      <table id="contactsTableEdit" class="contacts-table display responsive nowrap">
@@ -636,8 +644,8 @@
 
           <div class="contact-toolbar">
             <button type="button" class="btn btn-primary" onclick="saveContactForCustomer('edit')">
-    💾 حفظ / تحديث جهة الاتصال
-</button>
+              💾 Save / Update
+          </button>
             <button type="button" class="btn-secondary" onclick="clearContactFormEdit()">
               <i class="fas fa-eraser"></i> Clear Form
             </button>
@@ -649,17 +657,14 @@
       <!-- 🔹 Modal Footer -->
       <div class="form-buttons modal-bottom-buttons">
             <button type="button" class="btn-primary" onclick="closeEditCustomerModal()"><i class="fas fa-times"></i> Close</button>
-        <button type="submit" class="btn-success"><i class="fas fa-save"></i> Update & Close</button>
-        <button type="button" class="btn-success"><i class="fas fa-save"></i> Update</button>
+           <button type="button" class="btn-success" onclick="updateCustomer(event, true)">
+            <i class="fas fa-save"></i> Update & Close
+          </button>
 
-      </div>
+            <button type="submit" class="btn-success" data-close="false"><i class="fas fa-save"></i> Update</button>
+          </div>
+
     </form>
   </div>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById("registrationDate").value = today;
-    });
-</script>

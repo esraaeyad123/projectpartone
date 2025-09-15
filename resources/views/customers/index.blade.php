@@ -148,144 +148,185 @@
 
 @include('customers.create') <!-- المودال -->
 
-<!-- ================== JS ================== -->
+<!-- ================================== JS ================================== -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 
 
 <script>
+
     function showAlert(message, type) {
-    Swal.fire({
-        title: type === 'success' ? 'Success!' : (type === 'error' ? 'Error!' : 'Warning!'),
-        text: message,
-        icon: type,
-        confirmButtonText: 'OK'
-    });
+        Swal.fire({
+            title: type === 'success' ? 'Success!' : (type === 'error' ? 'Error!' : 'Warning!'),
+            text: message,
+            icon: type,
+            confirmButtonText: 'OK'
+        });
+    }
+
+    function showConfirm(message, callback, title = 'Confirm', confirmButtonText = 'Yes', cancelButtonText = 'No') {
+        Swal.fire({
+            title: title,
+            text: message,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: confirmButtonText,
+            cancelButtonText: cancelButtonText
+        }).then((result) => {
+            if (result.isConfirmed) {
+                callback();
+            }
+        });
 }
+    // تهيئة AJAX لإرسال رمز CSRF مع كل طلب
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }});
 
-function showConfirm(message, callback, title = 'Confirm', confirmButtonText = 'Yes', cancelButtonText = 'No') {
-    Swal.fire({
-        title: title,
-        text: message,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: confirmButtonText,
-        cancelButtonText: cancelButtonText
-    }).then((result) => {
-        if (result.isConfirmed) {
-            callback();
-        }
-    });
-}
 
-$(document).ready(function () {
-    // ==========================
-    // إعداد CSRF لجميع طلبات AJAX
-    // ==========================
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+    // تهيئة جدول DataTables والبحث بالاعمدة
+    $(document).ready(function() {
 
-    // ==========================
-    // جدول العملاء
-    // ==========================
-    var table = $('#customersTable').DataTable({
-        responsive: true,
-        processing: true,
-        scrollX:true,
-        serverSide: false,
-        ajax: "{{ route('customers.data') }}",
-        columns: [
-            { data: null, render: data => `<input type="checkbox" class="customerCheckbox" value="${data.id}">`, orderable: false },
-            { data: 'customer_id' },
-            { data: 'customer_name' },
-            { data: 'arabic_name' },
-            { data: 'customer_type' },
-            { data: 'potential', render: d => d ? 'Yes' : 'No' },
-            { data: 'date_registered' },
-            { data: 'phone' },
-            { data: 'city' },
-            { data: 'country' },
-            { data: 'payment_terms' },
-            { data: 'discount' },
-            { data: 'vat_profile' },
-            { data: 'cash', render: d => d ? 'Yes' : 'No' },
-            { data: 'trn_tin' },
-            { data: 'registration_no' }
-        ]
-    });
+        var table = $('#customersTable').DataTable({
+            responsive: true,
+            processing: true,
+            scrollX: true,
+            serverSide: false,
+            ajax: "{{ route('customers.data') }}",
+            columns: [
+                { data: null, render: data => `<input type="checkbox" class="customerCheckbox" value="${data.id}">`, orderable: false },
+                { data: 'customer_id' },
+                { data: 'customer_name' },
+                { data: 'arabic_name' },
+                { data: 'customer_type' },
+                { data: 'potential', render: d => d ? 'Yes' : 'No' },
+                { data: 'date_registered' },
+                { data: 'phone' },
+                { data: 'city' },
+                { data: 'country' },
+                { data: 'payment_terms' },
+                { data: 'discount' },
+                { data: 'vat_profile' },
+                { data: 'cash', render: d => d ? 'Yes' : 'No' },
+                { data: 'trn_tin' },
+                { data: 'registration_no' }
+            ]
+        });
 
-    var contactsTable;
+        // --------------------------------------------------------
+        // الكود الجديد لتفعيل البحث في الأعمدة
 
-    // function closeCustomerModal() { $('#customerModal').hide(); }
-    // window.closeCustomerModal = closeCustomerModal;
+        // استنساخ صف الرؤوس لإنشاء صف البحث
+        $('#customersTable thead tr').clone(true).appendTo('#customersTable thead');
+
+        // منع البحث في عمود صندوق الاختيار
+        $('#customersTable thead tr:eq(1) th:eq(0)').empty();
+
+        // تطبيق الفلترة على كل حقل بحث
+        table.columns().every(function() {
+            var that = this;
+            var column = table.column(this.index());
+
+            // ⛔️ هذا هو الحل: تجاوز العمود الأول (الذي يحتوي على مربع الاختيار)
+            if (this.index() === 0) {
+                return;
+            }
+
+            // معالجة البحث لجميع أنواع الحقول
+            $('input, select', this.header()).on('keyup change', function() {
+                var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                // إذا كان العمود هو "Potential" أو "Cash"، نقوم بتحويل القيمة
+                 if (column.index() === 5) {
+                    if (val === "Yes") {
+                        column.search('1', false, false).draw(); // البحث عن '1'
+                    } else if (val === "No") {
+                        column.search('0', false, false).draw(); // البحث عن '0'
+                    } else {
+                        column.search('').draw(); // مسح الفلتر
+                    }
+                }
+                // إذا كان العمود هو "Cash" (العمود رقم 13)، قم بتحويل قيمة الفلتر
+                else if (column.index() === 13) {
+                    if (val === "Yes") {
+                        column.search('1', false, false).draw();
+                    } else if (val === "No") {
+                        column.search('0', false, false).draw();
+                    } else {
+                        column.search('').draw();
+                    }
+                }
+
+                if (column.search() !== val) {
+                    column.search(val).draw();
+                }
+            });
+        });
 
 
     function deleteSelectedCustomers() {
-    const selected = Array.from($('.customerCheckbox:checked')).map(cb => cb.value);
+        const selected = Array.from($('.customerCheckbox:checked')).map(cb => cb.value);
 
-    if (selected.length === 0) {
+        if (selected.length === 0) {
+            Swal.fire({
+                title: "تحذير",
+                text: "⚠️ اختر عميل واحد على الأقل",
+                icon: "warning",
+                confirmButtonText: "حسناً"
+            });
+            return;
+        }
+
         Swal.fire({
-            title: "تحذير",
-            text: "⚠️ اختر عميل واحد على الأقل",
+            title: "تأكيد الحذف",
+            text: `هل أنت متأكد من حذف ${selected.length} عميل(عملاء) محدد(ة)؟ لا يمكن التراجع عن هذا الإجراء.`,
             icon: "warning",
-            confirmButtonText: "حسناً"
-        });
-        return;
-    }
+            showCancelButton: true,
+            confirmButtonText: "نعم، احذفهم",
+            cancelButtonText: "إلغاء"
+        }).then((result) => {
+            if (!result.isConfirmed) return;
 
-    Swal.fire({
-        title: "تأكيد الحذف",
-        text: `هل أنت متأكد من حذف ${selected.length} عميل(عملاء) محدد(ة)؟ لا يمكن التراجع عن هذا الإجراء.`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "نعم، احذفهم",
-        cancelButtonText: "إلغاء"
-    }).then((result) => {
-        if (!result.isConfirmed) return;
-
-        $.ajax({
-            url: '/customers/bulk-delete',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                ids: selected,
-                _token: $('meta[name="csrf-token"]').attr('content')
-            }),
-            success: res => {
-                if (res.success) {
-                    Swal.fire({
-                        title: "تم الحذف",
-                        text: res.message,
-                        icon: "success",
-                        confirmButtonText: "حسناً"
-                    }).then(() => {
-                        table.ajax.reload(null, false);
-                    });
-                } else {
+            $.ajax({
+                url: '/customers/bulk-delete',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    ids: selected,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                }),
+                success: res => {
+                    if (res.success) {
+                        Swal.fire({
+                            title: "تم الحذف",
+                            text: res.message,
+                            icon: "success",
+                            confirmButtonText: "حسناً"
+                        }).then(() => {
+                            table.ajax.reload(null, false);
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "خطأ",
+                            text: res.message || "حدث خطأ أثناء الحذف",
+                            icon: "error",
+                            confirmButtonText: "حسناً"
+                        });
+                    }
+                },
+                error: () => {
                     Swal.fire({
                         title: "خطأ",
-                        text: res.message || "حدث خطأ أثناء الحذف",
+                        text: "❌ خطأ في الاتصال بالسيرفر",
                         icon: "error",
                         confirmButtonText: "حسناً"
                     });
                 }
-            },
-            error: () => {
-                Swal.fire({
-                    title: "خطأ",
-                    text: "❌ خطأ في الاتصال بالسيرفر",
-                    icon: "error",
-                    confirmButtonText: "حسناً"
-                });
-            }
+            });
         });
-    });
-}
+    }
 
 window.deleteSelectedCustomers = deleteSelectedCustomers;
 
@@ -430,6 +471,11 @@ window.openEditCustomerModal = function() {
     });
 }
 
+
+
+
+var contactsTable;
+
 function populateContactsTable(contacts = []) {
     if (!window.contactsTable) {
         // إنشاء الجدول لو مش موجود
@@ -557,6 +603,57 @@ $('#editCustomerForm').on('submit', function(e, closeAfterUpdate = false){
 });
 
 
+
+
+window.updateCustomer = function(event, closeModal = true) {
+    event.preventDefault(); // منع الإرسال التلقائي
+
+    let formData = {};
+    $('#editCustomerForm').find('input, select').each(function(){
+        let name = $(this).attr('name');
+        if($(this).is(':checkbox')) formData[name] = $(this).is(':checked') ? 1 : 0;
+        else formData[name] = $(this).val();
+    });
+    formData['_token'] = $('input[name="_token"]').val();
+
+    $.ajax({
+        url: "{{ route('customers.store') }}",
+        type: "POST", // يفضل استخدام PUT/PATCH للتحديث، ولكن الكود الحالي يستخدم POST
+        data: formData,
+        success: function(response){
+            Swal.fire({
+                title: "نجاح",
+                text: "✅ تم تحديث العميل بنجاح",
+                icon: "success",
+                confirmButtonText: "حسناً"
+            }).then(() => {
+                if (closeModal) {
+                    closeEditCustomerModal();
+                }
+                // تحديث الصف في الجدول
+                let rowIndex = table.rows().indexes().filter(idx => table.row(idx).data().id == response.customer.id);
+                if(rowIndex.length){
+                    table.row(rowIndex[0]).data(response.customer).draw(false);
+                } else {
+                    table.row.add(response.customer).draw(false);
+                }
+            });
+        },
+        error: function(xhr){
+            let errors = xhr.responseJSON?.errors || {};
+            let errorMsg = '';
+            for(let field in errors) errorMsg += errors[field] + '\n';
+
+            Swal.fire({
+                title: "خطأ",
+                text: errorMsg || '❌ حدث خطأ أثناء الحفظ',
+                icon: "error",
+                confirmButtonText: "حسناً"
+            });
+        }
+    });
+};
+
 window.saveCustomer = function(e, closeAfterSave = false) {
     e.preventDefault();
 
@@ -664,126 +761,117 @@ window.saveCustomer = function(e, closeAfterSave = false) {
 // لجدول اتصال خاصة لكل العمي
     $(document).ready(function() {
 
-    // تعريف الجدول مرة واحدة
-   window.contactsTable = $('#contactsTable').DataTable({
-    columns: [
-        { data: null,
-          render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`,
-          orderable: false },
-        { data: 'name' },
-        { data: 'email' },
-        { data: 'phone' },
-        { data: 'mobile' },
-        { data: 'position' },
-        {
-          data: 'is_primary',
-          render: function(d) {
-              // d ممكن يكون 0, "0", 1, "1"
-              return (d === 1 || d === "1") ? 'Yes' : 'No';
-          }
-        }
-    ],
-    createdRow: function(row, data) {
-        $(row).attr('data-contact-id', data.id);
-    }
-});
+        // تعريف الجدول مرة واحدة
+        window.contactsTable = $('#contactsTable').DataTable({
+            columns: [
+                { data: null,
+                render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`,
+                orderable: false },
+                { data: 'name' },
+                { data: 'email' },
+                { data: 'phone' },
+                { data: 'mobile' },
+                { data: 'position' },
+                {
+                data: 'is_primary',
+                render: function(d) {
+                    // d ممكن يكون 0, "0", 1, "1"
+                    return (d === 1 || d === "1") ? 'Yes' : 'No';
+                }
+                }
+            ],
+            createdRow: function(row, data) {
+                $(row).attr('data-contact-id', data.id);
+            }
+        });
 
-
-
-window.saveContactForCustomer = function(modalType = 'add') {
-    let customerId = (modalType === 'edit') ? $('#editCustomerId').val() : $('#customerId').val();
-    if (!customerId) {
-        Swal.fire("خطأ", "❌ الرجاء حفظ العميل أولًا قبل تعديل جهة الاتصال", "error");
-        return;
-    }
-
-    let contactId = (modalType === 'edit') ? $('#editContactId').val().trim() : $('#editContactIdAdd').val().trim();
-
-    let formData = {
-        name: (modalType === 'edit') ? $('#contactNameedit').val() : $('#contactNameAdd').val(),
-        email: (modalType === 'edit') ? $('#contactEmailedit').val() : $('#contactEmailAdd').val(),
-        phone: (modalType === 'edit') ? $('#contactPhoneedit').val() : $('#contactPhoneAdd').val(),
-        mobile: (modalType === 'edit') ? $('#contactMobileedit').val() : $('#contactMobileAdd').val(),
-        position: (modalType === 'edit') ? $('#contactPositionedit').val() : $('#contactPositionAdd').val(),
-        is_primary: (modalType === 'edit') ? ($('#isPrimaryContact').is(':checked') ? 1 : 0) : ($('#isPrimaryContactAdd').is(':checked') ? 1 : 0),
-        _token: $('meta[name="csrf-token"]').attr('content')
-    };
-
-    if (!formData.name) {
-        Swal.fire("خطأ", "❌ الرجاء إدخال اسم جهة الاتصال", "warning");
-        return;
-    }
-
-    $.ajax({
-        url: contactId ? `/customers/${customerId}/contacts/${contactId}` : `/customers/${customerId}/contacts`,
-        type: contactId ? 'PUT' : 'POST',
-        data: formData,
-        success: function(res) {
-            if (!res.contact) {
-                Swal.fire("خطأ", "❌ الرد من السيرفر لا يحتوي على بيانات جهة الاتصال", "error");
+        window.saveContactForCustomer = function(modalType = 'add') {
+            let customerId = (modalType === 'edit') ? $('#editCustomerId').val() : $('#customerId').val();
+            if (!customerId) {
+                Swal.fire("خطأ", "❌ الرجاء حفظ العميل أولًا قبل تعديل جهة الاتصال", "error");
                 return;
             }
 
-            // تأكد من القيمة الصحيحة للـ is_primary
-            res.contact.is_primary = (res.contact.is_primary == 1 || res.contact.is_primary === true || res.contact.is_primary === '1') ? 1 : 0;
+            let contactId = (modalType === 'edit') ? $('#editContactId').val().trim() : $('#editContactIdAdd').val().trim();
 
-            Swal.fire(contactId ? "نجاح" : "نجاح", contactId ? "✔️ تم تحديث جهة الاتصال" : "✔️ تم إضافة جهة اتصال جديدة", "success");
+            let formData = {
+                name: (modalType === 'edit') ? $('#contactNameedit').val() : $('#contactNameAdd').val(),
+                email: (modalType === 'edit') ? $('#contactEmailedit').val() : $('#contactEmailAdd').val(),
+                phone: (modalType === 'edit') ? $('#contactPhoneedit').val() : $('#contactPhoneAdd').val(),
+                mobile: (modalType === 'edit') ? $('#contactMobileedit').val() : $('#contactMobileAdd').val(),
+                position: (modalType === 'edit') ? $('#contactPositionedit').val() : $('#contactPositionAdd').val(),
+                is_primary: (modalType === 'edit') ? ($('#isPrimaryContact').is(':checked') ? 1 : 0) : ($('#isPrimaryContactAdd').is(':checked') ? 1 : 0),
+                _token: $('meta[name="csrf-token"]').attr('content')
+            };
 
-            // تحديث الجدول الصحيح
-            let table = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
-
-            if (contactId) {
-                let rowIndex = table.rows().eq(0).filter(idx => table.row(idx).data().id == contactId);
-                if (rowIndex.length) table.row(rowIndex[0]).data(res.contact).draw(false);
-            } else {
-                table.row.add(res.contact).draw(false);
+            if (!formData.name) {
+                Swal.fire("خطأ", "❌ الرجاء إدخال اسم جهة الاتصال", "warning");
+                return;
             }
 
-            // مسح الحقول بعد الحفظ
-            if (modalType === 'edit') {
-                $('#editContactId').val('');
-                $('#contactNameedit, #contactEmailedit, #contactPhoneedit, #contactMobileedit, #contactPositionedit').val('');
-                $('#isPrimaryContact').prop('checked', false);
-            } else {
-                $('#editContactIdAdd').val('');
-                $('#contactNameAdd, #contactEmailAdd, #contactPhoneAdd, #contactMobileAdd, #contactPositionAdd').val('');
-                $('#isPrimaryContactAdd').prop('checked', false);
-            }
-        },
-        error: function(xhr) {
-            let errors = xhr.responseJSON?.errors || {};
-            let msg = '';
-            for (let f in errors) msg += errors[f] + '\n';
-            Swal.fire("خطأ", msg || '❌ حدث خطأ أثناء الحفظ', "error");
-        }
+            $.ajax({
+                url: contactId ? `/customers/${customerId}/contacts/${contactId}` : `/customers/${customerId}/contacts`,
+                type: contactId ? 'PUT' : 'POST',
+                data: formData,
+                success: function(res) {
+                    if (!res.contact) {
+                        Swal.fire("خطأ", "❌ الرد من السيرفر لا يحتوي على بيانات جهة الاتصال", "error");
+                        return;
+                    }
+
+                    // تأكد من القيمة الصحيحة للـ is_primary
+                    res.contact.is_primary = (res.contact.is_primary == 1 || res.contact.is_primary === true || res.contact.is_primary === '1') ? 1 : 0;
+
+                    Swal.fire(contactId ? "نجاح" : "نجاح", contactId ? "✔️ تم تحديث جهة الاتصال" : "✔️ تم إضافة جهة اتصال جديدة", "success");
+
+                    // تحديث الجدول الصحيح
+                    let table = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
+
+                    if (contactId) {
+                        let rowIndex = table.rows().eq(0).filter(idx => table.row(idx).data().id == contactId);
+                        if (rowIndex.length) table.row(rowIndex[0]).data(res.contact).draw(false);
+                    } else {
+                        table.row.add(res.contact).draw(false);
+                    }
+
+                    // مسح الحقول بعد الحفظ
+                    if (modalType === 'edit') {
+                        $('#editContactId').val('');
+                        $('#contactNameedit, #contactEmailedit, #contactPhoneedit, #contactMobileedit, #contactPositionedit').val('');
+                        $('#isPrimaryContact').prop('checked', false);
+                    } else {
+                        $('#editContactIdAdd').val('');
+                        $('#contactNameAdd, #contactEmailAdd, #contactPhoneAdd, #contactMobileAdd, #contactPositionAdd').val('');
+                        $('#isPrimaryContactAdd').prop('checked', false);
+                    }
+                },
+                error: function(xhr) {
+                    let errors = xhr.responseJSON?.errors || {};
+                    let msg = '';
+                    for (let f in errors) msg += errors[f] + '\n';
+                    Swal.fire("خطأ", msg || '❌ حدث خطأ أثناء الحفظ', "error");
+                }
+            });
+        };
+        // ------------------------- إضافة صف للـ DataTable -------------------------
+        window.addContactRowToTable = function(contact) {
+            if(!contact) return;
+            window.contactsTable.row.add(contact).draw(false);
+        };
+        // ------------------------- فتح / إغلاق المودال -------------------------
+        window.openCustomerModal = function(){
+            $('#customerForm')[0].reset();
+            $('#customerId').val('');
+            $('#customerModal').show();
+        };
+        // window.closeCustomerModal = function(){
+        //     $('#customerModal').hide();
+        // };
+
     });
-};
 
 
 
-
-
-    // ------------------------- إضافة صف للـ DataTable -------------------------
-    window.addContactRowToTable = function(contact) {
-        if(!contact) return;
-        window.contactsTable.row.add(contact).draw(false);
-    };
-
-
-    // ------------------------- فتح / إغلاق المودال -------------------------
-    window.openCustomerModal = function(){
-        $('#customerForm')[0].reset();
-        $('#customerId').val('');
-        $('#customerModal').show();
-    };
-    // window.closeCustomerModal = function(){
-    //     $('#customerModal').hide();
-    // };
-
-});
- window.closeEditCustomerModal = function(){
-  $('#editCustomerModal').hide();
-}
 
 
 // 🔹 التبديل بين تبويبات المودال (Customer / Contacts)
@@ -935,7 +1023,17 @@ window.deleteSelectedContacts = function(tableSelector) {
     });
 };
 
-
+window.exportCustomersExcelBtn = function() {
+    const table = document.getElementById('customersTable');
+    if (!table) {
+        console.error('Table with ID "customersTable" not found.');
+        return;
+    }
+    const worksheet = XLSX.utils.table_to_sheet(table);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Customers');
+    XLSX.writeFile(workbook, 'customers_data.xlsx');
+};
 
 
 function exportCustomersExcelBtn() {
@@ -981,13 +1079,24 @@ window.exportCustomersExcelBtn = exportCustomersExcelBtn;
 
 
 
-// الدالة الأصلية
-// عرف الجداول مرة وحدة عند التحميل
-function printCustomersTable() {
-    const table = $('#customersTable').DataTable();
 
-    if (!table) {
-        alert("❌ لم يتم العثور على الجدول.");
+
+// ----------------------------------------------------------------------
+// دالة الطباعة العامة المحدثة
+// ----------------------------------------------------------------------
+
+/**
+ * يطبع محتوى جدول DataTables بناءً على المعرف والعنوان.
+ *
+ * @param {string} tableId - معرف HTML للجدول (مثلاً 'customersTable').
+ * @param {string} title - العنوان الذي سيظهر في رأس صفحة الطباعة.
+ */
+function printTable(tableId, title) {
+    const table = $('#' + tableId).DataTable();
+
+    if (!table || !table.data() || table.data().length === 0) {
+        // يمكنك هنا عرض رسالة خطأ للمستخدم بطريقة لطيفة
+        console.error("❌ لا توجد بيانات للطباعة في هذا الجدول.");
         return;
     }
 
@@ -999,15 +1108,16 @@ function printCustomersTable() {
             th { background-color: #f2f2f2; }
             h2 { text-align: center; margin-bottom: 20px; }
         </style>
-        <h2>Customers Table</h2>
+        <h2>${title}</h2>
         <table>
             <thead>
                 <tr>`;
 
     // عناوين الأعمدة (تجاهل أول عمود checkbox)
-    $('#customersTable thead th').each(function (index) {
+    $('#' + tableId + ' thead th').each(function (index) {
         if (index === 0) return;
-        printContents += `<th>${$(this).text().split('\n')[0].trim()}</th>`;
+        const columnTitle = $(this).text().split('\n')[0].trim();
+        printContents += `<th>${columnTitle}</th>`;
     });
 
     printContents += `</tr></thead><tbody>`;
@@ -1017,122 +1127,179 @@ function printCustomersTable() {
         const rowData = this.data();
         printContents += `<tr>`;
 
-        // rowData ممكن يكون Array أو Object -> نحوله Array بالطريقة الصحيحة
-        if (Array.isArray(rowData)) {
-            rowData.forEach((cell, i) => {
-                if (i === 0) return; // تجاهل checkbox
-                printContents += `<td>${cell || ''}</td>`;
-            });
-        } else {
-            // إذا كان Object (في حالة Ajax sources)
-            let i = 0;
-            for (let key in rowData) {
-                if (i === 0) { i++; continue; } // skip checkbox
-                printContents += `<td>${rowData[key] || ''}</td>`;
+        // الصفوف بناءً على نوع البيانات (Array أو Object)
+        let i = 0;
+        $.each(rowData, function(key, value) {
+            if (i === 0) {
                 i++;
+                return true;
             }
-        }
+            printContents += `<td>${value || ''}</td>`;
+            i++;
+        });
 
         printContents += `</tr>`;
     });
 
     printContents += `</tbody></table>`;
 
-     const printWindow = window.open('', '_blank');
+    const printWindow = window.open('', '_blank');
     printWindow.document.write(printContents);
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
     printWindow.close();
-    showAlert("تم إعداد الجدول للطباعة!", "success");
 }
 
-// خليها global
-window.printCustomersTable = function() {
-    printTable('customersTable', 'قائمة العملاء');
-};
+// ----------------------------------------------------------------------
+// ربط الدوال بالأزرار (جعلها عامة لسهولة الوصول)
+// ----------------------------------------------------------------------
+
+// 🔹 هذه الدالة لطباعة جدول جهات الاتصال عند إضافة عميل جديد
 window.printContactsTable = function() {
     printTable('contactsTable', 'قائمة جهات الاتصال');
 };
-
-
-
-// تأكد أنها global
-window.printCustomersTable = printCustomersTable;
-window.printContactsTable = printContactsTable;
-
-function goToCustomerFiles(button) {
-    let selected = $('.customerCheckbox:checked');
-
-    if (selected.length === 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'تنبيه',
-            text: '⚠️ الرجاء اختيار عميل أولاً'
-        });
-        return;
-    }
-
-    if (selected.length > 1) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'تنبيه',
-            text: '⚠️ الرجاء اختيار عميل واحد فقط'
-        });
-        return;
-    }
-
-    let customerId = selected.val();
-
-    // استبدال الـ :id في الرابط بالـ customerId الحقيقي
-    let urlTemplate = $(button).data('url');
-    let url = urlTemplate.replace(':id', customerId);
-
-    // توجه للصفحة مباشرة
-    window.location.href = url;
-}
-
-window.goToCustomerFiles = goToCustomerFiles;
-
-
-});
-
-
-
-/**
- * هذه الدالة مسؤولة عن إغلاق النافذة المنبثقة لإضافة عميل جديد
- * وإعادة تهيئة النموذج.
- */
-/**
- * هذه الدالة مسؤولة عن إغلاق النافذة المنبثقة لإضافة عميل جديد
- * وإعادة تهيئة النموذج.
- */
-window.closeCustomerModal = function() {
-    // 1. إخفاء النافذة المنبثقة.
-    // 💡 نستخدم كلتا الطريقتين لضمان الإخفاء بغض النظر عن طريقة العرض في CSS
-    $('#customerModal').removeClass('active').hide();
-
-    // 2. إعادة تعيين النموذج (مسح جميع الحقول)
-    $('#customerForm')[0].reset();
-
-    // 3. إعادة تعيين الحقول المخفية أو الـ ID
-    $('#customerId').val('');
-
-    // 4. إعادة تعيين التبويبات إلى التبويب الأول (Customer Tab)
-    $('#customer-btn').addClass('active');
-    $('#contact-btn').removeClass('active');
-
-    // 5. مسح جدول جهات الاتصال إذا كان يظهر
-    if (window.contactsTable) {
-        window.contactsTable.clear().draw();
-    }
+window.printCustomersTable = function() {
+    printTable('customersTable', 'قائمة العملاء');
 };
+
+// 🔹 هذه هي الدالة الجديدة لطباعة جدول جهات الاتصال
+window.printContactsTableEdit = function() {
+    printTable('contactsTableEdit', 'قائمة جهات الاتصال');
+};
+
+
+
+    // تأكد أنها global
+    window.printContactsTable = printContactsTable;
+    window.printCustomersTable = printCustomersTable;
+    window.printContactsTableEdit = printContactsTableEdit;
+
+    function goToCustomerFiles(button) {
+        let selected = $('.customerCheckbox:checked');
+
+        if (selected.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'تنبيه',
+                text: '⚠️ الرجاء اختيار عميل أولاً'
+            });
+            return;
+        }
+
+        if (selected.length > 1) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'تنبيه',
+                text: '⚠️ الرجاء اختيار عميل واحد فقط'
+            });
+            return;
+        }
+
+        let customerId = selected.val();
+
+        // استبدال الـ :id في الرابط بالـ customerId الحقيقي
+        let urlTemplate = $(button).data('url');
+        let url = urlTemplate.replace(':id', customerId);
+
+        // توجه للصفحة مباشرة
+        window.location.href = url;
+        }
+
+        window.goToCustomerFiles = goToCustomerFiles;
+
+
+    });
+
+
+/**
+ * هذه الدالة مسؤولة عن إغلاق النافذة المنبثقة لإضافة عميل جديد
+ * وإعادة تهيئة النموذج.
+ */
+    window.closeCustomerModal = function() {
+        // 1. إخفاء النافذة المنبثقة.
+        // 💡 نستخدم كلتا الطريقتين لضمان الإخفاء بغض النظر عن طريقة العرض في CSS
+        $('#customerModal').removeClass('active').hide();
+
+        // 2. إعادة تعيين النموذج (مسح جميع الحقول)
+        $('#customerForm')[0].reset();
+
+        // 3. إعادة تعيين الحقول المخفية أو الـ ID
+        $('#customerId').val('');
+
+        // 4. إعادة تعيين التبويبات إلى التبويب الأول (Customer Tab)
+        $('#customer-btn').addClass('active');
+        $('#contact-btn').removeClass('active');
+
+        // 5. مسح جدول جهات الاتصال إذا كان يظهر
+        if (window.contactsTable) {
+            window.contactsTable.clear().draw();
+        }
+    };
+
+    window.closeEditCustomerModal = function(){
+        $('#editCustomerModal').hide();
+    }
+
+
+window.exportContactsExcelBtn = function() {
+    const table = document.getElementById('contactsTable');
+    if (!table) {
+        console.error('Table with ID "contactsTable" not found.');
+        return;
+    }
+    const worksheet = XLSX.utils.table_to_sheet(table);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Contacts');
+    XLSX.writeFile(workbook, 'contacts_data.xlsx');
+};
+
+function exportContactsExcelBtn() {
+    const ids = Array.from($('.contactCheckbox:checked')).map(cb => cb.value);
+
+    const selectAll = document.getElementById('selectAllContacts');
+    const table = $('#contactsTable').DataTable();
+
+    // التحقق إذا لم يتم اختيار أي جهة اتصال ولم يتم تفعيل Select All
+    if (!selectAll.checked && ids.length === 0) {
+        alert('❌ الرجاء اختيار جهة اتصال واحدة على الأقل أو تفعيل "Select All"');
+        return;
+    }
+
+    // تجهيز البيانات للإرسال
+    const payload = selectAll.checked ? { all: true, ids: [] } : { all: false, ids: ids };
+
+    // ⚠️ انتبه: ستحتاج إلى إنشاء هذا المسار في ملف routes/web.php
+    fetch("{{ route('customers.export.selected') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'contacts.xlsx'; // اسم الملف
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+        console.error(err);
+        alert('❌ فشل التصدير');
+    });
+}
+window.exportContactsExcelBtn = exportContactsExcelBtn;
+
+
 
 
 
 </script>
-
-
-
 
 @endsection

@@ -40,6 +40,9 @@
            <button title="Send to Customer" onclick="sendQuotationToCustomer(getSingleSelectedQuotationId())" class="btn-icon">
                 <i class="fas fa-share-from-square"></i>
             </button>
+             <button class="btn btn-success btn-add-price" onclick="openAddPriceModal()">
+        <i class="fas fa-plus"></i>
+    </button>
         </div>
 
         <div class="icon-separator"></div>
@@ -1450,6 +1453,63 @@ body.dark-mode {
         box-shadow: none !important;
     }
 }
+
+/* المودال العادي */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+/* المودال الصغير */
+.small-modal {
+    width: 400px;   /* ✅ عرض صغير */
+    margin: 10% auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* عنوان المودال */
+.small-modal .modal-header-title h2 {
+    font-size: 18px;
+    margin: 0;
+    padding-bottom: 10px;
+}
+
+/* الحقول داخل المودال */
+.small-modal form label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+.small-modal form input,
+.small-modal form select {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* الفوتر */
+.small-modal .modal-footer {
+    margin-top: 15px;
+    text-align: right;
+}
+.small-modal .modal-footer button {
+    padding: 6px 12px;
+    margin-left: 5px;
+    border-radius: 5px;
+}
+
 </style>
 
 
@@ -2022,6 +2082,7 @@ body.dark-mode {
                 <div class="btn-group-left">
                     <button type="button" class="btn btn-secondary btn-reset-price-list" onclick="resetPriceListFilters()"><i class="fas fa-arrows-rotate"></i> Reset/Refresh</button>
                 </div>
+
                 <div class="btn-group-center">
                     <button type="button" class="btn btn-info btn-set-price-only" onclick="setPriceOnlyForSelected()"><i class="fas fa-money-bill-alt"></i> Set Selected as Price Only</button>
                 </div>
@@ -2033,6 +2094,56 @@ body.dark-mode {
             </div>
         </div>
     </div>
+   <div id="addPriceModal" class="modal" style="display: none;">
+    <div class="modal-content small-modal">
+        <span class="close" id="closeAddPriceModalBtn">&times;</span>
+        <div class="modal-header-title">
+            <h2>Add New Price Item</h2>
+        </div>
+        <div class="modal-body-content">
+            <form id="addPriceForm">
+                <!-- Service ID -->
+                <label for="priceServiceId">Service ID:</label>
+                <input type="text" id="priceServiceId" name="service_id" required placeholder="مثال: LIMS-001">
+
+                <!-- Name -->
+                <label for="priceName">Name:</label>
+                <input type="text" id="priceName" name="name" required>
+
+                <!-- Method -->
+                <label for="priceMethod">Method:</label>
+                <select id="priceMethod" name="method" required>
+                    <option value="list">List</option>
+                    <option value="fixed">Fixed</option>
+                    <option value="calculated">Calculated</option>
+                </select>
+
+                <!-- Unit -->
+                <label for="priceUnit">Unit:</label>
+                <input type="text" id="priceUnit" name="unit">
+
+                <!-- Price -->
+                <label for="priceAmount">Price:</label>
+                <input type="number" id="priceAmount" name="price" step="0.01" required>
+
+                <!-- Price Only -->
+                <label>
+                    <input type="checkbox" id="priceOnly" name="priceOnly"> Price Only
+                </label>
+
+                <!-- Active -->
+                <label>
+                    <input type="checkbox" id="priceActive" name="active" checked> Active
+                </label>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" id="cancelAddPriceBtn">Cancel</button>
+            <button type="button" class="btn btn-primary" id="savePriceBtn">Save</button>
+        </div>
+    </div>
+</div>
+
 <div id="editQuoteLineModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span class="close-button" onclick="closeEditQuoteLineModal()">&times;</span>

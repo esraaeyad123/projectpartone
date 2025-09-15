@@ -2287,6 +2287,163 @@ function setupEventListeners() {
 // Document Ready and Initialization
 // =====================================================================
 
+function initializeQuotationLinesDataTable() {
+    if (DOM.quotationLinesTable && !$.fn.DataTable.isDataTable(DOM.quotationLinesTable)) {
+        console.log("Initializing DataTables for 'quotationLinesTable'...");
+
+        quotationLinesDataTable = $(DOM.quotationLinesTable).DataTable({
+            ajax: {
+                url: '/quotations/lines/data', // هذا الراوت يرجع JSON من Laravel
+                type: 'GET',
+                dataSrc: '' // البيانات عبارة عن مصفوفة JSON
+            },
+            scrollX: true,
+            scrollY: "400px",
+            autoWidth: false,
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            dom: '<"top"Bfl>rt<"bottom"ip>',
+            buttons: [
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> طباعة جدول سطور عروض الأسعار',
+                    title: 'تقرير سطور عروض الأسعار',
+                    orientation: 'landscape',
+                    pageSize: 'A4',
+                    exportOptions: {
+                        columns: function(idx, data, node) {
+                            const headerNode = quotationLinesDataTable.column(idx).header();
+                            if (!headerNode) return false;
+                            const headerText = headerNode.textContent.trim().toLowerCase();
+                            return headerText !== '' && headerText !== 'actions' && headerText !== 'select' && headerText !== 'checkbox';
+                        },
+                        stripHtml: true
+                    },
+                    messageTop: function() {
+                        return 'بيانات سطور عروض الأسعار - تاريخ الطباعة: ' + new Date().toLocaleDateString();
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i> تصدير إلى Excel',
+                    title: 'بيانات سطور عروض الأسعار',
+                    exportOptions: {
+                        columns: function(idx, data, node) {
+                            const headerNode = quotationLinesDataTable.column(idx).header();
+                            if (!headerNode) return false;
+                            const headerText = headerNode.textContent.trim().toLowerCase();
+                            return headerText !== '' && headerText !== 'actions' && headerText !== 'select' && headerText !== 'checkbox';
+                        },
+                        stripHtml: true
+                    }
+                }
+            ],
+            responsive: false,
+            pagingType: "full_numbers",
+            scrollCollapse: true,
+            language: {
+                processing: "جاري المعالجة...",
+                search: "بحث:",
+                lengthMenu: "عرض _MENU_ سجلات",
+                info: "عرض _START_ إلى _END_ من _TOTAL_ سجل",
+                infoEmpty: "عرض 0 إلى 0 من 0 سجل",
+                infoFiltered: "(تمت التصفية من _MAX_ إجمالي السجلات)",
+                loadingRecords: "جاري تحميل السجلات...",
+                zeroRecords: "لا توجد سجلات مطابقة",
+                emptyTable: "لا توجد بيانات متاحة في الجدول",
+                paginate: {
+                    first: "الأول",
+                    previous: "السابق",
+                    next: "التالي",
+                    last: "الأخير"
+                },
+                aria: {
+                    sortAscending: ": تفعيل لترتيب العمود تصاعدياً",
+                    sortDescending: ": تفعيل لترتيب العمود تنازلياً"
+                }
+            },
+            columns: [
+                { data: "id", orderable: false, width: "30px", render: d => `<input type="checkbox" class="select-row-checkbox" value="${d}">` },
+                { data: "service_id", width: "120px" },
+                { data: "description", width: "200px" },
+                { data: "accounted", width: "80px" },
+                { data: "category", width: "100px" },
+                { data: "type", width: "80px" },
+                { data: "method", width: "80px" },
+                { data: null, orderable: false, width: "100px", render: (data, type, row) =>
+                    `<button class="btn btn-sm btn-primary" onclick="editQuoteLine(this)">✏️</button>
+                     <button class="btn btn-sm btn-danger" onclick="deleteQuoteLine(this)">🗑️</button>`
+                }
+            ],
+            fixedColumns: { leftColumns: 1 },
+            initComplete: function() {
+                $('#quotationLinesTable tbody').on('change', 'input[type="checkbox"]', function() {
+                    $(this).closest('tr').toggleClass('selected-row', this.checked);
+                });
+                if (quotationLinesDataTable) quotationLinesDataTable.columns.adjust();
+            },
+            drawCallback: function() {
+                if (quotationLinesDataTable) quotationLinesDataTable.columns.adjust();
+            }
+        });
+
+        // Filters الأعمدة
+        $('#quotationLinesTable tfoot tr.filter-row input').each(function(i) {
+            var that = quotationLinesDataTable.column(i);
+            $(this).on('keyup change clear', function() {
+                if (that.search() !== this.value) that.search(this.value).draw();
+            });
+        });
+
+        // مربع الاختيار الرئيسي
+        if (DOM.selectAllLinesCheckbox) {
+            DOM.selectAllLinesCheckbox.addEventListener('change', function() {
+                toggleSelectAllQuoteLines(this);
+            });
+        }
+
+        console.log("DataTables initialized for 'quotationLinesTable' successfully.");
+    }
+}
+
+
+function addQuoteLine() {
+    console.log("Add Empty Line button clicked.");
+
+    // بيانات السطر الجديد (يمكنك تركها فارغة أو ملء بعض القيم الافتراضية)
+    const newLineData = {
+        description: '',
+        accounted: '',
+        category: '',
+        type: '',
+        method: '',
+        quotation_id: currentQuotationId // يجب أن يكون لديك ID عرض الأسعار الحالي
+    };
+
+    // AJAX لإضافة السطر في قاعدة البيانات
+    $.ajax({
+        url: '/quotations/lines/store',
+        type: 'POST',
+        data: newLineData,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // مهم للـ Laravel
+        },
+        success: function(response) {
+            // أضف السطر الجديد للـ DataTable مباشرة بعد أن تم حفظه في DB
+            if (quotationLinesDataTable) {
+                quotationLinesDataTable.row.add(response).draw(false);
+                showToast("تم إضافة سطر جديد بنجاح!", "info");
+            }
+        },
+        error: function(xhr) {
+            console.error("Error adding quote line:", xhr.responseText);
+            showToast("حدث خطأ أثناء إضافة السطر.", "error");
+        }
+    });
+}
+
 
 
 
@@ -2296,6 +2453,521 @@ function setupEventListeners() {
 
 
 
+function copyQuoteLine() {
+    const selectedRows = quotationLinesDataTable.rows(':has(input[type="checkbox"]:checked)').data();
+    if (selectedRows.length > 0) {
+        // Store a deep copy of the data, excluding the checkbox and action buttons
+        window.copiedQuoteLineData = selectedRows[0].toArray().slice(1, -1); // Exclude first (checkbox) and last (actions)
+        alert("Line copied! Now click Paste Line to add it.");
+        console.log("Copied Line Data:", window.copiedQuoteLineData);
+    } else {
+        alert("Please select a line to copy.");
+    }
+}
+
+function pasteQuoteLine() {
+    if (window.copiedQuoteLineData) {
+        const newRowData = ['<input type="checkbox">', ...window.copiedQuoteLineData, '<button class="btn btn-sm btn-info edit-btn" onclick="editQuoteLine(this)"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-danger delete-btn" onclick="deleteQuoteLine(this)"><i class="fas fa-trash-alt"></i></button>'];
+        quotationLinesDataTable.row.add(newRowData).draw(false);
+        alert("Line pasted!");
+        console.log("Pasted new line:", newRowData);
+    } else {
+        alert("No line copied yet. Please copy a line first.");
+    }
+}
+
+// عند تهيئة جدول quotationLinesDataTable:
+$(document).ready(function() { // تأكد من أن الكود يعمل بعد تحميل DOM
+    if (DOM.quotationLinesTable && !$.fn.DataTable.isDataTable(DOM.quotationLinesTable)) {
+        quotationLinesDataTable = $(DOM.quotationLinesTable).DataTable({
+            // ... إعدادات DataTables الأخرى ...
+        });
+
+        // ربط حقول الإدخال المخصصة بالبحث في الأعمدة
+        $('#quotationLinesTable thead tr.filter-row input').on('keyup change', function() {
+            quotationLinesDataTable
+                .column($(this).parent().index()) // الحصول على فهرس العمود
+                .search(this.value)
+                .draw();
+        });
+    }
+});
+
+// دالة مسح الفلاتر المعدلة
+function clearLinesFilters() {
+    if (quotationLinesDataTable) {
+        // مسح قيمة حقول الإدخال بصرياً
+        $('#quotationLinesTable thead tr.filter-row input').val('');
+
+        // مسح فلاتر DataTables برمجياً وإعادة الرسم
+        quotationLinesDataTable.columns().search('').draw();
+
+        alert("Filters cleared for Quote Lines table.");
+    } else {
+        alert("Quotation Lines table not initialized.");
+        console.error("quotationLinesDataTable is null or undefined.");
+    }
+}
+function refreshQuoteLinesTable() {
+    if (quotationLinesDataTable) {
+        // In a real app, this would re-fetch data from a backend
+        quotationLinesDataTable.clear().draw();
+        // For now, just a dummy refresh
+        alert("Quote Lines table refreshed (data cleared).");
+    } else {
+        alert("Quote Lines table not initialized.");
+    }
+}
+
+function exportQuoteLinesToExcel() {
+    if (quotationLinesDataTable) {
+        console.log("Starting export for quotationLinesTable...");
+
+        // 1. استخراج البيانات المرئية/المفلترة فقط
+        // استخدام rows({ search: 'applied' }) يضمن أنك تحصل على الصفوف التي تظهر حاليًا بعد أي تصفية أو بحث.
+        const dataRows = quotationLinesDataTable.rows({ search: 'applied' }).data();
+        const numRows = dataRows.length;
+
+        if (numRows === 0) {
+            alert("No data to export in Quote Lines table.");
+            console.warn("No rows found in quotationLinesTable with applied filters for export.");
+            return;
+        }
+
+        // 2. استخراج رؤوس الأعمدة المرئية وتصفيتها
+        // DataTables.columns().header() يعطي عناصر الـ <th>
+        const headers = quotationLinesDataTable.columns().header().toArray().map(th => th.textContent.trim());
+
+        // قم بتصفية الرؤوس لاستبعاد العمود الفارغ، عمود الإجراءات، وأي رأس لـ checkbox
+        // يمكنك إضافة المزيد من الشروط هنا إذا كانت هناك رؤوس أعمدة أخرى لا تريد تصديرها
+        const filteredHeaders = headers.filter(header =>
+            header !== '' &&          // استبعاد الرؤوس الفارغة (عادة لـ checkboxes أو أعمدة مخصصة)
+            header.toLowerCase() !== 'actions' && // استبعاد عمود الإجراءات (غير حساس لحالة الأحرف)
+            header.toLowerCase() !== 'select'     // استبعاد رأس عمود التحديد/checkbox إذا كان موجودًا
+        );
+
+        console.log("Original Headers:", headers);
+        console.log("Filtered Headers for Excel:", filteredHeaders);
+
+        // 3. معالجة وتنظيف بيانات الصفوف
+        const cleanedData = [];
+        dataRows.each(function(rowData, dataIndex) {
+            const tempRow = [];
+
+            quotationLinesDataTable.columns().every(function(colIdx) {
+                const headerText = this.header().textContent.trim();
+
+                if (filteredHeaders.includes(headerText)) {
+                    let cellContent = rowData[colIdx];
+
+                    // Check if cellContent is an HTML string and extract text
+                    if (typeof cellContent === 'string' && $(cellContent).length > 0) {
+                        // Create a temporary div to parse HTML and get text content
+                        const tempDiv = $('<div>').html(cellContent);
+                        cellContent = tempDiv.text().trim();
+                    }
+                    // Handle cases where DataTables might store objects or other types
+                    else if (typeof cellContent === 'object' && cellContent !== null) {
+                        cellContent = String(cellContent); // Convert object to string representation
+                    }
+                    // If the cell content is empty or only whitespace, convert it to an empty string
+                    if (cellContent === undefined || cellContent === null || (typeof cellContent === 'string' && cellContent.trim() === '')) {
+                         cellContent = '';
+                    }
+
+                    tempRow.push(cellContent);
+                }
+            });
+            cleanedData.push(tempRow);
+        });
+
+        console.log("Cleaned Data for Excel:", cleanedData);
+
+        // 4. بناء ورقة العمل والملف Excel
+        if (typeof XLSX === 'undefined') {
+            console.error("XLSX library (SheetJS) is not loaded. Make sure the script is included.");
+            alert("Export failed: XLSX library not found. Please contact support.");
+            return;
+        }
+
+        const worksheet = XLSX.utils.aoa_to_sheet([filteredHeaders, ...cleanedData]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Quotation Lines Data"); // اسم الورقة في Excel
+        XLSX.writeFile(workbook, "QuotationLines_Export.xlsx"); // اسم ملف Excel
+
+        alert("Quotation Lines exported to Excel successfully!");
+    } else {
+        alert("Quotation Lines table not initialized for export.");
+        console.error("quotationLinesDataTable is null or undefined. Ensure it's initialized.");
+    }
+}
+
+function printQuoteLinesTable() {
+   if (quotationLinesDataTable) {
+        console.log("Preparing quotationLinesTable for printing - ALL COLUMNS AND ROWS...");
+
+        // فهارس الأعمدة التي نريد طباعتها (باستثناء Checkbox و Actions)
+        // هذا يتطابق مع ترتيب الأعمدة في HTML
+        const columnsToPrintIndexes = [1, 2, 3, 4, 5, 6]; // Service/Test Id to Method
+
+        // 1. استخراج رؤوس الأعمدة المراد طباعتها فقط
+        const filteredHeaders = columnsToPrintIndexes.map(idx => {
+            const headerElement = quotationLinesDataTable.column(idx).header();
+            // تحقق مما إذا كان العنصر موجودًا قبل الوصول إلى textContent
+            return headerElement ? headerElement.textContent.trim() : '';
+        }).filter(header => header !== ''); // فلتر لأي رؤوس فارغة قد تنتج عن خطأ
+
+        console.log("Original Headers (all - for debugging):", quotationLinesDataTable.columns().header().toArray().map(th => th.textContent.trim()));
+        console.log("Filtered Headers for print (by index):", filteredHeaders);
+
+        if (filteredHeaders.length === 0) {
+            alert("لا توجد أعمدة صالحة للطباعة (ربما خطأ في فهارس الأعمدة أو رؤوسها فارغة).");
+            console.warn("Print aborted: No valid headers found after filtering by index.");
+            return;
+        }
+
+        // 2. استخراج جميع الصفوف المرئية/المفلترة من DataTables
+        const dataRows = quotationLinesDataTable.rows({ search: 'applied' }).data();
+        const numRows = dataRows.length;
+
+        console.log("Number of data rows (after filters):", numRows);
+        // console.log("Raw data from DataTables (first 5 rows for inspection):", dataRows.toArray().slice(0, 5)); // إلغاء التعليق إذا احتجت لمزيد من التفاصيل
+
+        if (numRows === 0) {
+            alert("لا توجد بيانات للطباعة في جدول سطور عروض الأسعار (بعد الفلاتر).");
+            console.warn("Print aborted: No rows found in quotationLinesTable with applied filters.");
+            return;
+        }
+
+        // 3. معالجة وتنظيف بيانات الصفوف لضمان استخراج النص من HTML
+        const cleanedData = [];
+        dataRows.each(function(rowData, dataIndex) {
+            const tempRow = [];
+            // المرور فقط على الأعمدة المحددة للطباعة
+            columnsToPrintIndexes.forEach(colIdx => {
+                let cellContent = rowData[colIdx]; // هذا هو محتوى الخلية الخام من DataTables
+
+                // إذا كان المحتوى سلسلة HTML، استخرج النص منها
+                if (typeof cellContent === 'string' && $(cellContent).length > 0) {
+                    const tempDiv = $('<div>').html(cellContent);
+                    cellContent = tempDiv.text().trim();
+                }
+                // إذا كان المحتوى كائنًا (مثل كائن زر أو أي شيء آخر)، قم بتحويله إلى سلسلة
+                else if (typeof cellContent === 'object' && cellContent !== null) {
+                    cellContent = String(cellContent);
+                }
+                // إذا كان المحتوى فارغًا أو مسافات بيضاء فقط، اجعله سلسلة فارغة
+                if (cellContent === undefined || cellContent === null || (typeof cellContent === 'string' && cellContent.trim() === '')) {
+                     cellContent = '';
+                }
+
+                tempRow.push(cellContent);
+            });
+            cleanedData.push(tempRow);
+        });
+
+        console.log("Cleaned Data for print (first 5 processed rows):", cleanedData.slice(0, 5));
+
+        // 4. بناء جدول HTML للطباعة
+        let tableHtml = '<h2>تقرير عروض الأسعار</h2>'; // عنوان للتقرير
+        tableHtml += '<table border="1" style="width:100%; border-collapse: collapse;">'; // جدول بحدود بسيطة
+
+        // رؤوس الجدول
+        tableHtml += '<thead><tr>';
+        filteredHeaders.forEach(header => {
+            tableHtml += `<th style="padding: 8px; text-align: left; background-color: #f2f2f2; border: 1px solid #ddd;">${header}</th>`;
+        });
+        tableHtml += '</tr></thead>';
+
+        // جسم الجدول
+        tableHtml += '<tbody>';
+        cleanedData.forEach(row => {
+            tableHtml += '<tr>';
+            row.forEach(cell => {
+                tableHtml += `<td style="padding: 8px; border: 1px solid #ddd;">${cell}</td>`;
+            });
+            tableHtml += '</tr>';
+        });
+        tableHtml += '</tbody>';
+        tableHtml += '</table>';
+
+        console.log("Generated table HTML (check this in console, copy-paste to .html file to verify):", tableHtml);
+
+        // 5. فتح نافذة جديدة للطباعة وعرض الجدول
+        const printWindow = window.open('', '', 'height=600,width=800');
+        printWindow.document.write('<html><head><title>طباعة عروض الأسعار</title>');
+        // تضمين CSS لتنسيق الطباعة
+        printWindow.document.write('<style>');
+        printWindow.document.write(`
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h2 { text-align: center; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            /* قواعد CSS للطباعة فقط */
+            @media print {
+                /* إخفاء عناصر غير مرغوب فيها عند الطباعة */
+                body * { visibility: hidden; }
+                .printable-area, .printable-area * { visibility: visible; }
+                .printable-area { position: absolute; left: 0; top: 0; }
+                /* ضبط عرض الأعمدة إذا لزم الأمر */
+                table { table-layout: fixed; } /* قد يساعد في التحكم في عرض الأعمدة */
+            }
+        `);
+        printWindow.document.write('</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<div class="printable-area">'); // منطقة قابلة للطباعة
+        printWindow.document.write(tableHtml);
+        printWindow.document.write('</div>');
+        printWindow.document.write('</body></html>');
+        printWindow.document.close(); // مهم لإغلاق مستند النافذة الجديدة
+        printWindow.focus(); // نقل التركيز إلى نافذة الطباعة
+
+        // تأخير الطباعة قليلاً للسماح للمحتوى بالتحميل الكامل
+        setTimeout(() => {
+            printWindow.print(); // فتح مربع حوار الطباعة
+            // printWindow.close(); // يمكنك إزالة التعليق على هذا السطر إذا أردت إغلاق النافذة تلقائيًا بعد الطباعة
+        }, 500); // تأخير 500 مللي ثانية (نصف ثانية)
+
+        console.log("Print process initiated for quotationLinesTable.");
+
+    } else {
+        alert("Quotation Lines table not initialized for printing.");
+        console.error("quotationLinesDataTable is null or undefined for print. Ensure it's initialized.");
+    }
+}
+
+
+/**
+ * Opens the Price List modal.
+ */
+function openPriceListModal() {
+    if (DOM.priceListModal) {
+        DOM.priceListModal.style.display = "flex"; // Use flex for centering
+        // Initialize DataTables for the price list table when modal opens
+        setTimeout(() => {
+            initializePriceListDataTable();
+            // Force DataTables to adjust columns after modal is visible
+            if (priceListDataTable) {
+                priceListDataTable.columns.adjust().draw();
+                console.log("DataTables columns adjusted after modal opened.");
+            }
+        }, 300); // Increased delay to 300ms
+    }
+}
+
+/**
+ * Closes the Price List modal.
+ */
+function closePriceListModal() {
+    if (DOM.priceListModal) {
+        DOM.priceListModal.style.display = "none";
+        // Clear search input and reset filters when closing
+        if (DOM.priceListSearchInput) {
+            DOM.priceListSearchInput.value = '';
+        }
+        if (priceListDataTable) {
+            priceListDataTable.search('').columns().search('').draw();
+            // Uncheck master checkbox (it's now part of the DataTables header)
+            // We need to find the checkbox within the DataTables header dynamically
+            const masterCheckboxElement = $('#priceListTable thead .select-all-price-list-items')[0];
+            if (masterCheckboxElement) {
+                masterCheckboxElement.checked = false;
+            }
+            // Remove selected-row class from all rows when closing the modal
+            priceListDataTable.$('tbody tr').removeClass('selected-row');
+        }
+        // Hide the reset button when closing the modal
+        if (DOM.priceListResetButtonContainer) {
+            DOM.priceListResetButtonContainer.style.display = 'none';
+        }
+    }
+}
+function initializePriceListDataTable() {
+    if (DOM.priceListTable && !$.fn.DataTable.isDataTable(DOM.priceListTable)) {
+        priceListDataTable = $(DOM.priceListTable).DataTable({
+            ajax: {
+                url: '/price-lists',
+                type: 'GET',
+                dataSrc: '' // JSON array مباشرة
+            },
+            columns: [
+                {
+                    data: null,
+                    orderable: false,
+                    title: '<input type="checkbox" class="select-all-price-list-items" onclick="toggleSelectAllPriceListItems(this)" />',
+                    render: function(data, type, row) {
+                        return `<input type="checkbox" ${row.price_only ? 'checked' : ''}>`;
+                    },
+                    width: "30px"
+                },
+                { data: 'id', title: 'ID', width: "80px" },
+                { data: 'name', title: 'Name', width: "250px" },
+                { data: 'method', title: 'Method', width: "100px" },
+                { data: 'unit', title: 'Unit', width: "80px" },
+                {
+                    data: 'price',
+                    title: 'Price',
+                    render: function(data) {
+                        return `<input type="number" class="price-input" value="${parseFloat(data).toFixed(2)}" step="0.01" style="width: 80px;">`;
+                    },
+                    width: "100px"
+                },
+                {
+                    data: 'price_only',
+                    title: 'Price Only',
+                    render: function(data) {
+                        return `<input type="checkbox" class="price-only-checkbox" ${data ? 'checked' : ''}>`;
+                    },
+                    width: "80px"
+                },
+                {
+                    data: 'quantity',
+                    title: 'Quantity',
+                    render: function(data) {
+                        return `<input type="number" class="quantity-input" value="${data}" min="0" step="1" style="width: 60px;">`;
+                    },
+                    width: "80px"
+                },
+                {
+                    data: 'active',
+                    title: 'Active',
+                    render: function(data) {
+                        return `<input type="checkbox" class="active-checkbox" ${data ? 'checked' : ''}>`;
+                    },
+                    width: "60px"
+                }
+            ],
+            scrollX: true,
+            scrollY: "400px",
+            autoWidth: false,
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            dom: '<"top"lf>rt<"bottom"ip>',
+            responsive: false,
+            pagingType: "full_numbers",
+            scrollCollapse: true,
+            fixedColumns: { leftColumns: 1 },
+            initComplete: function() {
+                attachPriceListEditableEvents();
+            },
+            drawCallback: function() {
+                // Apply selected-row classes based on price_only
+                priceListDataTable.rows().every(function() {
+                    const data = this.data();
+                    const node = this.node();
+                    const mainCheckbox = $(node).find('input[type="checkbox"]:first')[0];
+                    if (data.price_only) {
+                        $(node).addClass('selected-row-price-only selected-row');
+                        if (mainCheckbox) mainCheckbox.checked = true;
+                    } else {
+                        $(node).removeClass('selected-row-price-only');
+                        if (mainCheckbox && !mainCheckbox.checked) $(node).removeClass('selected-row');
+                    }
+                });
+            }
+        });
+    } else if (DOM.priceListTable && $.fn.DataTable.isDataTable(DOM.priceListTable)) {
+        priceListDataTable.ajax.reload(null, false); // Reload data without resetting pagination
+    }
+}
+
+function attachPriceListEditableEvents() {
+    $('#priceListTable tbody').on('change', '.price-input', function() {
+        const row = priceListDataTable.row($(this).closest('tr'));
+        const data = row.data();
+        data.price = parseFloat($(this).val());
+        row.data(data).draw(false);
+    });
+    $('#priceListTable tbody').on('change', '.quantity-input', function() {
+        const row = priceListDataTable.row($(this).closest('tr'));
+        const data = row.data();
+        data.quantity = parseInt($(this).val());
+        row.data(data).draw(false);
+    });
+    $('#priceListTable tbody').on('change', '.price-only-checkbox', function() {
+        const row = priceListDataTable.row($(this).closest('tr'));
+        const data = row.data();
+        data.price_only = this.checked;
+        row.data(data).draw(false);
+    });
+    $('#priceListTable tbody').on('change', '.active-checkbox', function() {
+        const row = priceListDataTable.row($(this).closest('tr'));
+        const data = row.data();
+        data.active = this.checked;
+        row.data(data).draw(false);
+    });
+}
+function openAddPriceModal() {
+    document.getElementById("addPriceModal").style.display = "block";
+}
+
+function closeAddPriceModal() {
+    document.getElementById("addPriceModal").style.display = "none";
+}
+
+ // JavaScript: حفظ سعر جديد
+function savePriceItem() {
+    const payload = {
+        name: $('#priceName').val().trim(),
+        method: $('#priceMethod').val(),
+        unit: $('#priceUnit').val().trim(),
+        price: parseFloat($('#priceAmount').val()) || 0,
+        price_only: $('#priceOnly').is(':checked') ? 1 : 0,
+        quantity: parseInt($('#priceQuantity').val()) || 1,
+        active: $('#priceActive').is(':checked') ? 1 : 0
+    };
+
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+    $.ajax({
+        url: '/price-lists',
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrfToken },
+        data: JSON.stringify(payload),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showToast("✅ Price item saved successfully!", "success");
+                closeAddPriceModal();
+
+                // إعادة تحميل جدول الأسعار
+                if (typeof priceListDataTable !== "undefined") {
+                    priceListDataTable.ajax.reload(null, false);
+                }
+            } else {
+                showToast("❌ Failed to save price item: " + (response.message || ''), "error");
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error saving price item:", xhr.responseText || error);
+            showToast("❌ Error saving price item: " + (xhr.responseJSON?.message || error), "error");
+        }
+    });
+}
+
+// ربط الزر عند تحميل الصفحة
+$(document).ready(function() {
+    $('#savePriceBtn').click(savePriceItem);
+});
+
+
+// Modal open/close handlers
+    function closeAddPriceModal() {
+        document.getElementById("addPriceModal").style.display = "none";
+    }
+
+    function openAddPriceModal() {
+        document.getElementById("addPriceModal").style.display = "block";
+    }
+
+
+$(document).ready(function() {
+    $('#savePriceBtn').click(savePriceItem);
+});
 
 // =====================================================================
 // Document Ready and Initialization
