@@ -27,16 +27,11 @@ RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available
 # تفعيل mod_rewrite للـ Laravel routing
 RUN a2enmod rewrite
 
-# تثبيت حزم المشروع باستخدام Composer
+# تثبيت Dependencies الخاصة بالمشروع
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# لا نفعل Laravel caching هنا لتجنب مشاكل .env
-# بعد Deploy على Render يمكن تشغيل:
-# php artisan key:generate
-# php artisan config:cache
-# php artisan route:cache
-# php artisan view:cache
-# php artisan migrate --force
+# لا نفعل Laravel caching أو key generation هنا لتجنب مشاكل Free Plan
+# سيتم التعامل مع APP_KEY و caching من خلال Environment Variables بعد Deploy
 
 # تشغيل Apache عند بدء الحاوية
 CMD ["apache2-foreground"]
