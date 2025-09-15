@@ -1,25 +1,24 @@
-# 1) اختر نسخة PHP مع Composer
 FROM php:8.2-cli
 
-# 2) ثبّت المكتبات المطلوبة
+# تثبيت الأدوات والـ PHP extensions المطلوبة
 RUN apt-get update && apt-get install -y \
     unzip git libpq-dev libzip-dev zip \
-    && docker-php-ext-install pdo pdo_pgsql pdo_mysql zip
+    libonig-dev \
+    && docker-php-ext-install pdo pdo_pgsql pdo_mysql mbstring bcmath tokenizer xml fileinfo ctype
 
-# 3) نسخ Composer من صورة رسمية
+# تثبيت Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 4) نسخ المشروع داخل الحاوية
 WORKDIR /app
 COPY . .
 
-# 5) تثبيت Dependencies
-RUN composer install --optimize-autoloader --no-dev
+# تثبيت الحزم بدون مشاكل
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# 6) Laravel caching
-RUN php artisan config:cache \
+# Laravel caching
+RUN php artisan key:generate \
+ && php artisan config:cache \
  && php artisan route:cache \
  && php artisan view:cache
 
-# 7) تشغيل Laravel على البورت اللي يحدده Render
 CMD php artisan serve --host 0.0.0.0 --port $PORT
