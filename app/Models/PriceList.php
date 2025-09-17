@@ -15,6 +15,7 @@ class PriceList extends Model
         'price',
         'price_only',
         'active',
+        'service_id'
     ];
 
     // علاقة مع quotation_lines

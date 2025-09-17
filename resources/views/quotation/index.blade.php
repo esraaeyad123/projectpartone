@@ -9,7 +9,6 @@
 <section id="quotation-section" class="section-content active">
     <div class="icon-toolbar">
         <div>
-
             <button title="Add" onclick="openQuotationModal()" class="btn-icon">
                 <i class="fas fa-file"></i>
             </button>
@@ -23,6 +22,9 @@
             <button title="Revise" onclick="reviseQuotation(getSingleSelectedQuotationId())" class="btn-icon">
                 <i class="fas fa-pen-to-square"></i>
             </button>
+            <button class="btn btn-success btn-add-price" onclick="openAddPriceModal()">
+        <i class="fas fa-plus"></i>
+    </button>
         </div>
 
         <div class="icon-separator"></div>
@@ -40,9 +42,6 @@
            <button title="Send to Customer" onclick="sendQuotationToCustomer(getSingleSelectedQuotationId())" class="btn-icon">
                 <i class="fas fa-share-from-square"></i>
             </button>
-             <button class="btn btn-success btn-add-price" onclick="openAddPriceModal()">
-        <i class="fas fa-plus"></i>
-    </button>
         </div>
 
         <div class="icon-separator"></div>
@@ -55,9 +54,9 @@
                 <i class="fas fa-file-pdf"></i>
             </button>
 
- <button title="Preview" onclick="previewQuotation('AAM-MT-Q-25-00001')" class="btn-icon">
-        <i class="fas fa-file-invoice"></i>
-    </button>
+ <button title="Preview" onclick="previewQuotation()" class="btn-icon">
+    <i class="fas fa-file-invoice"></i>
+</button>
 
         <button title="Export to Excel" onclick="exportSelectedToExcel()" class="btn-icon">
                 <i class="fas fa-file-excel"></i>
@@ -123,217 +122,241 @@
     </div>
 
  <script>
-    const allQuotationData = {
-        'AAM-MT-Q-25-00001': {
-            proposal_number: 'AAM-MT-Q-25-00001',
-            proposal_date: '100',
-            inquiry_ref: 'a',
-            validity_days: 100,
-            terms: 'a',
-            subject: 'a',
-            proposed_to: 'a',
-            address: 'a',
-            contact_person: 'a',
-            contact_title: 'a',
-            project_name: 'a',
-            contact_number: '100',
-            contact_email: 'a',
-            section_title: 'a',
-            items: [
-                { id: 1, description: 'اختبار الهبوط', method: 'NO.', unit: 'NO.', qty: 0, price: 100.00, isPriceOnly: true },
-                { id: 2, description: 'اختبار مقاومة الرمل', method: 'NO.', unit: 'NO.', qty: 0, price: 185.00, isPriceOnly: true },
-                { id: 3, description: 'الامتصاص', method: 'NO.', unit: 'NO.', qty: 0, price: 80.00, isPriceOnly: true },
-                { id: 4, description: 'التدرج الحبيبي', method: 'NO.', unit: 'NO.', qty: 150, price: 255.00, isPriceOnly: false }
-            ],
-            tax_rate: 0.15,
-            amount_in_words: 'Only twenty-five thousand eight hundred and seventy-five Saudi Riyal and Halala 0.'
-        }
+function getQuotationDataFromUI() {
+    const headerData = {
+        proposal_number: document.getElementById('quoteNo')?.value || '',
+        proposal_date: document.getElementById('quoteDate')?.value || '',
+        inquiry_ref: document.getElementById('quoteInquiry')?.value || '',
+        validity_days: parseInt(document.getElementById('quoteValidity')?.value) || 0,
+        terms: document.getElementById('quotePaymentTermsInput')?.value || '',
+        subject: document.getElementById('quoteSubject')?.value || '',
+        proposed_to: document.getElementById('quoteAttnTo')?.value || '',
+        address: document.getElementById('quoteContactTo')?.value || '',
+        contact_person: document.getElementById('quoteContactPerson')?.value || '',
+        contact_title: document.getElementById('quoteAttnPos')?.value || '',
+        project_name: document.getElementById('quoteProject')?.value || '',
+        contact_number: document.getElementById('quoteContactMobile')?.value || '',
+        contact_email: document.getElementById('quoteContactEmail')?.value || '',
+        section_title: document.getElementById('quoteSubject')?.value || '',
+        tax_rate: parseFloat(document.getElementById('quoteVAT')?.value) / 100 || 0,
+        amount_in_words: document.getElementById('financialTotalLines')?.value || '',
+
     };
 
-    function getQuotationDataById(id) {
-        return allQuotationData[id];
+    const linesData = [];
+    const tableRows = document.querySelectorAll('#quotationLinesTable tbody tr');
+
+    tableRows.forEach((row, index) => {
+        const descriptionElement = row.querySelector('.description-input, [name="description"]');
+        const unitElement = row.querySelector('.unit-input, [name="unit"]');
+        const methodElement = row.querySelector('.method-input, [name="method"]');
+        const qtyElement = row.querySelector('.qty-input, [name="qty"]');
+        const priceElement = row.querySelector('.price-input, [name="price"]');
+
+        const description = descriptionElement ? descriptionElement.value : row.cells[1]?.textContent || '';
+        const qty = qtyElement ? parseFloat(qtyElement.value) : parseFloat(row.cells[2]?.textContent) || 0;
+        const price = priceElement ? parseFloat(priceElement.value) : parseFloat(row.cells[3]?.textContent) || 0;
+        const unit = unitElement ? unitElement.value : row.cells[3]?.textContent || '';
+        const method = methodElement ? methodElement.value : row.cells[2]?.textContent || '';
+
+        linesData.push({
+            id: index + 1,
+            description: description,
+            method: method,
+            unit: unit,
+            qty: qty,
+            price: price,
+            isPriceOnly: false
+        });
+    });
+
+    return {
+        header: headerData,
+        lines: linesData
+    };
+}
+function formatQuotation(data) {
+    if (!data) {
+        return '<p style="text-align: center; margin-top: 50px;">التقرير غير متوفر.</p>';
     }
 
-    function formatQuotation(data) {
-        if (!data) {
-            return '<p style="text-align: center; margin-top: 50px;">التقرير غير متوفر.</p>';
-        }
-        const totalCalculated = data.items.reduce((sum, item) => sum + (item.isPriceOnly ? 0 : item.qty * item.price), 0);
-        const taxAmount = totalCalculated * data.tax_rate;
-        const finalTotal = totalCalculated + taxAmount;
-        const headerHtml = `
-            <header class="report-header">
-                <div class="header-info-left">
-                    <p style="margin: 0;">Office of</p>
-                    <p style="margin: 0; font-weight: bold;">Abdulkarim Abdullah Almansour For Engineering Consultings</p>
-                    <p style="margin: 0;">Engineering consultings, Designing,</p>
-                    <p style="margin: 0;">Supervision, Survey Works</p>
-                    <p style="margin: 0;">Engineering License # 3448, J.C.C.L# 162903, C.R. # 4030279674</p>
-                </div>
-                <div class="header-logo-center">
+    const { header, lines } = data;
+    // تعديل لحساب الإجمالي بناءً على isPriceOnly
+    const totalCalculated = lines.reduce((sum, item) => {
+        // نتحقق من أن item.qty و item.price موجودة قبل الحساب
+        const qty = item.qty ?? 0;
+        const price = item.price ?? 0;
+        return sum + (item.isPriceOnly ? 0 : qty * price);
+    }, 0);
+    // نتحقق من وجود tax_rate قبل الحساب
+    const taxRate = header.tax_rate ?? 0;
+    const taxAmount = totalCalculated * taxRate;
+    const finalTotal = totalCalculated + taxAmount;
 
-              <img src="" alt="Office Logo" class="logo">
+    // كود HTML الخاص برأس التقرير
+    const headerHtml = `
+        <header class="report-header">
+            <div class="header-info-left">
+                <p style="margin: 0;">Office of</p>
+                <p style="margin: 0; font-weight: bold;">Abdulkarim Abdullah Almansour For Engineering Consultings</p>
+                <p style="margin: 0;">Engineering consultings, Designing,</p>
+                <p style="margin: 0;">Supervision, Survey Works</p>
+                <p style="margin: 0;">Engineering License # 3448, J.C.C.L# 162903, C.R. # 4030279674</p>
+            </div>
+            <div class="header-logo-center">
+                <img src="" alt="Office Logo" class="logo">
+            </div>
+            <div class="header-info-right">
+                <p style="margin: 0";>مكتب</p>
+                <p style="margin: 0; font-weight: bold;">عبدالكريم عبدالله المنصور للاستشارات الهندسية</p>
+                <p style="margin: 0;">إستشارات هندسية - تصاميم معمارية</p>
+                <p style="margin: 0;">رفوعات مساحية - إشراف هندسي</p>
+                <p style="margin: 0;">ترخيص هندسي رقم 3448، سجل تجاري رقم 162903</p>
+            </div>
+        </header>
+        <div class="header-underline"></div>
+        <h1 class="report-title">Proposal for Materials Testing</h1>
+    `;
+
+    // استخدام المعامل ?? لوضع قيمة افتراضية "N/A"
+    const detailsHtml = `
+        <section class="proposal-details">
+            <div class="details-column">
+                <div class="detail-item">
+                    <span class="label">PROPOSAL #</span>
+                    <span class="value editable">${header.proposal_number ?? 'N/A'} <span class="rev-label">REV</span> <span class="rev-value">0</span></span>
                 </div>
-                <div class="header-info-right">
-                    <p style="margin: 0";>مكتب</p>
-                    <p style="margin: 0; font-weight: bold;">عبدالكريم عبدالله المنصور للاستشارات الهندسية</p>
-                    <p style="margin: 0;">إستشارات هندسية - تصاميم معمارية</p>
-                    <p style="margin: 0;">رفوعات مساحية - إشراف هندسي</p>
-                    <p style="margin: 0;">ترخيص هندسي رقم 3448، سجل تجاري رقم 162903</p>
+                <div class="detail-item">
+                    <span class="label">PROPOSAL DATE</span>
+                    <span class="value editable">${header.proposal_date ?? 'N/A'}</span>
                 </div>
-            </header>
-            <div class="header-underline"></div>
-            <h1 class="report-title">Proposal for Materials Testing</h1>
-        `;
-        const detailsHtml = `
-            <section class="proposal-details">
-                <div class="details-column">
-                    <div class="detail-item">
-                        <span class="label">PROPOSAL #</span>
-                        <span class="value editable proposal-number-highlight">${data.proposal_number} <span class="rev-label">REV</span> <span class="rev-value">0</span></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="label">PROPOSAL DATE</span>
-                        <span class="value editable">${data.proposal_date}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="label">INQUIRY REF</span>
-                        <span class="value editable">${data.inquiry_ref}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="label">VALIDITY - DAYS</span>
-                        <span class="value editable">${data.validity_days}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="label">TERMS</span>
-                        <span class="value editable">${data.terms}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="label">SUBJECT</span>
-                        <span class="value editable">${data.subject}</span>
-                    </div>
-                    <div class="contact-person-details">
-                        <div class="detail-item">
-                            <span class="label">CONTACT PERSON</span>
-                            <span class="value editable">${data.contact_person}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">CONTACT TITLE</span>
-                            <span class="value editable">${data.contact_title}</span>
-                        </div>
-                    </div>
+                <div class="detail-item">
+                    <span class="label">INQUIRY REF</span>
+                    <span class="value editable">${header.inquiry_ref ?? 'N/A'}</span>
                 </div>
-                <div class="details-column">
-                    <div class="detail-item proposed-to-item">
-                        <span class="label">PROPOSED TO:</span>
-                        <span class="value editable">${data.proposed_to}</span>
-                    </div>
-                    <div class="project-details">
-                        <div class="detail-item">
-                            <span class="label">Project</span>
-                            <span class="value editable">${data.project_name}</span>
-                        </div>
+                <div class="detail-item">
+                    <span class="label">VALIDITY - DAYS</span>
+                    <span class="value editable">${header.validity_days ?? 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">TERMS</span>
+                    <span class="value editable">${header.terms ?? 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">SUBJECT</span>
+                    <span class="value editable">${header.subject ?? 'N/A'}</span>
+                </div>
+                <div class="contact-person-details">
+                    <div class="detail-item">
+                        <span class="label">CONTACT PERSON</span>
+                        <span class="value editable">${header.contact_person ?? 'N/A'}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="label">CONTACT NUMBER</span>
-                        <span class="value editable">${data.contact_number}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="label">CONTACT EMAIL</span>
-                        <span class="value editable">${data.contact_email}</span>
+                        <span class="label">CONTACT TITLE</span>
+                        <span class="value editable">${header.contact_title ?? 'N/A'}</span>
                     </div>
                 </div>
-            </section>
-            <p class="greeting-text">Dear Sir,</p>
-            <p class="intro-text">As requested, we're please to submit herewith our proposal for Quality Control / Material testig services for project as given above</p>
-        `;
-        const sectionTitleHtml = `
-            <h3 class="section-heading">${data.section_title}</h3>
-        `;
-        const tableHtml = `
-            <main class="report-body">
-                <table class="report-table">
-                    <thead>
+            </div>
+            <div class="details-column">
+                <div class="detail-item proposed-to-item">
+                    <span class="label">PROPOSED TO:</span>
+                    <span class="value editable">${header.proposed_to ?? 'N/A'}</span>
+                </div>
+                <div class="project-details">
+                    <div class="detail-item">
+                        <span class="label">Project</span>
+                        <span class="value editable">${header.project_name ?? 'N/A'}</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <span class="label">CONTACT NUMBER</span>
+                    <span class="value editable">${header.contact_number ?? 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">CONTACT EMAIL</span>
+                    <span class="value editable">${header.contact_email ?? 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">ADDRESS</span>
+                    <span class="value editable">${header.address ?? 'N/A'}</span>
+                </div>
+            </div>
+        </section>
+        <p class="greeting-text">Dear Sir,</p>
+        <p class="intro-text">As requested, we're pleased to submit herewith our proposal for Quality Control / Material testing services for project as given above</p>
+    `;
+
+    // استخدام المعامل ?? لوضع قيمة افتراضية "N/A"
+    const sectionTitleHtml = `
+        <h3 class="section-heading">${header.section_title ?? 'Scope of Work'}</h3>
+    `;
+
+    // كود HTML للجدول، مع تكرار عناصر المصفوفة 'lines'
+    const tableHtml = `
+        <main class="report-body">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>DESCRIPTION</th>
+                        <th>METHOD</th>
+                        <th>UNIT</th>
+                        <th>QTY</th>
+                        <th>PRICE (SAR)</th>
+                        <th>TOTAL (SAR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${lines.map(item => `
                         <tr>
-                            <th>#</th>
-                            <th>DESCRIPTION</th>
-                            <th>METHOD</th>
-                            <th>UNIT</th>
-                            <th>QTY</th>
-                            <th>PRICE (SAR)</th>
-                            <th>TOTAL (SAR)</th>
+                            <td>${item.id ?? '-'}</td>
+                            <td class="editable description-cell">${item.description ?? 'N/A'}</td>
+                            <td class="editable">${item.method ?? 'N/A'}</td>
+                            <td class="editable">${item.unit ?? 'N/A'}</td>
+                            <td class="editable">${item.isPriceOnly ? '-' : (item.qty ?? 0)}</td>
+                            <td class="editable">${(item.price ?? 0).toFixed(2)}</td>
+                            <td>${item.isPriceOnly ? 'PriceOnly' : ((item.qty ?? 0) * (item.price ?? 0)).toFixed(2)}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        ${data.items.map(item => `
-                            <tr>
-                                <td>${item.id}</td>
-                                <td class="editable description-cell">${item.description}</td>
-                                <td class="editable">${item.method}</td>
-                                <td class="editable">${item.unit}</td>
-                                <td class="editable">${item.isPriceOnly ? '-' : item.qty}</td>
-                                <td class="editable">${item.price.toFixed(2)}</td>
-                                <td>${item.isPriceOnly ? 'PriceOnly' : (item.qty * item.price).toFixed(2)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </main>
-        `;
-        const totalsHtml = `
-            <div class="totals">
-                <div class="total-item">
-                    <span class="label">SUBTOTAL</span>
-                    <span class="value">SAR ${totalCalculated.toFixed(2)}</span>
-                </div>
-                <div class="total-item">
-                    <span class="label">TAX %(${data.tax_rate * 100})</span>
-                    <span class="value">SAR ${taxAmount.toFixed(2)}</span>
-                </div>
-                <div class="total-item final-total">
-                    <span class="label">TOTAL</span>
-                    <span class="value">SAR ${finalTotal.toFixed(2)}</span>
-                </div>
-                <p class="amount-in-words">${data.amount_in_words}</p>
+                    `).join('')}
+                </tbody>
+            </table>
+        </main>
+    `;
+
+    // استخدام المعامل ?? لوضع قيمة افتراضية "0.00"
+    const totalsHtml = `
+        <div class="totals">
+            <div class="total-item">
+                <span class="label">SUBTOTAL</span>
+                <span class="value">SAR ${totalCalculated.toFixed(2)}</span>
             </div>
-            <footer class="report-footer-line"></footer>
-        `;
-        return `
-            <div class="report-container a4-size">
-                ${headerHtml}
-                ${detailsHtml}
-                ${sectionTitleHtml}
-                ${tableHtml}
-                ${totalsHtml}
+            <div class="total-item">
+                <span class="label">TAX %(${(taxRate * 100).toFixed(2)})</span>
+                <span class="value">SAR ${taxAmount.toFixed(2)}</span>
             </div>
-        `;
-    }
+            <div class="total-item final-total">
+                <span class="label">TOTAL</span>
+                <span class="value">SAR ${finalTotal.toFixed(2)}</span>
+            </div>
+            <p class="amount-in-words">${header.amount_in_words ?? 'N/A'}</p>
+        </div>
+        <footer class="report-footer-line"></footer>
+    `;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const modalContainer = document.getElementById('modalpre-container');
-        const quotationModal = document.getElementById('quotationModalpre');
-        const modalHeader = document.querySelector('.modalpre-header');
-        const reportContent = document.getElementById('report-content');
-        const closeBtn = document.querySelector('.close-btn');
-        const maximizeBtn = document.querySelector('.maximize-btn');
-        const minimizeBtn = document.querySelector('.minimize-btn');
-        const sizePercentageSpan = document.getElementById('resize-percentage');
+    return `
+        <div class="report-container a4-size">
+            ${headerHtml}
+            ${detailsHtml}
+            ${sectionTitleHtml}
+            ${tableHtml}
+            ${totalsHtml}
+        </div>
+    `;
+}
 
-        let isDragging = false;
-        let isResizing = false;
-        let resizeDirection = null;
-        let startX, startY, startWidth, startHeight;
-        let startLeft, startTop;
+// Global functions for commenting and highlighting
+let highlightListener = null;
 
-        let offsetX, offsetY;
-        let isMaximized = false;
-        let isMinimized = false;
-        let originalPosition = {};
-        let originalSize = {};
-
-        document.querySelector('.comment-btn').onclick = () => {
-    createCommentBox();
-};
 
 // Function to highlight the selected text
 function highlightText() {
@@ -419,8 +442,6 @@ function showPopupMessage(message, type) {
     }, 3000);
 }
 
-// Global variable to store the highlight listener
-let highlightListener = null;
 
 // Function to create the comment box and its buttons
 function createCommentBox() {
@@ -621,229 +642,321 @@ function createCommentBox() {
         };
 
 
-        // ربط الأزرار بوظائفها
-        document.querySelector('.approve-btn').onclick = () => alert('Approve button clicked!');
 
-        document.querySelector('.decline-btn').onclick = () => {
-            const reportContainer = document.querySelector('.report-container');
-            if (reportContainer) {
-                let declinedStamp = document.querySelector('.declined-stamp');
-                if (!declinedStamp) {
-                    declinedStamp = document.createElement('div');
-                    declinedStamp.classList.add('declined-stamp');
-                    declinedStamp.textContent = 'Declined';
-                    reportContainer.appendChild(declinedStamp);
-                }
+
+
+function previewQuotation() {
+    // 1. احصل على ID عرض السعر المحدد من الجدول الرئيسي
+    const quotationId = getSingleSelectedQuotationId();
+
+    if (!quotationId) {
+        showToast("يرجى اختيار عرض سعر من الجدول أولاً.", "warning");
+        return;
+    }
+
+    // 2. ابحث عن الصف المحدد في جدول DataTables باستخدام ID
+    // هذا يفترض أن لديك دالة `getQuotationDataById`
+    const quotationData = getQuotationDataById(quotationId);
+
+    if (!quotationData) {
+        showToast("فشل العثور على بيانات عرض السعر.", "error");
+        return;
+    }
+
+    // 3. استخدم البيانات المجمعة لتنسيق التقرير وعرضه
+    const dataForReport = {
+        header: quotationData.header,
+        lines: quotationData.lines // تأكد من أن هذه البيانات موجودة في جدولك
+    };
+
+    const reportHtml = formatQuotation(dataForReport);
+    document.getElementById('report-content').innerHTML = reportHtml;
+    $('#quotationModalpre').modal('show'); // افتح نافذة المعاينة
+}
+document.addEventListener('DOMContentLoaded', () => {
+    // START OF YOUR EXISTING CODE
+    const modalContainer = document.getElementById('modalpre-container');
+    const quotationModal = document.getElementById('quotationModalpre');
+    const modalHeader = document.querySelector('.modalpre-header');
+    const reportContent = document.getElementById('report-content');
+    const closeBtn = document.querySelector('.close-btn');
+    const maximizeBtn = document.querySelector('.maximize-btn');
+    const minimizeBtn = document.querySelector('.minimize-btn');
+    const sizePercentageSpan = document.getElementById('resize-percentage');
+
+    let isDragging = false;
+    let isResizing = false;
+    let resizeDirection = null;
+    let startX, startY, startWidth, startHeight;
+    let startLeft, startTop;
+    let offsetX, offsetY;
+    let isMaximized = false;
+    let isMinimized = false;
+    let originalPosition = {};
+    let originalSize = {};
+
+    // Attach event listeners to existing buttons
+    document.querySelector('.comment-btn').addEventListener('click', createCommentBox);
+    document.querySelector('.approve-btn').addEventListener('click', () => showPopupMessage('تمت الموافقة على التقرير بنجاح.', 'success'));
+    document.querySelector('.decline-btn').addEventListener('click', () => {
+        const reportContainer = document.querySelector('.report-container');
+        if (reportContainer) {
+            let declinedStamp = document.querySelector('.declined-stamp');
+            if (!declinedStamp) {
+                declinedStamp = document.createElement('div');
+                declinedStamp.classList.add('declined-stamp');
+                declinedStamp.textContent = 'Declined';
+                reportContainer.appendChild(declinedStamp);
             }
-        };
-
-
-
-// Start of the corrected print function
-document.querySelector('.print-btn').onclick = () => {
-    const reportContainer = document.querySelector('.report-container');
-    const reportHeader = document.querySelector('.report-header');
-    const reportFooter = document.querySelector('.report-footer');
-
-    // 1. Create a temporary iframe for printing
-    const printFrame = document.createElement('iframe');
-    printFrame.style.cssText = 'position: absolute; top: -9999px; left: -9999px;';
-    document.body.appendChild(printFrame);
-    const doc = printFrame.contentWindow.document;
-
-    // 2. Build the full HTML content to be printed
-    let contentToPrint = '';
-
-    // Copy all stylesheets and inline styles
-    const stylesheets = document.querySelectorAll('link[rel="stylesheet"], style');
-    stylesheets.forEach(sheet => {
-        if (sheet.tagName === 'LINK') {
-            contentToPrint += `<link rel="stylesheet" href="${sheet.href}">`;
-        } else if (sheet.tagName === 'STYLE') {
-            contentToPrint += `<style>${sheet.textContent}</style>`;
         }
+        showPopupMessage('تم رفض التقرير.', 'warning');
     });
 
-    // *** الكود الجديد: إضافة أنماط الطباعة الملونة ***
-    contentToPrint += `
-    <style>
-        @media print {
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .report-header, .report-container, .report-footer {
-                background-color: transparent !important;
-                border: none !important;
-            }
-            /* تأكد من إضافة أي أنماط أخرى تريد الاحتفاظ بها في الطباعة */
-            .highlighted-text {
-                background-color: #ffc107 !important;
-                color: #000 !important;
-            }
-        }
-    </style>
-    `;
+    document.querySelector('.print-btn').addEventListener('click', () => {
+        const reportContainer = document.querySelector('.report-container');
+        const printFrame = document.createElement('iframe');
+        printFrame.style.cssText = 'position: absolute; top: -9999px; left: -9999px;';
+        document.body.appendChild(printFrame);
+        const doc = printFrame.contentWindow.document;
 
-    // Add the report header, container, and footer
-    if (reportHeader) {
-        contentToPrint += reportHeader.outerHTML;
-    }
-    if (reportContainer) {
+        let contentToPrint = '<html><head><title>Print</title>';
+
+        // Copy all stylesheets
+        document.querySelectorAll('link[rel="stylesheet"], style').forEach(sheet => {
+            contentToPrint += sheet.outerHTML;
+        });
+
+        // Add print-specific styles
+        contentToPrint += `
+        <style>
+            @media print {
+                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                .report-container, .report-header, .report-footer {
+                    background-color: transparent !important;
+                    border: none !important;
+                }
+                .highlighted-text {
+                    background-color: #ffc107 !important;
+                    color: #000 !important;
+                }
+                .declined-stamp {
+                    color: red !important;
+                    border: 2px solid red !important;
+                    opacity: 1 !important;
+                }
+                /* Hide buttons and unnecessary elements */
+                .modalpre-header, .modalpre-footer, .button-container { display: none; }
+            }
+        </style>
+        `;
+        contentToPrint += '</head><body>';
         contentToPrint += reportContainer.outerHTML;
-    }
-    if (reportFooter) {
-        contentToPrint += reportFooter.outerHTML;
-    }
+        contentToPrint += '</body></html>';
 
-    // 3. Write the content to the iframe document
-    doc.open();
-    doc.write('<html><head>' + contentToPrint + '</head><body></body></html>');
-    doc.close();
+        doc.open();
+        doc.write(contentToPrint);
+        doc.close();
 
-    // 4. Wait for a short moment before printing
-    setTimeout(() => {
-        printFrame.contentWindow.focus();
-        printFrame.contentWindow.print();
-
-        // 5. Remove the iframe after printing
         setTimeout(() => {
-            document.body.removeChild(printFrame);
-        }, 500);
-    }, 100); // 100ms delay to ensure content is rendered
-};
-
-        if (modalHeader) {
-            modalHeader.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                offsetX = e.clientX - quotationModal.offsetLeft;
-                offsetY = e.clientY - quotationModal.offsetTop;
-                quotationModal.style.cursor = 'grabbing';
-            });
-        }
-
-        document.querySelectorAll('.resize-handle').forEach(handle => {
-            handle.addEventListener('mousedown', (e) => {
-                e.stopPropagation();
-                isResizing = true;
-                resizeDirection = handle.classList.contains('right') ? 'right' : 'left';
-                startX = e.clientX;
-                startWidth = quotationModal.offsetWidth;
-                startLeft = quotationModal.offsetLeft;
-            });
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                quotationModal.style.left = `${e.clientX - offsetX}px`;
-                quotationModal.style.top = `${e.clientY - offsetY}px`;
-            }
-            if (isResizing) {
-                if (resizeDirection === 'right') {
-                    const newWidth = startWidth + (e.clientX - startX);
-                    quotationModal.style.width = `${newWidth}px`;
-                } else if (resizeDirection === 'left') {
-                    const newWidth = startWidth - (e.clientX - startX);
-                    const newLeft = startLeft + (e.clientX - startX);
-                    quotationModal.style.width = `${newWidth}px`;
-                    quotationModal.style.left = `${newLeft}px`;
-                }
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            isResizing = false;
-            resizeDirection = null;
-            quotationModal.style.cursor = 'default';
-        });
-
-        if (maximizeBtn) {
-            maximizeBtn.onclick = () => {
-                if (!isMaximized) {
-                    originalPosition = { left: quotationModal.style.left, top: quotationModal.style.top };
-                    originalSize = { width: quotationModal.style.width, height: quotationModal.style.height };
-                    quotationModal.style.left = '0';
-                    quotationModal.style.top = '0';
-                    quotationModal.style.width = '100vw';
-                    quotationModal.style.height = '100vh';
-                    quotationModal.style.transform = 'none';
-                    isMaximized = true;
-                } else {
-                    quotationModal.style.left = originalPosition.left;
-                    quotationModal.style.top = originalPosition.top;
-                    quotationModal.style.width = originalSize.width;
-                    quotationModal.style.height = originalSize.height;
-                    isMaximized = false;
-                }
-                updateSizePercentage();
-            };
-        }
-
-        if (minimizeBtn) {
-            minimizeBtn.onclick = () => {
-                if (isMinimized) {
-                    quotationModal.style.width = originalSize.width;
-                    quotationModal.style.height = originalSize.height;
-                    quotationModal.style.display = 'flex';
-                    isMinimized = false;
-                } else {
-                    originalSize = { width: quotationModal.style.width, height: quotationModal.style.height };
-                    quotationModal.style.width = '200px';
-                    quotationModal.style.height = '50px';
-                    quotationModal.style.bottom = '10px';
-                    quotationModal.style.right = '10px';
-                    quotationModal.style.top = 'auto';
-                    quotationModal.style.left = 'auto';
-                    quotationModal.style.transform = 'none';
-                    isMinimized = true;
-                }
-                updateSizePercentage();
-            };
-        }
-
-        if (closeBtn) {
-            closeBtn.onclick = () => {
-                modalContainer.style.display = 'none';
-            };
-        }
-
-        function updateSizePercentage() {
-            const currentWidth = quotationModal.offsetWidth;
-            const currentHeight = quotationModal.offsetHeight;
-            const originalWidth = 800;
-            const originalHeight = 600;
-            const widthPercentage = Math.round((currentWidth / originalWidth) * 100);
-            const heightPercentage = Math.round((currentHeight / originalHeight) * 100);
-            if (sizePercentageSpan) {
-                sizePercentageSpan.textContent = `${widthPercentage}%`;
-            }
-        }
-
-        window.previewQuotation = (quotationId) => {
-            const quotationData = getQuotationDataById(quotationId);
-            reportContent.innerHTML = formatQuotation(quotationData);
-            modalContainer.style.display = 'flex';
-            quotationModal.style.display = 'flex';
-            quotationModal.style.width = '800px';
-            quotationModal.style.height = '600px';
-            quotationModal.style.left = '50%';
-            quotationModal.style.top = '50%';
-            quotationModal.style.transform = 'translate(-50%, -50%)';
-            isMaximized = false;
-            isMinimized = false;
-            updateSizePercentage();
-        };
-
-        const resizeObserver = new ResizeObserver(entries => {
-            for (let entry of entries) {
-                if (entry.target === quotationModal) {
-                    updateSizePercentage();
-                }
-            }
-        });
-        resizeObserver.observe(quotationModal);
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+            }, 500);
+        }, 100);
     });
+
+    // Dragging and resizing logic
+    if (modalHeader) {
+        modalHeader.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - quotationModal.offsetLeft;
+            offsetY = e.clientY - quotationModal.offsetTop;
+            quotationModal.style.cursor = 'grabbing';
+        });
+    }
+
+    document.querySelectorAll('.resize-handle').forEach(handle => {
+        handle.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            isResizing = true;
+            resizeDirection = handle.classList.contains('right') ? 'right' : 'left';
+            startX = e.clientX;
+            startWidth = quotationModal.offsetWidth;
+            startLeft = quotationModal.offsetLeft;
+        });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            quotationModal.style.left = `${e.clientX - offsetX}px`;
+            quotationModal.style.top = `${e.clientY - offsetY}px`;
+        }
+        if (isResizing) {
+            if (resizeDirection === 'right') {
+                const newWidth = startWidth + (e.clientX - startX);
+                quotationModal.style.width = `${newWidth}px`;
+            } else if (resizeDirection === 'left') {
+                const newWidth = startWidth - (e.clientX - startX);
+                const newLeft = startLeft + (e.clientX - startX);
+                quotationModal.style.width = `${newWidth}px`;
+                quotationModal.style.left = `${newLeft}px`;
+            }
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        isResizing = false;
+        resizeDirection = null;
+        quotationModal.style.cursor = 'default';
+    });
+
+    // Maximize and Minimize logic
+    if (maximizeBtn) {
+        maximizeBtn.addEventListener('click', () => {
+            if (!isMaximized) {
+                originalPosition = { left: quotationModal.style.left, top: quotationModal.style.top };
+                originalSize = { width: quotationModal.style.width, height: quotationModal.style.height };
+                quotationModal.style.left = '0';
+                quotationModal.style.top = '0';
+                quotationModal.style.width = '100vw';
+                quotationModal.style.height = '100vh';
+                quotationModal.style.transform = 'none';
+                isMaximized = true;
+            } else {
+                quotationModal.style.left = originalPosition.left;
+                quotationModal.style.top = originalPosition.top;
+                quotationModal.style.width = originalSize.width;
+                quotationModal.style.height = originalSize.height;
+                isMaximized = false;
+            }
+            updateSizePercentage();
+        });
+    }
+
+    if (minimizeBtn) {
+        minimizeBtn.addEventListener('click', () => {
+            if (isMinimized) {
+                quotationModal.style.width = originalSize.width;
+                quotationModal.style.height = originalSize.height;
+                quotationModal.style.display = 'flex';
+                isMinimized = false;
+            } else {
+                originalSize = { width: quotationModal.style.width, height: quotationModal.style.height };
+                quotationModal.style.width = '200px';
+                quotationModal.style.height = '50px';
+                quotationModal.style.bottom = '10px';
+                quotationModal.style.right = '10px';
+                quotationModal.style.top = 'auto';
+                quotationModal.style.left = 'auto';
+                quotationModal.style.transform = 'none';
+                isMinimized = true;
+            }
+            updateSizePercentage();
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modalContainer.style.display = 'none';
+        });
+    }
+
+    // HERE IS WHERE YOU SHOULD INSERT THE CODE FOR THE PREVIEW BUTTON
+    // Do not create a new document.addEventListener('DOMContentLoaded', ...); block
+    const previewBtn = document.getElementById('preview-btn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', () => {
+            const quotationData = getQuotationDataFromUI();
+
+            // تحقق من وجود البيانات قبل عرضها
+            if (quotationData) {
+                // الوصول إلى العناصر التي ستحتاجها
+                const reportContent = document.getElementById('report-content');
+                const modalContainer = document.getElementById('modalpre-container');
+                const quotationModal = document.getElementById('quotationModalpre');
+
+                reportContent.innerHTML = formatQuotation(quotationData);
+                modalContainer.style.display = 'flex';
+                quotationModal.style.display = 'flex';
+                quotationModal.style.width = '800px';
+                quotationModal.style.height = '600px';
+                quotationModal.style.left = '50%';
+                quotationModal.style.top = '50%';
+                quotationModal.style.transform = 'translate(-50%, -50%)';
+
+                isMaximized = false;
+                isMinimized = false;
+                updateSizePercentage();
+            }
+        });
+    }
+/**
+ * تبحث عن بيانات عرض السعر الكاملة في جدول DataTables
+ * بناءً على ID الخاص بالصف.
+ * @param {string} quotationId - الـ ID الخاص بعرض الأسعار المراد استرجاع بياناته.
+ * @returns {object|null} كائن بيانات عرض السعر أو null إذا لم يتم العثور عليه.
+ */
+function getQuotationDataById(quotationId) {
+    if (!quotationDataTable) {
+        console.error("جدول عروض الأسعار غير مُهيأ.");
+        return null;
+    }
+
+    // ابحث عن الصف الذي يتطابق مع الـ ID
+    let rowData = null;
+    quotationDataTable.rows().every(function () {
+        const data = this.data();
+        // هنا يجب أن تتأكد من أن `data.id` أو أي حقل آخر هو معرف فريد
+        // إذا كان لديك حقل فريد مثل quoteNo، استخدمه بدلاً من ID
+        if (data.id === quotationId) {
+            rowData = data;
+            return false; // توقف عن البحث بعد العثور على الصف
+        }
+    });
+
+    return rowData;
+}
+
+    // Resize and percentage update
+    function updateSizePercentage() {
+        const currentWidth = quotationModal.offsetWidth;
+        const currentHeight = quotationModal.offsetHeight;
+        const originalWidth = 800; // Assuming initial width
+        const originalHeight = 600; // Assuming initial height
+        const widthPercentage = Math.round((currentWidth / originalWidth) * 100);
+        if (sizePercentageSpan) {
+            sizePercentageSpan.textContent = `${widthPercentage}%`;
+        }
+    }
+
+    // Global function to show the modal
+    window.previewQuotation = (quotationId) => {
+        // Here you would fetch data, for now we use the local function
+        const quotationData = getQuotationDataFromUI(); // Using the new function
+        reportContent.innerHTML = formatQuotation(quotationData);
+        modalContainer.style.display = 'flex';
+        quotationModal.style.display = 'flex';
+        quotationModal.style.width = '800px';
+        quotationModal.style.height = '600px';
+        quotationModal.style.left = '50%';
+        quotationModal.style.top = '50%';
+        quotationModal.style.transform = 'translate(-50%, -50%)';
+        isMaximized = false;
+        isMinimized = false;
+        updateSizePercentage();
+    };
+
+    const resizeObserver = new ResizeObserver(entries => {
+        for (let entry of entries) {
+            if (entry.target === quotationModal) {
+                updateSizePercentage();
+            }
+        }
+    });
+    resizeObserver.observe(quotationModal);
+});
 </script>
     <style>
 
@@ -1315,7 +1428,7 @@ body.dark-mode {
     outline: 1px solid var(--primary-color);
 }
 /* الأنماط الخاصة بجدول الإجماليات (totals) */
-
+/* الأنماط الخاصة بجدول الإجماليات (totals) */
 .totals {
     width: 250px; /* جعل العرض أصغر ليتناسب مع الصورة */
     text-align: right; /* محاذاة النص إلى اليمين */
@@ -1453,63 +1566,6 @@ body.dark-mode {
         box-shadow: none !important;
     }
 }
-
-/* المودال العادي */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1050;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5);
-}
-
-/* المودال الصغير */
-.small-modal {
-    width: 400px;   /* ✅ عرض صغير */
-    margin: 10% auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-/* عنوان المودال */
-.small-modal .modal-header-title h2 {
-    font-size: 18px;
-    margin: 0;
-    padding-bottom: 10px;
-}
-
-/* الحقول داخل المودال */
-.small-modal form label {
-    display: block;
-    margin: 10px 0 5px;
-    font-weight: bold;
-    font-size: 14px;
-}
-.small-modal form input,
-.small-modal form select {
-    width: 100%;
-    padding: 6px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-/* الفوتر */
-.small-modal .modal-footer {
-    margin-top: 15px;
-    text-align: right;
-}
-.small-modal .modal-footer button {
-    padding: 6px 12px;
-    margin-left: 5px;
-    border-radius: 5px;
-}
-
 </style>
 
 
@@ -1599,14 +1655,15 @@ body.dark-mode {
         </section>
     </section>
 
-
+    <!-- Container for fixed bottom pagination -->
     <div id="quotation-pagination-fixed-bottom" class="fixed-bottom-bar">
+        <!-- DataTables will inject pagination and info here via JavaScript -->
     </div>
-            <form id="quotationForm">
 
     <div id="quotationModal" class="modal" style="display: none;">
         <div class="modal-content large-modal quotation-modal-grid">
             <span class="close" onclick="closeQuotationModal()">&times;</span>
+
             <ul class="tab-list">
                 <li class="tab active" data-tab-target="headerTab" onclick="openTab(event, 'headerTab')">Quote Header</li>
                 <li class="tab" data-tab-target="linesTab" onclick="openTab(event, 'linesTab')">Quote Lines</li>
@@ -1621,6 +1678,7 @@ body.dark-mode {
                 <div id="headerTab" class="tab-content active">
                     <div class="left-form-section">
                         <fieldset class="form-section">
+                            <input type="hidden" id="currentQuotationId" value="">
                             <legend>Quote Info</legend>
                             <div class="form-grid-2-col">
                                 <label for="quoteCategory">Category:<span class="required-star">*</span></label>
@@ -1777,8 +1835,6 @@ body.dark-mode {
 </div>
 
  <style>
-
-
        /* Number input with controls */
 .number-input-wrapper {
     display: flex;
@@ -1933,8 +1989,8 @@ body.dark-mode {
                             </div>
                         </fieldset>
                     </div>
+
                 </div>
-             </form>
 
                 <!-- START: Updated Quote Lines Tab Content -->
                 <div id="linesTab" class="tab-content lines-tab-layout">
@@ -2082,7 +2138,6 @@ body.dark-mode {
                 <div class="btn-group-left">
                     <button type="button" class="btn btn-secondary btn-reset-price-list" onclick="resetPriceListFilters()"><i class="fas fa-arrows-rotate"></i> Reset/Refresh</button>
                 </div>
-
                 <div class="btn-group-center">
                     <button type="button" class="btn btn-info btn-set-price-only" onclick="setPriceOnlyForSelected()"><i class="fas fa-money-bill-alt"></i> Set Selected as Price Only</button>
                 </div>
@@ -2094,56 +2149,6 @@ body.dark-mode {
             </div>
         </div>
     </div>
-   <div id="addPriceModal" class="modal" style="display: none;">
-    <div class="modal-content small-modal">
-        <span class="close" id="closeAddPriceModalBtn">&times;</span>
-        <div class="modal-header-title">
-            <h2>Add New Price Item</h2>
-        </div>
-        <div class="modal-body-content">
-            <form id="addPriceForm">
-                <!-- Service ID -->
-                <label for="priceServiceId">Service ID:</label>
-                <input type="text" id="priceServiceId" name="service_id" required placeholder="مثال: LIMS-001">
-
-                <!-- Name -->
-                <label for="priceName">Name:</label>
-                <input type="text" id="priceName" name="name" required>
-
-                <!-- Method -->
-                <label for="priceMethod">Method:</label>
-                <select id="priceMethod" name="method" required>
-                    <option value="list">List</option>
-                    <option value="fixed">Fixed</option>
-                    <option value="calculated">Calculated</option>
-                </select>
-
-                <!-- Unit -->
-                <label for="priceUnit">Unit:</label>
-                <input type="text" id="priceUnit" name="unit">
-
-                <!-- Price -->
-                <label for="priceAmount">Price:</label>
-                <input type="number" id="priceAmount" name="price" step="0.01" required>
-
-                <!-- Price Only -->
-                <label>
-                    <input type="checkbox" id="priceOnly" name="priceOnly"> Price Only
-                </label>
-
-                <!-- Active -->
-                <label>
-                    <input type="checkbox" id="priceActive" name="active" checked> Active
-                </label>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-cancel" id="cancelAddPriceBtn">Cancel</button>
-            <button type="button" class="btn btn-primary" id="savePriceBtn">Save</button>
-        </div>
-    </div>
-</div>
-
 <div id="editQuoteLineModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span class="close-button" onclick="closeEditQuoteLineModal()">&times;</span>
@@ -2160,6 +2165,43 @@ body.dark-mode {
             <button type="button" id="saveEditedLineBtn" class="btn btn-primary">حفظ التغييرات</button>
             <button type="button" onclick="closeEditQuoteLineModal()" class="btn btn-secondary">إلغاء</button>
         </form>
+    </div>
+</div>
+<div id="addPriceModal" class="modal" style="display: none;">
+    <div class="modal-content small-modal">
+        <span class="close" id="closeAddPriceModalBtn">&times;</span>
+        <div class="modal-header-title">
+            <h2>Add New Price Item</h2>
+        </div>
+        <div class="modal-body-content">
+            <form id="addPriceForm">
+                <label for="priceServiceId">Service ID:</label>
+                <input type="text" id="priceServiceId" name="service_id" required placeholder="مثال: LIMS-001" autocomplete="off">
+
+                <label for="priceName">Name:</label>
+                <input type="text" id="priceName" name="name" required autocomplete="off">
+
+                <label for="priceMethod">Method:</label>
+                <select id="priceMethod" name="method" required>
+                    <option value="list">List</option>
+                    <option value="fixed">Fixed</option>
+                    <option value="calculated">Calculated</option>
+                </select>
+
+                <label for="priceUnit">Unit:</label>
+                <input type="text" id="priceUnit" name="unit" autocomplete="off">
+
+                <label for="priceAmount">Price:</label>
+                <input type="number" id="priceAmount" name="price" step="0.01" required>
+
+                <label><input type="checkbox" id="priceOnly" name="priceOnly"> Price Only</label>
+                <label><input type="checkbox" id="priceActive" name="active" checked> Active</label>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" id="cancelAddPriceBtn">Cancel</button>
+            <button type="button" class="btn btn-primary" id="savePriceBtn">Save</button>
+        </div>
     </div>
 </div>
 

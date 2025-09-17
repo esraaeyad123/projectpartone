@@ -10,6 +10,8 @@
 let quotationDataTable;
 let quotationLinesDataTable;
 let priceListDataTable;
+let currentEditingRow = null;
+let currentQuotationId = null; // تعريف المتغير العام
 let lastQuotationNumbers = {
     'proposal_geotechnical': 1000,
     'proposal_material_testing': 2000
@@ -141,6 +143,12 @@ masterQuotationCheckbox: document.getElementById('selectQuotations'),
     refreshPriceListBtn: document.getElementById('refreshPriceListBtn'),
     priceListResetButtonContainer: document.getElementById('priceListResetButtonContainer'),
     newQuotationBtn: document.getElementById('newQuotationBtn'),
+    savePriceBtn: document.getElementById("savePriceBtn"),
+    addPriceModal : document.getElementById("addPriceModal"),
+   openAddPriceBtn :  document.getElementById("btnOpenAddPrice"),
+    closeAddPriceBtn : document.getElementById("closeAddPriceModalBtn"),
+    cancelAddPriceBtn : document.getElementById("cancelAddPriceBtn"),
+
 
     // Dynamically added elements (like PDF button from initializeDynamicDOMElements)
     generatePdfButton: null,
@@ -2738,9 +2746,121 @@ function printQuoteLinesTable() {
 }
 
 
-/**
- * Opens the Price List modal.
- */
+function initializePriceListDataTable() {
+    if (!DOM.priceListTable) return console.error("Price list table not found");
+
+    if (!$.fn.DataTable.isDataTable(DOM.priceListTable)) {
+        priceListDataTable = $(DOM.priceListTable).DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '/price-lists',
+                type: 'GET',
+                dataSrc: 'data'
+            },
+            columns: [
+                { // Checkbox column
+                    data: null,
+                    orderable: false,
+                    title: '<input type="checkbox" class="select-all-price-list-items" />',
+                    render: function (data, type, row) {
+                        return `<input type="checkbox" class="row-master-checkbox" ${row.price_only ? 'checked' : ''}>`;
+                    },
+                    width: "30px"
+                },
+                { data: 'id', title: 'ID', width: "80px" },
+                { data: 'name', title: 'Name', width: "250px" },
+                { data: 'method', title: 'Method', width: "100px" },
+                { data: 'unit', title: 'Unit', width: "80px" },
+                { data: 'price', title: 'Price', render: function(data){ return `<input type="number" class="price-input" value="${parseFloat(data).toFixed(2)}" step="0.01" style="width:80px">`; }, width: "100px" },
+                { data: 'price_only', title: 'Price Only', render: function(data){ return `<input type="checkbox" class="price-only-checkbox" ${data ? 'checked' : ''}>`; }, width: "80px" },
+                { data: 'quantity', title: 'Quantity', render: function(data){ return `<input type="number" class="quantity-input" value="${data}" min="0" step="1" style="width:60px">`; }, width: "80px" },
+                { data: 'active', title: 'Active', render: function(data){ return `<input type="checkbox" class="active-checkbox" ${data ? 'checked' : ''}>`; }, width: "60px" }
+            ],
+            scrollX: true,
+            scrollY: "400px",
+            autoWidth: false,
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            dom: '<"top"lf>rt<"bottom"ip>',
+            responsive: false,
+            pagingType: "full_numbers",
+            scrollCollapse: true,
+            fixedColumns: { leftColumns: 1 },
+            language: {
+                processing: "Processing...",
+                search: "Search:",
+                lengthMenu: "Show _MENU_ entries",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                infoEmpty: "Showing 0 to 0 of 0 entries",
+                infoFiltered: "(filtered from _MAX_ total entries)",
+                loadingRecords: "Loading records...",
+                zeroRecords: "No matching records found",
+                emptyTable: "No data available in table",
+                paginate: { first:"First", previous:"Previous", next:"Next", last:"Last" }
+            },
+            initComplete: function() {
+                DOM.selectAllPriceListItems = document.querySelector('#priceListTable thead .select-all-price-list-items');
+
+                // Event: master checkbox
+                $(DOM.selectAllPriceListItems).on('change', function(){
+                    const checked = this.checked;
+                    $('#priceListTable tbody input.row-master-checkbox').prop('checked', checked).trigger('change');
+                });
+
+                attachPriceListEditableEvents();
+            },
+            rowCallback: function(row, data) {
+        // أضف data-id لكل <tr>
+        $(row).attr('data-id', data.id);
+    },
+            drawCallback: function(){
+                priceListDataTable.columns.adjust();
+            }
+
+        });
+    } else {
+        priceListDataTable.ajax.reload(null, false);
+        if(DOM.selectAllPriceListItems) DOM.selectAllPriceListItems.checked = false;
+        priceListDataTable.$('tbody tr').removeClass('selected-row selected-row-price-only');
+    }
+}
+
+// ----------------- Attach Editable Events -----------------
+function attachPriceListEditableEvents() {
+    $('#priceListTable tbody').on('change', '.price-input', function(){
+        const row = priceListDataTable.row($(this).closest('tr'));
+        const data = row.data();
+        data.price = parseFloat($(this).val());
+        row.data(data).draw(false);
+    });
+    $('#priceListTable tbody').on('change', '.quantity-input', function(){
+        const row = priceListDataTable.row($(this).closest('tr'));
+        const data = row.data();
+        data.quantity = parseInt($(this).val());
+        row.data(data).draw(false);
+    });
+    $('#priceListTable tbody').on('change', '.price-only-checkbox', function(){
+        const row = priceListDataTable.row($(this).closest('tr'));
+        const data = row.data();
+        data.price_only = this.checked ? 1 : 0;
+        row.data(data).draw(false);
+    });
+    $('#priceListTable tbody').on('change', '.active-checkbox', function(){
+        const row = priceListDataTable.row($(this).closest('tr'));
+        const data = row.data();
+        data.active = this.checked ? 1 : 0;
+        row.data(data).draw(false);
+    });
+    $('#priceListTable tbody').on('change', '.row-master-checkbox', function(){
+        const tr = $(this).closest('tr');
+        tr.toggleClass('selected-row', this.checked);
+    });
+}
+
+// ----------------- Open / Close Modals -----------------
 function openPriceListModal() {
     if (DOM.priceListModal) {
         DOM.priceListModal.style.display = "flex"; // Use flex for centering
@@ -2755,162 +2875,23 @@ function openPriceListModal() {
         }, 300); // Increased delay to 300ms
     }
 }
-
-/**
- * Closes the Price List modal.
- */
-function closePriceListModal() {
-    if (DOM.priceListModal) {
+function closePriceListModal(){
+    if(DOM.priceListModal){
         DOM.priceListModal.style.display = "none";
-        // Clear search input and reset filters when closing
-        if (DOM.priceListSearchInput) {
-            DOM.priceListSearchInput.value = '';
-        }
-        if (priceListDataTable) {
+        if(priceListDataTable){
             priceListDataTable.search('').columns().search('').draw();
-            // Uncheck master checkbox (it's now part of the DataTables header)
-            // We need to find the checkbox within the DataTables header dynamically
-            const masterCheckboxElement = $('#priceListTable thead .select-all-price-list-items')[0];
-            if (masterCheckboxElement) {
-                masterCheckboxElement.checked = false;
-            }
-            // Remove selected-row class from all rows when closing the modal
             priceListDataTable.$('tbody tr').removeClass('selected-row');
         }
-        // Hide the reset button when closing the modal
-        if (DOM.priceListResetButtonContainer) {
-            DOM.priceListResetButtonContainer.style.display = 'none';
-        }
-    }
-}
-function initializePriceListDataTable() {
-    if (DOM.priceListTable && !$.fn.DataTable.isDataTable(DOM.priceListTable)) {
-        priceListDataTable = $(DOM.priceListTable).DataTable({
-            ajax: {
-                url: '/price-lists',
-                type: 'GET',
-                dataSrc: '' // JSON array مباشرة
-            },
-            columns: [
-                {
-                    data: null,
-                    orderable: false,
-                    title: '<input type="checkbox" class="select-all-price-list-items" onclick="toggleSelectAllPriceListItems(this)" />',
-                    render: function(data, type, row) {
-                        return `<input type="checkbox" ${row.price_only ? 'checked' : ''}>`;
-                    },
-                    width: "30px"
-                },
-                { data: 'id', title: 'ID', width: "80px" },
-                { data: 'name', title: 'Name', width: "250px" },
-                { data: 'method', title: 'Method', width: "100px" },
-                { data: 'unit', title: 'Unit', width: "80px" },
-                {
-                    data: 'price',
-                    title: 'Price',
-                    render: function(data) {
-                        return `<input type="number" class="price-input" value="${parseFloat(data).toFixed(2)}" step="0.01" style="width: 80px;">`;
-                    },
-                    width: "100px"
-                },
-                {
-                    data: 'price_only',
-                    title: 'Price Only',
-                    render: function(data) {
-                        return `<input type="checkbox" class="price-only-checkbox" ${data ? 'checked' : ''}>`;
-                    },
-                    width: "80px"
-                },
-                {
-                    data: 'quantity',
-                    title: 'Quantity',
-                    render: function(data) {
-                        return `<input type="number" class="quantity-input" value="${data}" min="0" step="1" style="width: 60px;">`;
-                    },
-                    width: "80px"
-                },
-                {
-                    data: 'active',
-                    title: 'Active',
-                    render: function(data) {
-                        return `<input type="checkbox" class="active-checkbox" ${data ? 'checked' : ''}>`;
-                    },
-                    width: "60px"
-                }
-            ],
-            scrollX: true,
-            scrollY: "400px",
-            autoWidth: false,
-            paging: true,
-            searching: true,
-            ordering: true,
-            info: true,
-            dom: '<"top"lf>rt<"bottom"ip>',
-            responsive: false,
-            pagingType: "full_numbers",
-            scrollCollapse: true,
-            fixedColumns: { leftColumns: 1 },
-            initComplete: function() {
-                attachPriceListEditableEvents();
-            },
-            drawCallback: function() {
-                // Apply selected-row classes based on price_only
-                priceListDataTable.rows().every(function() {
-                    const data = this.data();
-                    const node = this.node();
-                    const mainCheckbox = $(node).find('input[type="checkbox"]:first')[0];
-                    if (data.price_only) {
-                        $(node).addClass('selected-row-price-only selected-row');
-                        if (mainCheckbox) mainCheckbox.checked = true;
-                    } else {
-                        $(node).removeClass('selected-row-price-only');
-                        if (mainCheckbox && !mainCheckbox.checked) $(node).removeClass('selected-row');
-                    }
-                });
-            }
-        });
-    } else if (DOM.priceListTable && $.fn.DataTable.isDataTable(DOM.priceListTable)) {
-        priceListDataTable.ajax.reload(null, false); // Reload data without resetting pagination
+        if(DOM.priceListResetButtonContainer) DOM.priceListResetButtonContainer.style.display = 'none';
+        if(DOM.priceListSearchInput) DOM.priceListSearchInput.value = '';
     }
 }
 
-function attachPriceListEditableEvents() {
-    $('#priceListTable tbody').on('change', '.price-input', function() {
-        const row = priceListDataTable.row($(this).closest('tr'));
-        const data = row.data();
-        data.price = parseFloat($(this).val());
-        row.data(data).draw(false);
-    });
-    $('#priceListTable tbody').on('change', '.quantity-input', function() {
-        const row = priceListDataTable.row($(this).closest('tr'));
-        const data = row.data();
-        data.quantity = parseInt($(this).val());
-        row.data(data).draw(false);
-    });
-    $('#priceListTable tbody').on('change', '.price-only-checkbox', function() {
-        const row = priceListDataTable.row($(this).closest('tr'));
-        const data = row.data();
-        data.price_only = this.checked;
-        row.data(data).draw(false);
-    });
-    $('#priceListTable tbody').on('change', '.active-checkbox', function() {
-        const row = priceListDataTable.row($(this).closest('tr'));
-        const data = row.data();
-        data.active = this.checked;
-        row.data(data).draw(false);
-    });
-}
-function openAddPriceModal() {
-    document.getElementById("addPriceModal").style.display = "block";
-}
 
-function closeAddPriceModal() {
-    document.getElementById("addPriceModal").style.display = "none";
-}
-
- // JavaScript: حفظ سعر جديد
-function savePriceItem() {
+// ----------------- Save Price Item via AJAX -----------------
+function savePriceItem(){
     const payload = {
+        service_id: $('#priceServiceId').val().trim(),
         name: $('#priceName').val().trim(),
         method: $('#priceMethod').val(),
         unit: $('#priceUnit').val().trim(),
@@ -2919,7 +2900,6 @@ function savePriceItem() {
         quantity: parseInt($('#priceQuantity').val()) || 1,
         active: $('#priceActive').is(':checked') ? 1 : 0
     };
-
     const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
     $.ajax({
@@ -2929,45 +2909,231 @@ function savePriceItem() {
         data: JSON.stringify(payload),
         contentType: 'application/json',
         dataType: 'json',
-        success: function(response) {
-            if (response.success) {
+        success: function(res){
+            if(res.success){
                 showToast("✅ Price item saved successfully!", "success");
                 closeAddPriceModal();
-
-                // إعادة تحميل جدول الأسعار
-                if (typeof priceListDataTable !== "undefined") {
-                    priceListDataTable.ajax.reload(null, false);
-                }
+                if(priceListDataTable) priceListDataTable.ajax.reload(null,false);
             } else {
-                showToast("❌ Failed to save price item: " + (response.message || ''), "error");
+                showToast("❌ Failed: "+(res.message||''),"error");
             }
         },
-        error: function(xhr, status, error) {
-            console.error("Error saving price item:", xhr.responseText || error);
-            showToast("❌ Error saving price item: " + (xhr.responseJSON?.message || error), "error");
+        error: function(xhr){
+            showToast("❌ Error: "+(xhr.responseJSON?.message || xhr.statusText),"error");
         }
     });
 }
 
-// ربط الزر عند تحميل الصفحة
+function openAddPriceModal() {
+    document.getElementById("addPriceModal").style.display = "block";
+}
+
+function closeAddPriceModal() {
+    document.getElementById("addPriceModal").style.display = "none";
+}
 $(document).ready(function() {
     $('#savePriceBtn').click(savePriceItem);
 });
 
+/**
+ * Resets filters and reloads data for the price list table.
+ */
+function resetPriceListFilters() {
+    if (priceListDataTable) {
+        DOM.priceListSearchInput.value = ''; // Clear search input
+        priceListDataTable.search('').columns().search('').draw(); // Clear all filters and redraw
+        priceListDataTable.clear().rows.add(getPriceListData()).draw(); // Reload original data
+        // Uncheck master checkbox on reset
+        const masterCheckboxElement = $('#priceListTable thead .select-all-price-list-items')[0];
+        if (masterCheckboxElement) {
+            masterCheckboxElement.checked = false;
+        }
+        // Remove selected-row class from all rows on reset
+        priceListDataTable.$('tbody tr').removeClass('selected-row');
+        // Hide the reset button when reloading data
+        if (DOM.priceListResetButtonContainer) {
+            DOM.priceListResetButtonContainer.style.display = 'none';
+        }
+        alert("Price List filters reset and data refreshed.");
+    } else {
+        alert("Price List table not initialized.");
+    }
+}
 
-// Modal open/close handlers
-    function closeAddPriceModal() {
-        document.getElementById("addPriceModal").style.display = "none";
+/**
+ * Toggles the visibility of the "Reset Search" button in the Price List modal.
+ * Shows the button if search input is not empty and no rows are found.
+ */
+function togglePriceListResetButton() {
+    if (priceListDataTable && DOM.priceListSearchInput && DOM.priceListResetButtonContainer) {
+        const searchTerm = DOM.priceListSearchInput.value.trim();
+        const rowCount = priceListDataTable.rows({ search: 'applied' }).count();
+
+        if (searchTerm !== '' && rowCount === 0) {
+            DOM.priceListResetButtonContainer.style.display = 'block';
+        } else {
+            DOM.priceListResetButtonContainer.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * Toggles the selection of all checkboxes in the Price List table based on 'priceOnly' property.
+ * It also applies a visual highlight (grey) to these rows, overriding any blue selection.
+ */
+/**
+ * Toggles the selection of all checkboxes in the Price List table based on 'priceOnly' property.
+ * It also applies a visual highlight (grey) to these rows, overriding any blue selection.
+ */
+function toggleSelectPriceListOnly() {
+    // تأكد من تهيئة priceListDataTable
+    if (!priceListDataTable) {
+        console.warn("Price List DataTable is not initialized.");
+        return;
     }
 
-    function openAddPriceModal() {
-        document.getElementById("addPriceModal").style.display = "block";
+    let allPriceOnlySelected = true; // نفترض أن الكل محدد في البداية
+    let rowsToToggle = [];
+
+    // نمر على جميع الصفوف (بما في ذلك الصفوف المخفية بالتصفية أو الترقيم)
+    priceListDataTable.rows({ search: 'none', order: 'none', page: 'all' }).every(function() {
+        const rowData = this.data();
+        const rowNode = this.node();
+        const rowCheckbox = $(rowNode).find('input[type="checkbox"]:first');
+
+        if (rowData.priceOnly) {
+            // قم بتخزين الصفوف التي تحتوي على priceOnly
+            rowsToToggle.push({ rowNode: rowNode, rowCheckbox: rowCheckbox[0] });
+            // تحقق مما إذا كانت جميع الصفوف priceOnly محددة حاليًا
+            if (!rowCheckbox[0].checked) {
+                allPriceOnlySelected = false;
+            }
+        }
+    });
+
+    // إذا كانت جميع الصفوف التي تحتوي على priceOnly محددة بالفعل، فقم بإلغاء تحديدها كلها.
+    // وإلا، قم بتحديد كل الصفوف التي تحتوي على priceOnly.
+    const newState = !allPriceOnlySelected;
+
+    rowsToToggle.forEach(item => {
+        item.rowCheckbox.checked = newState;
+
+        // **** هنا هو الجزء الحاسم لضمان اختفاء الأزرق وظهور الرمادي ****
+        if (newState) {
+            // إذا كنا نقوم بتحديد "Price Only" (newState = true)
+            $(item.rowNode).removeClass('selected-row');      // أولاً: أزل فئة اللون الأزرق تمامًا
+            $(item.rowNode).addClass('selected-row-price-only'); // ثم: طبق فئة اللون الرمادي
+        } else {
+            // إذا كنا نقوم بإلغاء تحديد "Price Only" (newState = false)
+            $(item.rowNode).removeClass('selected-row-price-only'); // أزل فئة اللون الرمادي
+            // لا نُعيد الفئة الزرقاء هنا، لأنها تحديد عام ويتم التحكم بها بواسطة الـ checkbox الرئيسي
+            // أو الـ drawCallback عند إعادة رسم الجدول.
+        }
+    });
+
+    // هذا السطر يضمن أن الـ checkbox الرئيسي (الخاص بتحديد الكل) لا يتأثر.
+    // DOM.selectAllPriceListItemsCheckbox.checked = false; // لا تفعل هذا! (يبقى معلقاً أو محذوفاً)
+
+    console.log(`Rows with Price Only toggled to: ${newState}`);
+}
+
+/**
+ * Sets the "Price Only" checkbox for all selected items in the Price List.
+ */
+function setPriceOnlyForSelected() {
+    if (priceListDataTable) {
+        priceListDataTable.rows().every(function() {
+            const rowNode = this.node();
+            const checkbox = $(rowNode).find('input[type="checkbox"]:first')[0]; // Main row checkbox
+            if (checkbox && checkbox.checked) {
+                const priceOnlyCheckbox = $(rowNode).find('.price-only-checkbox')[0];
+                if (priceOnlyCheckbox) {
+                    priceOnlyCheckbox.checked = true;
+                    // Update the DataTables data model
+                    const data = this.data();
+                    data.priceOnly = true;
+                    this.data(data).draw(false); // Update row data without redrawing the whole table
+                }
+            }
+        });
+        alert("Set 'Price Only' for selected items.");
+    } else {
+        alert("Price List table not initialized.");
+    }
+}
+
+
+/**
+ * Adds selected items from the Price List modal to the main Quotation Lines table.
+ * @param {boolean} withGroups - True if items should be inserted with groups (dummy functionality for now).
+ */
+// دالة لإضافة العناصر المحددة من جدول قائمة الأسعار إلى جدول سطور عرض الأسعار
+function addSelectedItemsToQuoteLines(withGroups = false) {
+    if (!currentQuotationId) {
+        return showToast("الرجاء اختيار عرض سعر أولاً!", "warning");
+    }
+    if (!priceListDataTable) {
+        return showToast("جدول قائمة الأسعار غير جاهز.", "error");
     }
 
+    const selectedItems = [];
+    priceListDataTable.rows().every(function() {
+        const rowNode = this.node();
+        const checkbox = $(rowNode).find('input[type="checkbox"]:first')[0];
+        if (checkbox && checkbox.checked) {
+            const data = this.data();
+            data.price = parseFloat($(rowNode).find('.price-input').val() || data.price || 0);
+            data.quantity = parseInt($(rowNode).find('.quantity-input').val() || data.quantity || 1);
+            data.priceOnly = $(rowNode).find('.price-only-checkbox').prop('checked');
+            data.active = $(rowNode).find('.active-checkbox').prop('checked');
+            selectedItems.push(data);
+        }
+    });
 
-$(document).ready(function() {
-    $('#savePriceBtn').click(savePriceItem);
-});
+    if (selectedItems.length === 0) {
+        return showToast("الرجاء تحديد عنصر واحد على الأقل من قائمة الأسعار.", "info");
+    }
+
+    const payload = selectedItems.map(item => ({
+        quotation_id: currentQuotationId,
+        price_list_id: item.id,
+        description: item.name,
+        category: item.unit,
+        type: item.priceOnly ? "سعر فقط" : "عادي",
+        method: item.method,
+        quantity: item.quantity,
+        price: item.price,
+        total: item.price * item.quantity
+    }));
+
+    $.ajax({
+        url: '/quotation-lines',
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        data: JSON.stringify({ lines: payload }),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showToast(response.message, "success");
+                closePriceListModal();
+
+                if (quotationLinesDataTable) {
+                    // إعادة تحميل بيانات الجدول من السيرفر بعد الحفظ
+                    quotationLinesDataTable.ajax.reload(null, false);
+                }
+            } else {
+                showToast("❌ فشل الحفظ: " + (response.message || ''), "error");
+            }
+        },
+        error: function(xhr) {
+            console.error("خطأ عند حفظ العناصر:", xhr.responseText || xhr.statusText);
+            showToast("❌ حدث خطأ عند حفظ العناصر.", "error");
+        }
+    });
+}
+
+
 
 // =====================================================================
 // Document Ready and Initialization

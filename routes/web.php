@@ -125,3 +125,8 @@ Route::get('/quotations/lines/data',   [QuotationLineController::class, 'getLine
 Route::post('/quotations/lines/store', [QuotationLineController::class, 'storeLine'])->name('quotations.lines.store');
 Route::get('/price-lists', [PriceListController::class, 'index']); // لجلب البيانات في DataTable
 Route::post('/price-lists', [PriceListController::class, 'store']); // لحفظ السعر الجديد
+Route::post('/price-lists/selected', [PriceListController::class, 'getSelected']);
+Route::post('/quotation-lines/bulk-add', [QuotationLineController::class, 'bulkAdd']);
+Route::get('/quotation-lines/{quotationId}', [QuotationLineController::class, 'getByQuotation']);
+// routes/web.php أو routes/api.php
+Route::post('/quotations/{quotation}/lines/store', [QuotationLineController::class, 'storeLine']);

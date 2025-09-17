@@ -7,7 +7,7 @@
     <title>@yield('title', 'LIMS Control Panel')</title>
 
     {{-- أيقونة الموقع --}}
-    <link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('FullLogo.png') }}" >
 
     {{-- مكتبات خارجية عبر HTTPS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -15,13 +15,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     {{-- ملفات المشروع --}}
-<link rel="stylesheet" href="/css/main.css">
-<link rel="stylesheet" href="/css/index.css">
-<link rel="stylesheet" href="/css/darkmode.css">
-<link rel="stylesheet" href="/css/customers.css">
-<link rel="stylesheet" href="/css/projects.css">
-<link rel="stylesheet" href="/css/project-files.css">
-<link rel="stylesheet" href="/css/customer-files.css">
+    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/index.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/darkmode.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customers.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/projects.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/project-files.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-files.css') }}">
 
 
 </head>
@@ -47,8 +47,10 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
 
    {{-- ملفات JS للمشروع --}}
-   <script src="/js/customer_types.js"></script>
-   <script src="/js/main.js"></script>
+
+     <script src="{{ asset('js/customer_types.js') }}"></script>
+     <script src="{{ asset('js/main.js') }}"></script>
+
 
 
 </body>

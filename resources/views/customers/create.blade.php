@@ -7,12 +7,8 @@
 
         <!-- Tabs -->
         <div class="tab-buttons">
-            <button id="customer-btn" onclick="switchTab('customer')" class="active">
-                <i class="fas fa-user"></i> Customer
-            </button>
-            <button id="contact-btn" onclick="switchTab('contact')">
-                <i class="fas fa-address-book"></i> Contacts
-            </button>
+            <button id="customer-btn" onclick="switchTab('customer')" class="active"><i class="fas fa-user"></i> Customer</button>
+            <button id="contact-btn" onclick="switchTab('contact')"><i class="fas fa-address-book"></i> Contacts</button>
         </div>
 
         <!-- Form Start -->
@@ -25,7 +21,7 @@
                 <!-- Customer Info -->
                 <fieldset class="form-section-fieldset">
                     <legend>Customer Information</legend>
-                                <input type="hidden" id="customerId">
+                        <input type="hidden" id="customerId">
 
                     <div class="form-row">
                         <div class="form-group">
@@ -244,7 +240,7 @@
                         <table id="contactsTable" class="contacts-table display responsive nowrap" data-ignore-lang>
                             <thead>
                                 <tr data-contact-id="">
-                                    <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this)"></th>
+                                    <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this, 'contactsTable')"></th>
                                     <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
@@ -305,7 +301,7 @@
                         <button type="button" class="btn btn-primary" onclick="saveContactForCustomer('add')">
                             💾 Save / Update
                         </button>
-                        <button type="button" class="btn-secondary" onclick="clearContactForm()">
+                        <button type="button" class="btn-secondary" onclick="clearContactForm('add')">
                             <i class="fas fa-eraser"></i> Clear Form
                         </button>
                     </div>
@@ -566,41 +562,42 @@
           <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
            <button type="button" class="btn-secondary" onclick="populateContactFormForEdit('edit')">
     <i class="fas fa-pen"></i> Edit Selected
-</button>
+  </button>
 
-<button type="button" class="btn-danger" onclick="deleteSelectedContacts('#contactsTableEdit')">
-    <i class="fas fa-trash"></i> Delete Selected
-</button>
+  <button type="button" class="btn-danger" onclick="deleteSelectedContacts('#contactsTableEdit')">
+      <i class="fas fa-trash"></i> Delete Selected
+  </button>
 
-<button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelBtn()">
-  <i class="fa-solid fa-table"></i>
-</button>
+  <button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelEditBtn()">
+    <i class="fa-solid fa-table"></i>
+  </button>
 
 
-<button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTableEdit()">
-    <i class="fas fa-print"></i>
-</button>
+  <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTableEdit()">
+      <i class="fas fa-print"></i>
+  </button>
           </div>
           <div class="table-responsive-container">
-     <table id="contactsTableEdit" class="contacts-table display responsive nowrap">
-              <thead>
-                <tr data-contact-id="">
-                  <th>
-                    <input type="checkbox" class="contact-select-all">
-                  </th>
-                  <th class="d-none">Contact ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Mobile</th>
-                  <th>Position</th>
-                  <th>Is Primary</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Rows added dynamically via JS -->
-              </tbody>
-            </table>
+                <table id="contactsTableEdit" class="contacts-table display responsive nowrap" data-ignore-lang>
+                            <thead>
+                                <tr data-contact-id="">
+                                    <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this, 'contactsTable')"></th>
+                                    <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Mobile<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Position<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Is Primary<br>
+                                        <select class="column-filter">
+                                            <option value="">All</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                  </table>
           </div>
         </fieldset>
 
@@ -646,9 +643,9 @@
             <button type="button" class="btn btn-primary" onclick="saveContactForCustomer('edit')">
               💾 Save / Update
           </button>
-            <button type="button" class="btn-secondary" onclick="clearContactFormEdit()">
-              <i class="fas fa-eraser"></i> Clear Form
-            </button>
+          <button type="button" class="btn-secondary" onclick="clearContactForm('edit')">
+            <i class="fas fa-eraser"></i> Clear Form
+          </button>
           </div>
         </fieldset>
       </div>
@@ -656,13 +653,10 @@
 
       <!-- 🔹 Modal Footer -->
       <div class="form-buttons modal-bottom-buttons">
-            <button type="button" class="btn-primary" onclick="closeEditCustomerModal()"><i class="fas fa-times"></i> Close</button>
-           <button type="button" class="btn-success" onclick="updateCustomer(event, true)">
-            <i class="fas fa-save"></i> Update & Close
-          </button>
-
-            <button type="submit" class="btn-success" data-close="false"><i class="fas fa-save"></i> Update</button>
-          </div>
+        <button type="button" class="btn-primary" onclick="closeEditCustomerModal()"><i class="fas fa-times"></i> Close</button>
+        <button type="submit" class="btn-success" onclick="updateCustomer(event, true)"><i class="fas fa-save"></i> Update & Close</button>
+        <button type="button" class="btn-success" onclick="updateCustomer(event, false)"><i class="fas fa-save"></i> Update</button>
+    </div>
 
     </form>
   </div>

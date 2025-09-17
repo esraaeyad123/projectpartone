@@ -4,27 +4,68 @@ namespace App\Http\Controllers\Quotation;
 use App\Models\PriceList;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PriceListController extends Controller
 {
-     public function index()
-    {
-        $prices = PriceList::all();
-        return response()->json($prices);
-    }
-    public function store(Request $request)
+
+
+
+  public function index(Request $request)
 {
-     $price= $request->validate([
-    'name' => 'required|string|max:255',
-    'method' => 'required|string',
-    'unit' => 'nullable|string',
-    'price' => 'required|numeric',
-    'price_only' => 'boolean',
-    'active' => 'boolean',
-              ]);
-    PriceList::create($request->all());
+    // جلب كل العناصر من جدول PriceList
+    $priceLists = PriceList::all();
 
-
-    return response()->json($price, 201); // ترجع JSON
+    // إعادة JSON مناسب للـ DataTables
+    return response()->json([
+        'data' => $priceLists
+    ]);
 }
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string',
+        'method' => 'nullable|string',
+        'unit' => 'nullable|string',
+        'price' => 'required|numeric',
+        'price_only' => 'boolean',
+        'active' => 'boolean',
+    ]);
+
+    // لو ما وصل service_id من الفورم → نولده أوتوماتيكياً
+    $serviceId = $request->service_id ?: 'SRV-' . strtoupper(Str::random(6));
+
+    // تأكد إنه مش موجود
+    if (PriceList::where('service_id', $serviceId)->exists()) {
+        return response()->json([
+            'success' => false,
+            'message' => "Service ID already exists: $serviceId"
+        ], 400);
+    }
+
+    $priceItem = PriceList::create([
+        'service_id' => $serviceId,
+        'name' => $validated['name'],
+        'method' => $validated['method'] ?? null,
+        'unit' => $validated['unit'] ?? null,
+        'price' => $validated['price'],
+        'price_only' => $validated['price_only'] ?? false,
+        'active' => $validated['active'] ?? true,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Price item saved successfully!',
+        'data' => $priceItem
+    ]);
+}
+
+public function getSelected(Request $request)
+{
+    $ids = $request->ids ?? [];
+    $items = PriceList::whereIn('id', $ids)->get();
+    return response()->json(['data' => $items]);
+}
+
+
 }
