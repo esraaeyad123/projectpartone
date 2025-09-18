@@ -13,20 +13,20 @@
                 <button title="Edit" onclick="openEditCustomerModal()"  class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedCustomers()" class="btn-icon"><i class="fas fa-trash"></i></button>
             </div>
-
+        
         <div class="icon-separator"></div>
             <div>
                 <button title="File Manager" class="btn-icon" data-url="{{ route('customer-files.index', ['customerId' => ':id']) }}" onclick="goToCustomerFiles(this)"><i class="fas fa-folder-open"></i></button>
                 <button title="Export to Excel" class="btn-icon" id="exportCustomersExcelBtn" onclick="exportCustomersExcelBtn()"><i class="fa-solid fa-table"></i></button>
                 <button title="Print" class="btn-icon" onclick="printCustomersTable()"><i class="fas fa-print"></i></button>
             </div>
-
+        
         </div>
         <!-------------------------------------------End Buttons----------------------------------------------->
-        <!-------------------------------------------Start Table----------------------------------------------->
+        <!-------------------------------------------StartcustomerTable----------------------------------------------->
         <div class="table-responsive-container">
-            <table id="customersTable" class="table table-bordered table-striped display responsive nowrap" style="width:100%">
-                <thead> selectCustomer
+            <table id="customersTable" class="tablecustomerTable-borderedcustomerTable-striped display responsive nowrap" style="width:100%">
+                <thead> selectCustomer 
                     <tr>
                         <th><input type="checkbox" id="selectAllCustomers"></th>
                         <th>Customer ID<br><input type="text" class="column-filter" placeholder="Search..."></th>
@@ -126,12 +126,12 @@
                 </tbody>
             </table>
         </div>
-        <!-------------------------------------------End Table------------------------------------------------->
+        <!-------------------------------------------EndcustomerTable------------------------------------------------->
     </section>
 </main>
 
 <!-- ================================== JS Libraries ================================== -->
- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -147,68 +147,20 @@
     // تهيئة AJAX لإرسال رمز CSRF مع كل طلب
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }});
 
-
-    //======================================================================
-    // هنا يتم تعريف الفلاتر المخصصة قبل تهيئة الجدول
-    //======================================================================
-    $.fn.dataTable.ext.search.push(
-        function(settings, data, dataIndex) {
-            // تحقق من أن هذه الفلترة تنطبق على جدول 'customersTable' فقط.
-            if (settings.nTable.id !== 'customersTable') {
-                return true;
-            }
-
-            // الحصول على قيم التاريخ من حقول البحث.
-            const fromDateStr = $('#customersTable thead input[data-filter-type="date-from"]').val();
-            const toDateStr = $('#customersTable thead input[data-filter-type="date-to"]').val();
-            const rowDateStr = data[6]; // عمود 'Date Registered'
-
-            // إذا كانت حقول الفلترة فارغة، لا تقم بالفلترة.
-            if (!fromDateStr && !toDateStr) {
-                return true;
-            }
-
-            // تحويل التواريخ إلى كائنات Date للقيام بالمقارنة.
-            const fromDate = fromDateStr ? new Date(fromDateStr) : null;
-            const toDate = toDateStr ? new Date(toDateStr) : null;
-            const rowDate = rowDateStr ? new Date(rowDateStr) : null;
-
-            // إذا كان تاريخ الصف غير صالح، لا تقم بعرضه.
-            if (!rowDate || isNaN(rowDate.getTime())) {
-                return false;
-            }
-
-            // تطبيق الفلترة بناءً على التاريخ المدخل.
-            if (fromDate && !toDate) {
-                return rowDate >= fromDate;
-            }
-            if (!fromDate && toDate) {
-                return rowDate <= toDate;
-            }
-            if (fromDate && toDate) {
-                return rowDate >= fromDate && rowDate <= toDate;
-            }
-
-            // في حال وجود خطأ غير متوقع، لا تقم بعرض الصف.
-            return false;
-        }
-    );
-    //======================================================================
-    //======================================================================
-    //======================================================================
-    // هذا هو الكود المسؤول عن تهيئة DataTables عند تحميل الصفحة
-    //======================================================================
-
     // تهيئة جدول DataTables والبحث بالاعمدة
     $(document).ready(function() {
 
-        // تهيئة Flatpickr على حقول التاريخ
+        // index العمود اللي فيه التاريخ (يبدأ من 0)
+        var dateColumnIndex = 6; // عندك العمود السابع "date_registered"
+
+        // تهيئة Flatpickr على الحقول
         flatpickr(".flatpickr-input", {
             dateFormat: "Y-m-d",
-            locale: "en"         // يفرض استخدام اللغة الإنجليزية
+            locale: "en",
+            allowInput: true
         });
-
-        var table = $('#customersTable').DataTable({
+        // ---------------------------------------------------------------------------------------
+        window.customerTable = $('#customersTable').DataTable({
             responsive: true,
             processing: true,
             scrollX: true,
@@ -233,31 +185,59 @@
                 { data: 'registration_no' }
             ]
         });
+        // ---------------------------------------------------------------------------------------
+        function parseDateToNumber(str) {
+            if (!str) return null;
+            str = String(str).trim().split(' ')[0]; // نشيل الوقت لو موجود
+            var parts = str.split('-'); // flatpickr يخرج Y-m-d
+            if (parts.length !== 3) return null;
 
-        // ربط حدث تغيير حقول التاريخ لإعادة رسم الجدول وتفعيل الفلتر المخصص
-        $('#customersTable thead input[data-filter-type="date-from"], #customersTable thead input[data-filter-type="date-to"]').on('change', function() {
-            table.draw();
-        });
-
+            var y = parts[0], m = parts[1], d = parts[2];
+            return parseInt(y + m.padStart(2, '0') + d.padStart(2, '0'), 10);
+        }
         // ---------------------------------------------------------------------------------------
         // الكود الجديد لتفعيل البحث في الأعمدة
+         // فلتر مخصص للتواريخ
+        $.fn.dataTable.ext.search.push(function(settings, data) {
+            if (settings.nTable.id !== 'customersTable') return true;
+
+            var minVal = $('input[data-filter-type="date-from"]').val();
+            var maxVal = $('input[data-filter-type="date-to"]').val();
+
+            var minNum = minVal ? parseDateToNumber(minVal) : null;
+            var maxNum = maxVal ? parseDateToNumber(maxVal) : null;
+            var rowNum = parseDateToNumber(data[dateColumnIndex]);
+
+            if (rowNum === null) return (minNum === null && maxNum === null);
+
+            if (minNum === null && maxNum === null) return true;
+            if (minNum === null && rowNum <= maxNum) return true;
+            if (maxNum === null && rowNum >= minNum) return true;
+            if (rowNum >= minNum && rowNum <= maxNum) return true;
+
+            return false;
+        });
+
+        $('input[data-filter-type="date-from"], input[data-filter-type="date-to"]').on('change keyup', function() {
+       customerTable.draw();
+        });
 
         // استنساخ صف الرؤوس لإنشاء صف البحث
         $('#customersTable thead tr').clone(true).appendTo('#customersTable thead');
-
+        
         // منع البحث في عمود صندوق الاختيار
         $('#customersTable thead tr:eq(1) th:eq(0)').empty();
-
+        
         // تطبيق الفلترة على كل حقل بحث
-        table.columns().every(function() {
+       customerTable.columns().every(function() {
             var that = this;
-            var column = table.column(this.index());
+            var column =customerTable.column(this.index());
 
             // ⛔️ تجاوز العمود الأول (الذي يحتوي على مربع الاختيار)
             if (this.index() === 0) {
-                return;
+                return; 
             }
-
+            
             // ⛔️ تجاوز عمود التاريخ
             if ($(this.header()).find('input[data-filter-type="date-from"]').length > 0) {
                 return;
@@ -293,17 +273,11 @@
             });
         });
 
-
-        // ربط الحدث بحقول التاريخ لإعادة رسم الجدول عند التغيير
-        $('#customersTable thead input[data-filter-type="date-from"], #customersTable thead input[data-filter-type="date-to"]').on('change', function() {
-            table.draw();
-        });
-    // ---------------------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------------------
+    });
+    // --------------------------------------------------------------------------------------- 
     // --------------------Select All & Update 'select all' button----------------------------
     $('#selectAllCustomers').on('change', function() {
-        let rows = table.rows({ 'search': 'applied' }).nodes(); // الصفوف الحالية بعد الفلترة
+        let rows =customerTable.rows({ 'search': 'applied' }).nodes(); // الصفوف الحالية بعد الفلترة
         $('input.customerCheckbox', rows).prop('checked', this.checked);
     });
     $('#customersTable tbody').on('change', 'input.customerCheckbox', function() {
@@ -376,7 +350,7 @@
                             icon: "success",
                             confirmButtonText: "حسناً"
                         }).then(() => {
-                            table.ajax.reload(null, false);
+                           customerTable.ajax.reload(null, false);
                         });
                     } else {
                         Swal.fire({
@@ -405,8 +379,8 @@
         $('#contactModal').show();
     }
     // ---------------------------------------------------------------------------------------
-    window.closeContactModal = function() {
-        $('#contactModal').hide();
+    window.closeContactModal = function() { 
+        $('#contactModal').hide(); 
     }
     // ---------------------------------------------------------------------------------------
     window.switchTab = function(tabName) {
@@ -479,10 +453,29 @@
                 console.log("🚀 Full Response:", response);
                 console.log("📌 JSON Stringified:", JSON.stringify(response, null, 2));
 
-                let cid = response.customer?.id || response.customer?.customer_id;
-                $('#customer_Id').val(response.customer.id);      // الحقل المخفي
-                    $('#customerId').val(response.customer.id);      // حقل العرض
-                console.log("🔑 Customer ID:", cid);
+                // ✅ التعديل الأول: التحقق من وجود بيانات العميل قبل استخدامها
+                if (response.customer) {
+                    let cid = response.customer.id || response.customer.customer_id;
+                    $('#customer_Id').val(response.customer.id);
+                    $('#customerId').val(response.customer.id);
+                    console.log("🔑 Customer ID:", cid);
+
+                    // ✅ التعديل الثاني: التحقق من أن customerTable مُعرّف
+                    if (typeof window.customerTable !== 'undefined') {
+                        let rowIndex = window.customerTable.rows().indexes().filter(idx => {
+                            let rowData = window.customerTable.row(idx).data();
+                            return rowData.id == cid || rowData.customer_id == cid;
+                        });
+
+                        if (rowIndex.length) {
+                            window.customerTable.row(rowIndex[0]).data(response.customer).draw(false);
+                        } else {
+                            window.customerTable.row.add(response.customer).draw(false);
+                        }
+                    }
+                } else {
+                    console.error("⛔️ الاستجابة من الخادم لا تحتوي على بيانات العميل.");
+                }
 
                 Swal.fire({
                     title: "نجاح",
@@ -490,29 +483,14 @@
                     icon: "success",
                     confirmButtonText: "حسناً"
                 }).then(() => {
-                    // 🚨 هذا هو الجزء الذي تم تعديله ليصبح أكثر ذكاءً 🚨
-                    // يقوم بالإغلاق فقط إذا كان زر "Save & Close" هو الذي تم الضغط عليه
                     if (closeAfterSave) {
-                        closeEditCustomerModal(); // للتحقق من أنك في وضع التعديل
-                        closeCustomerModal(); // للتحقق من أنك في وضع الإضافة
+                        closeEditCustomerModal();
+                        closeCustomerModal();
                     }
-        if (typeof table !== 'undefined') {
-                table.ajax.reload(null, false); // false = يبقى في نفس الصفحة
-            }
-                    if (typeof table !== 'undefined') {
-                        let rowIndex = table.rows().indexes().filter(idx => {
-                            let rowData = table.row(idx).data();
-                            return rowData.id == cid || rowData.customer_id == cid;
-                        });
-
-                        if (rowIndex.length) {
-                            table.row(rowIndex[0]).data(response.customer).draw(false);
-                        } else {
-                            table.row.add(response.customer).draw(false);
-                        }
+                    // ✅ إعادة تحميل الجدول بعد نجاح العملية فقط إذا كان موجودًا
+                    if (typeof window.customerTable !== 'undefined') {
+                        window.customerTable.ajax.reload(null, false);
                     }
-
-
                 });
             },
             error: function(xhr) {
@@ -552,11 +530,11 @@
                         closeEditCustomerModal();
                     }
                     // تحديث الصف في الجدول
-                    let rowIndex = table.rows().indexes().filter(idx => table.row(idx).data().id == response.customer.id);
+                    let rowIndex =customerTable.rows().indexes().filter(idx =>customerTable.row(idx).data().id == response.customer.id);
                     if(rowIndex.length){
-                        table.row(rowIndex[0]).data(response.customer).draw(false);
+                       customerTable.row(rowIndex[0]).data(response.customer).draw(false);
                     } else {
-                        table.row.add(response.customer).draw(false);
+                       customerTable.row.add(response.customer).draw(false);
                     }
                 });
             },
@@ -706,12 +684,8 @@
 
         // توجه للصفحة مباشرة
         window.location.href = url;
-        }
-
-        window.goToCustomerFiles = goToCustomerFiles;
-
-
-    });
+        //}
+    };
     // ---------------------------------------------------------------------------------------
     // لجدول جهات اتصال خاص بالعميل
     $(document).ready(function() {
@@ -794,7 +768,7 @@
 
         // دالة لملء فورم جهة الاتصال لغرض التعديل
         window.populateContactFormForEdit = function(modalType = 'add') {
-            let table = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
+            letcustomerTable = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
             let $tableSelector = (modalType === 'edit') ? '#contactsTableEdit' : '#contactsTable';
             let selectedCheckbox = $(`${$tableSelector} tbody input[type="checkbox"]:checked`);
 
@@ -803,7 +777,7 @@
                 return;
             }
 
-            let rowData = table.row(selectedCheckbox.closest('tr')).data();
+            let rowData =customerTable.row(selectedCheckbox.closest('tr')).data();
 
             if (!rowData) {
                 Swal.fire("خطأ", "❌ لم يتم العثور على بيانات جهة الاتصال", "error");
@@ -881,13 +855,13 @@
                     res.contact.is_primary = (res.contact.is_primary == 1 || res.contact.is_primary === true || res.contact.is_primary === '1') ? 1 : 0;
                     Swal.fire(contactId ? "نجاح" : "نجاح", contactId ? "✔️ تم تحديث جهة الاتصال" : "✔️ تم إضافة جهة اتصال جديدة", "success");
 
-                    let table = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
+                    letcustomerTable = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
 
                     if (contactId) {
-                        let rowIndex = table.rows().eq(0).filter(idx => table.row(idx).data().id == contactId);
-                        if (rowIndex.length) table.row(rowIndex[0]).data(res.contact).draw(false);
+                        let rowIndex =customerTable.rows().eq(0).filter(idx =>customerTable.row(idx).data().id == contactId);
+                        if (rowIndex.length)customerTable.row(rowIndex[0]).data(res.contact).draw(false);
                     } else {
-                        table.row.add(res.contact).draw(false);
+                       customerTable.row.add(res.contact).draw(false);
                     }
 
                     // مسح الحقول بعد الحفظ
@@ -941,9 +915,9 @@
                     success: function(res) {
                         if (res.success) {
                             Swal.fire("تم", res.message, "success");
-                            let table = window[tableSelector.replace('#', '')];
+                            letcustomerTable = window[tableSelector.replace('#', '')];
                             if (table) {
-                                table.rows(function(idx, data, node) {
+                               customerTable.rows(function(idx, data, node) {
                                     return ids.includes($(node).attr('data-contact-id'));
                                 }).remove().draw();
                             }
@@ -968,24 +942,24 @@
         });
     });
     // ----------------------------------------------------------------------
-    window.toggleAllContacts = function(source, tableId) {
-        const table = $(`#${tableId}`).DataTable();
-        const rows = table.rows({ 'search': 'applied' }).nodes();
+    window.toggleAllContacts = function(source,customerTableId) {
+        constcustomerTable = $(`#${tableId}`).DataTable();
+        const rows =customerTable.rows({ 'search': 'applied' }).nodes();
         $('input.contact-select', rows).prop('checked', source.checked);
     };
     //  دوال التصدير للاكسل
     // ----------------------------------------------------------------------
     window.exportCustomersExcelBtn = function() {
-        const tableElement = document.getElementById('customersTable');
-        const table = $(tableElement).DataTable();
+        constcustomerTableElement = document.getElementById('customersTable');
+        constcustomerTable = $(tableElement).DataTable();
 
-        const selectedCheckboxes = table.$('input[type="checkbox"]:checked');
+        const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
         let rowsToProcess;
 
         if (selectedCheckboxes.length > 0) {
             rowsToProcess = selectedCheckboxes.parents('tr');
         } else {
-            rowsToProcess = table.rows({ 'search': 'applied' }).nodes();
+            rowsToProcess =customerTable.rows({ 'search': 'applied' }).nodes();
         }
 
         // 1. بناء البيانات لـ SheetJS
@@ -1020,15 +994,15 @@
     };
     // ----------------------------------------------------------------------
     window.exportContactsExcelBtn = function() {
-        const tableElement = document.getElementById('contactsTable');
+        constcustomerTableElement = document.getElementById('contactsTable');
         if (!tableElement) {
             console.error('Table with ID "contactsTable" not found.');
             return;
         }
-        const table = $(tableElement).DataTable();
+        constcustomerTable = $(tableElement).DataTable();
 
         // 1. العثور على الصفوف التي سيتم تصديرها
-        const selectedCheckboxes = table.$('input[type="checkbox"]:checked');
+        const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
         let rowsToProcess;
 
         if (selectedCheckboxes.length > 0) {
@@ -1036,9 +1010,9 @@
             rowsToProcess = selectedCheckboxes.parents('tr');
         } else {
             // إذا لم يتم تحديد أي شيء، قم بمعالجة جميع الصفوف المرئية
-            rowsToProcess = table.rows({ 'search': 'applied' }).nodes();
+            rowsToProcess =customerTable.rows({ 'search': 'applied' }).nodes();
         }
-
+        
         // 2. بناء البيانات لـ SheetJS
         const data = [];
         const header = [];
@@ -1048,7 +1022,7 @@
             }
         });
         data.push(header);
-
+        
         $(rowsToProcess).each(function() {
             const rowData = [];
             $(this).find('td').each(function() {
@@ -1069,15 +1043,15 @@
     };
     // ----------------------------------------------------------------------
     window.exportContactsExcelEditBtn = function() {
-        const tableElement = document.getElementById('contactsTableEdit');
+        constcustomerTableElement = document.getElementById('contactsTableEdit');
         if (!tableElement) {
             console.error('Table with ID "contactsTableEdit" not found.');
             return;
         }
-        const table = $(tableElement).DataTable();
+        constcustomerTable = $(tableElement).DataTable();
 
         // 1. العثور على الصفوف التي سيتم تصديرها
-        const selectedCheckboxes = table.$('input[type="checkbox"]:checked');
+        const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
         let rowsToProcess;
 
         if (selectedCheckboxes.length > 0) {
@@ -1085,9 +1059,9 @@
             rowsToProcess = selectedCheckboxes.parents('tr');
         } else {
             // إذا لم يتم تحديد أي شيء، قم بمعالجة جميع الصفوف المرئية
-            rowsToProcess = table.rows({ 'search': 'applied' }).nodes();
+            rowsToProcess =customerTable.rows({ 'search': 'applied' }).nodes();
         }
-
+        
         // 2. بناء البيانات لـ SheetJS
         const data = [];
         const header = [];
@@ -1097,7 +1071,7 @@
             }
         });
         data.push(header);
-
+        
         $(rowsToProcess).each(function() {
             const rowData = [];
             $(this).find('td').each(function() {
@@ -1121,11 +1095,11 @@
     // ----------------------------------------------------------------------
     window.printCustomersTable = function() {
         // تحديد الجدول المطلوب (في هذه الحالة جدول العملاء)
-        const tableElement = document.getElementById('customersTable');
-        const table = $(tableElement).DataTable();
+        constcustomerTableElement = document.getElementById('customersTable');
+        constcustomerTable = $(tableElement).DataTable();
 
         // العثور على مربعات التحديد المحددة
-        const selectedCheckboxes = table.$('input[type="checkbox"]:checked');
+        const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
         let rowsToProcess;
 
         if (selectedCheckboxes.length > 0) {
@@ -1133,12 +1107,12 @@
             rowsToProcess = selectedCheckboxes.parents('tr');
         } else {
             // إذا لم يتم تحديد أي شيء، قم بمعالجة جميع الصفوف المرئية
-            rowsToProcess = table.rows({ 'search': 'applied' }).nodes();
+            rowsToProcess =customerTable.rows({ 'search': 'applied' }).nodes();
         }
 
         let printContents = `
             <style>
-                table { width: 100%; border-collapse: collapse; }
+               customerTable { width: 100%; border-collapse: collapse; }
                 th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
                 body { font-family: 'Arial', sans-serif; }
                 h2 { text-align: center; margin-bottom: 20px; }
@@ -1173,27 +1147,27 @@
         });
 
         printContents += `</tbody></table>`;
-
+        
         const printWindow = window.open('', '_blank');
         printWindow.document.write(printContents);
         printWindow.document.close();
         printWindow.focus();
         printWindow.print();
         printWindow.close();
-
+        
         showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
     };
     // ----------------------------------------------------------------------
     window.printContactsTable = function() {
-        const tableElement = document.getElementById('contactsTable');
+        constcustomerTableElement = document.getElementById('contactsTable');
         if (!tableElement) {
             console.error('❌ الجدول بالمعرّف "contactsTable" غير موجود.');
             return;
         }
-        const table = $(tableElement).DataTable();
+        constcustomerTable = $(tableElement).DataTable();
 
         // 1. العثور على الصفوف التي سيتم طباعتها
-        const selectedCheckboxes = table.$('input[type="checkbox"]:checked');
+        const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
         let rowsToProcess;
 
         if (selectedCheckboxes.length > 0) {
@@ -1201,13 +1175,13 @@
             rowsToProcess = selectedCheckboxes.parents('tr');
         } else {
             // إذا لم يتم تحديد أي شيء، قم بمعالجة جميع الصفوف المرئية
-            rowsToProcess = table.rows({ 'search': 'applied' }).nodes();
+            rowsToProcess =customerTable.rows({ 'search': 'applied' }).nodes();
         }
 
         let printContents = `
             <style>
                 body { font-family: Arial, sans-serif; }
-                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+               customerTable { width: 100%; border-collapse: collapse; margin: 20px 0; }
                 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
                 th { background-color: #f2f2f2; }
                 h2 { text-align: center; margin-bottom: 20px; }
@@ -1242,27 +1216,27 @@
         });
 
         printContents += `</tbody></table>`;
-
+        
         const printWindow = window.open('', '_blank');
         printWindow.document.write(printContents);
         printWindow.document.close();
         printWindow.focus();
         printWindow.print();
         printWindow.close();
-
+        
         showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
     };
     // ----------------------------------------------------------------------
     window.printContactsTableEdit = function() {
-        const tableElement = document.getElementById('contactsTableEdit');
+        constcustomerTableElement = document.getElementById('contactsTableEdit');
         if (!tableElement) {
             console.error('❌ الجدول بالمعرّف "contactsTableEdit" غير موجود.');
             return;
         }
-        const table = $(tableElement).DataTable();
+        constcustomerTable = $(tableElement).DataTable();
 
         // 1. العثور على الصفوف التي سيتم طباعتها
-        const selectedCheckboxes = table.$('input[type="checkbox"]:checked');
+        const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
         let rowsToProcess;
 
         if (selectedCheckboxes.length > 0) {
@@ -1270,13 +1244,13 @@
             rowsToProcess = selectedCheckboxes.parents('tr');
         } else {
             // إذا لم يتم تحديد أي شيء، قم بمعالجة جميع الصفوف المرئية
-            rowsToProcess = table.rows({ 'search': 'applied' }).nodes();
+            rowsToProcess =customerTable.rows({ 'search': 'applied' }).nodes();
         }
 
         let printContents = `
             <style>
                 body { font-family: Arial, sans-serif; }
-                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+               customerTable { width: 100%; border-collapse: collapse; margin: 20px 0; }
                 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
                 th { background-color: #f2f2f2; }
                 h2 { text-align: center; margin-bottom: 20px; }
@@ -1311,19 +1285,19 @@
         });
 
         printContents += `</tbody></table>`;
-
+        
         const printWindow = window.open('', '_blank');
         printWindow.document.write(printContents);
         printWindow.document.close();
         printWindow.focus();
         printWindow.print();
         printWindow.close();
-
+        
         showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
     };
     // ---------------------------End Functions------------------------------
-
-
+    //----------------------------------------------------------------------- 
+ 
 </script>
 
 @endsection
