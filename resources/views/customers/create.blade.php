@@ -571,7 +571,7 @@
   <button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelEditBtn()">
     <i class="fa-solid fa-table"></i>
   </button>
-
+            
 
   <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTableEdit()">
       <i class="fas fa-print"></i>
@@ -657,8 +657,7 @@
         <button type="submit" class="btn-success" onclick="updateCustomer(event, true)"><i class="fas fa-save"></i> Update & Close</button>
         <button type="button" class="btn-success" onclick="updateCustomer(event, false)"><i class="fas fa-save"></i> Update</button>
     </div>
-
+  
     </form>
   </div>
 </div>
-
