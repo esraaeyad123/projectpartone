@@ -3,7 +3,7 @@
         <span class="close-btn" onclick="closeCustomerModal()">
             <i class="fas fa-times"></i>
         </span>
-        <h2 class="modal-title">Add new customer</h2>
+        <h2 class="modal-title">Add new customer 📝</h2>
 
         <!-- Tabs -->
         <div class="tab-buttons">
@@ -21,12 +21,12 @@
                 <!-- Customer Info -->
                 <fieldset class="form-section-fieldset">
                     <legend>Customer Information</legend>
-                        <input type="hidden" id="customerId">
-
+                    <input type="hidden" id="customerId">
+                        
                     <div class="form-row">
                         <div class="form-group">
                             <label for="customerId">Customer ID:</label>
-                            <input type="text" id="customerId" readonly value="(Generated ID)">
+                            <input type="text" id="customerId" readonly style="background-color: #e9ecef; cursor: not-allowed;" placeholder = "Automatically Generated">
                         </div>
 
                         <div class="form-group-checkbox">
@@ -344,7 +344,7 @@
     <span class="close-btn" onclick="closeEditCustomerModal()">
       <i class="fas fa-times"></i>
     </span>
-    <h2 class="modal-title">Edit Customer</h2>
+    <h2 class="modal-title">Edit Customer 📝</h2>
 
     <!-- 🔹 Tab Buttons -->
     <div class="tab-buttons">
@@ -360,197 +360,211 @@
     <form id="editCustomerForm" onsubmit="updateCustomer(event)">
       <input type="hidden" name="_token" value="{{ csrf_token() }}">
       <input type="hidden" id="editCustomerId" name="id">
+ 
 
 
 
       <!-- ================= CUSTOMER TAB ================= -->
       <div id="editCustomerTab" class="form-tab-content active">
+
+      
         <fieldset class="form-section-fieldset">
-          <legend>Customer Information</legend>
-          <div class="form-row">
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editPotentialCustomer" name="potential" value="1">
-              <label for="editPotentialCustomer">Potential</label>
-            </div>
-            <div class="form-group">
-              <label for="editLegacyAccNo">Legacy Acc. No.:</label>
-              <input type="text" id="editLegacyAccNo" name="legacy_acc_no">
-            </div>
-          </div>
+            <legend>Customer Information</legend>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCustomerName">Customer Name:</label>
-              <input type="text" id="editCustomerName" name="customer_name" required>
-            </div>
-            <div class="form-group">
-              <label for="editCustomerArabicName">Arabic Name:</label>
-              <input type="text" id="editCustomerArabicName" name="arabic_name">
-            </div>
-          </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCustomerId">Customer ID:</label>
+                    <input type="text" id="editCustomerId" readonly style="background-color: #e9ecef; cursor: not-allowed;" placeholder = "Automatically Generated">
+                </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCustomerLegalName">Legal Name:</label>
-              <input type="text" id="editCustomerLegalName" name="customer_legal_name">
-            </div>
-            <div class="form-group">
-              <label for="editCustomerType">Customer Type:</label>
-              <select id="editCustomerType" name="customer_type" required>
-                <option value="" disabled>Select Type</option>
-                <option value="Contractor">Contractor</option>
-                <option value="Consultant">Consultant</option>
-                <option value="Supplier">Supplier</option>
-                <option value="Private">Private</option>
-                <option value="Owner">Owner</option>
-                <option value="Other">Other</option>
-                <option value="Governmental">Governmental</option>
-              </select>
-            </div>
-          </div>
+                <div class="form-group-checkbox">
+                    <input type="checkbox" id="editPotentialCustomer" name="potential">
+                    <label for="editPotentialCustomer">Potential</label>
+                </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editRegistrationDate">Date Registered:</label>
-              <input type="date" id="editRegistrationDate" name="date_registered">
+                <div class="form-group">
+                    <label for="editLegacyAccNo">Legacy Acc. No.:</label>
+                    <input type="text" id="editLegacyAccNo">
+                </div>
             </div>
-            <div class="form-group">
-              <label for="editCustomerPhone">Phone:</label>
-              <input type="tel" id="editCustomerPhone" name="phone" placeholder="e.g., +9665XXXXXXXX">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCustomerName">Customer Name:</label>
+                    <input type="text" id="editCustomerName" name="customer_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerArabicName">Arabic Name:</label>
+                    <input type="text" name="arabic_name" id="editCustomerArabicName">
+                </div>
             </div>
-          </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCustomerLegalName">Legal Name:</label>
+                    <input type="text" id="editCustomerLegalName" name="customer_legal_name">
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerType">Customer Type:</label>
+                    <select id="editCustomerType" name="customerType" required>
+                        <option value="" selected disabled>Select Type</option>
+                        <option value="Contractor">Contractor</option>
+                        <option value="Consultant">Consultant</option>
+                        <option value="Supplier">Supplier</option>
+                        <option value="Private">Private</option>
+                        <option value="Owner">Owner</option>
+                        <option value="Other">Other</option>
+                        <option value="Governmental">Governmental</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editRegistrationDate">Date Registered:</label>
+                    <input type="date" id="editRegistrationDate" value="{{ date('Y-m-d') }}">
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerPhone">Phone:</label>
+                    <input type="tel" id="editCustomerPhone" name="phone" placeholder="e.g., +9665XXXXXXXX">
+                </div>
+            </div>
         </fieldset>
 
+
+
         <fieldset class="form-section-fieldset">
-          <legend>Customer Location</legend>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCustomerCountry">Country:</label>
-              <select id="editCustomerCountry" name="country">
-                <option value="" disabled>Select Country</option>
-                <option value="Saudi Arabia">Saudi Arabia</option>
-              </select>
+            <legend>Customer Location</legend>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCustomerCountry">Country:</label>
+                    <select id="editCustomerCountry" name="country">
+                        <option value="" selected disabled>Select Country</option>
+                        <option value="Saudi Arabia">Saudi Arabia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerArabicLocation">Arabic Location:</label>
+                    <input type="text" id="editCustomerArabicLocation">
+                </div>
             </div>
-            <div class="form-group">
-              <label for="editCustomerArabicLocation">Arabic Location:</label>
-              <input type="text" id="editCustomerArabicLocation" name="arabic_location">
-            </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCustomerDistrict">District:</label>
-              <input type="text" id="editCustomerDistrict" name="district">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCustomerDistrict">District:</label>
+                    <input type="text" id="editCustomerDistrict" name="district">
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerCity">City:</label>
+                    <select id="editCustomerCity" name="city" required>
+                        <option value="" selected disabled>Select City</option>
+                        <option value="Ehsa">Ehsa</option>
+                        <option value="Riyadh">Riyadh</option>
+                        <option value="Jeddah">Jeddah</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-              <label for="editCustomerCity">City:</label>
-              <select id="editCustomerCity" name="city">
-                <option value="" disabled>Select City</option>
-                <option value="Ehsa">Ehsa</option>
-                <option value="Riyadh">Riyadh</option>
-                <option value="Jeddah">Jeddah</option>
-              </select>
-            </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="customerStreet">Street:</label>
-              <input type="text" id="editCustomerStreet" name="street">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCustomerStreet">Street:</label>
+                    <input type="text" id="editCustomerStreet" name="street">
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerPostCode">Post Code:</label>
+                    <input type="text" id="editCustomerPostCode" name="post_code">
+                </div>
             </div>
-            <div class="form-group">
-              <label for="customerPostCode">Post Code:</label>
-              <input type="text" id="editCustomerPostCode" name="post_code">
-            </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="customerAddressBlock">Address Block:</label>
-              <input type="text" id="editCustomerAddressBlock" name="address_block">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCustomerAddressBlock">Address Block:</label>
+                    <input type="text" id="editCustomerAddressBlock" name="address_block">
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerPoBox">PO Box:</label>
+                    <input type="text" id="editCustomerPoBox" name="po_box">
+                </div>
             </div>
-            <div class="form-group">
-              <label for="customerPoBox">PO Box:</label>
-              <input type="text" id="editCustomerPoBox" name="po_box">
-            </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="customerBuildingNo">Building No:</label>
-              <input type="text" id="editCustomerBuildingNo" name="building_no">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCustomerBuildingNo">Building No:</label>
+                    <input type="text" id="editCustomerBuildingNo" name="building_no">
+                </div>
             </div>
-          </div>
         </fieldset>
 
+
+
         <fieldset class="form-section-fieldset">
-          <legend>Terms & Other Controls</legend>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="paymentTerms">Payment Terms:</label>
-              <select id="editPaymentTerms" name="payment_terms">
-                <option value="" selected disabled>Select Payment Terms</option>
-                <option value="IM - Immediate">IM - Immediate</option>
-                <option value="PIA - Payment in advance">PIA - Payment in advance</option>
-                <option value="C.O.D - Cash on delivery">C.O.D - Cash on delivery</option>
-                <option value="E.O.M - End of month">E.O.M - End of month</option>
-              </select>
+            <legend>Terms & Other Controls</legend>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editPaymentTerms">Payment Terms:</label>
+                    <select id="editPaymentTerms" name="paymentTerms">
+                        <option value="" selected disabled>Select Payment Terms</option>
+                        <option value="IM - Immediate">IM - Immediate</option>
+                        <option value="PIA - Payment in advance">PIA - Payment in advance</option>
+                        <option value="C.O.D - Cash on delivery">C.O.D - Cash on delivery</option>
+                        <option value="E.O.M - End of month">E.O.M - End of month</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="discount">Discount:</label>
+                    <input type="number" id="editDiscount" name="discount">
+                </div>
+                <div class="form-group-checkbox">
+                    <input type="checkbox" id="editIsCash" name="cash">
+                    <label for="editIsCash">Cash</label>
+                </div>
             </div>
-            <div class="form-group">
-              <label for="discount">Discount:</label>
-              <input type="number" id="editDiscount" name="discount">
-            </div>
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editIsCash" name="cash" value="1">
-              <label for="isCash">Cash</label>
-            </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCreditLimit">Credit Limit:</label>
-              <input type="text" id="editCreditLimit" name="credit_limit">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCreditLimit">Credit Limit:</label>
+                    <input type="text" id="editCreditLimit" name="credit_limit">
+                </div>
+                <div class="form-group">
+                    <label for="editVatProfile">VAT Profile:</label>
+                    <select id="editVatProfile" name="vat_profile" required>
+                        <option value="" disabled>Select VAT Profile</option>
+                        <option value="Standard VAT" selected>Standard VAT</option>
+                        <option value="Exempt Supply">Exempt Supply</option>
+                        <option value="Zero-Rated Supply">Zero-Rated Supply</option>
+                        <option value="Non-VAT Registered">Non-VAT Registered</option>
+                        <option value="Flat Rate Scheme">Flat Rate Scheme</option>
+                        <option value="Reverse Charge">Reverse Charge</option>
+                        <option value="Mixed Supply">Mixed Supply</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-              <label for="vatProfile">VAT Profile:</label>
-              <select id="editVatProfile" name="vat_profile" required>
-                <option value="" disabled>Select VAT Profile</option>
-                <option value="Standard VAT" selected>Standard VAT</option>
-                <option value="Exempt Supply">Exempt Supply</option>
-                <option value="Zero-Rated Supply">Zero-Rated Supply</option>
-                <option value="Non-VAT Registered">Non-VAT Registered</option>
-                <option value="Flat Rate Scheme">Flat Rate Scheme</option>
-                <option value="Reverse Charge">Reverse Charge</option>
-                <option value="Mixed Supply">Mixed Supply</option>
-              </select>
-            </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editTrnTin">TRN/TIN #:</label>
-              <input type="text" id="editTrnTin" name="trn_tin">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editTrnTin">TRN/TIN #:</label>
+                    <input type="text" id="editTrnTin" name="trn_tin">
+                </div>
+                <div class="form-group">
+                    <label for="editRegistrationNo">Registration #:</label>
+                    <input type="text" id="editRegistrationNo" name="registration_no">
+                </div>
             </div>
-            <div class="form-group">
-              <label for="editRegistrationNo">Registration #:</label>
-              <input type="text" id="editRegistrationNo" name="registration_no">
-            </div>
-          </div>
 
-          <div class="form-row-checkboxes">
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editRestrictDeliveries" name="restrict_deliveries" value="1">
-              <label for="editRestrictDeliveries">Restrict Deliveries</label>
+            <div class="form-row-checkboxes">
+                <div class="form-group-checkbox">
+                    <input type="checkbox" id="editRestrictDeliveries" name="restrict_deliveries">
+                    <label for="editRestrictDeliveries">Restrict Deliveries</label>
+                </div>
+                <div class="form-group-checkbox">
+                    <input type="checkbox" id="editRestrictOrders" name="restrict_orders">
+                    <label for="editRestrictOrders">Restrict Orders</label>
+                </div>
+                <div class="form-group-checkbox">
+                    <input type="checkbox" id="editRestrictQuotations" name="restrict_quotations">
+                    <label for="editRestrictQuotations">Restrict Quotations</label>
+                </div>
             </div>
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editRestrictOrders" name="restrict_orders" value="1">
-              <label for="editRestrictOrders">Restrict Orders</label>
-            </div>
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editRestrictQuotations" name="restrict_quotations" value="1">
-              <label for="editRestrictQuotations">Restrict Quotations</label>
-            </div>
-          </div>
         </fieldset>
       </div>
       <!-- END CUSTOMER TAB -->
@@ -661,3 +675,4 @@
     </form>
   </div>
 </div>
+
