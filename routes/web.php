@@ -11,6 +11,8 @@ use App\Http\Controllers\Quotation\QuotationHeaderController;
 use App\Http\Controllers\ProjectFileController;
 use App\Http\Controllers\Quotation\QuotationLineController;
 use App\Http\Controllers\Quotation\PriceListController;
+use App\Http\Controllers\Employees\EmployeesController;
+
 
 
 
@@ -130,3 +132,12 @@ Route::post('/quotation-lines/bulk-add', [QuotationLineController::class, 'bulkA
 Route::get('/quotation-lines/{quotationId}', [QuotationLineController::class, 'getByQuotation']);
 // routes/web.php أو routes/api.php
 Route::post('/quotations/{quotation}/lines/store', [QuotationLineController::class, 'storeLine']);
+
+Route::get('/employees', [EmployeesController::class, 'viewEmployees'])->name('employees.view');
+// routes/web.php
+Route::get('/employees/data', [EmployeesController::class, 'getEmployeesData'])->name('employees.data');
+
+
+Route::post('/employees/store', [EmployeesController::class, 'store'])->name('employees.store');
+Route::put('/employees/{id}', [EmployeesController::class, 'update'])->name('employees.update');
+Route::get('/employees/{id}', [EmployeesController::class, 'getEmployee'])->name('employees.get');

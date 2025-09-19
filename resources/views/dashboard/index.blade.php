@@ -22,6 +22,10 @@
         <i class="fas fa-file-signature"></i>
         <span data-key="Quotations" onclick="window.location.href='{{ route('quotation.index') }}'">Quotations</span>
       </div>
+      <div class="general-card">
+    <i class="fas fa-users"></i>
+    <span data-key="Employees" onclick="window.location.href='{{ route('employees.view') }}'">Employees</span>
+</div>
       <div class="general-card"><i class="fas fa-file-invoice-dollar"></i><span>Invoices</span></div>
       <div class="general-card"><i class="fas fa-truck"></i><span>Deliveries</span></div>
       <div class="general-card"><i class="fas fa-envelope-open-text"></i><span>Mail Campaigns</span></div>
