@@ -62,7 +62,7 @@ public function store(Request $request)
         'po_box'              => 'nullable|string|max:255',
         'building_no'         => 'nullable|string|max:255',
         'payment_terms'       => 'nullable|string|max:255',
-        'discount'            => 'nullable|numeric',
+        'discount'            => 'nullable|numeric|min:0', // 💡 أضفنا هذا السطر
         'cash'                => 'nullable|boolean',
         'credit_limit'        => 'nullable|numeric',
         'vat_profile'         => 'nullable|string|max:255',
@@ -85,10 +85,8 @@ public function store(Request $request)
             'restrict_deliveries' => $request->restrict_deliveries ?? false,
             'restrict_orders'     => $request->restrict_orders ?? false,
             'restrict_quotations' => $request->restrict_quotations ?? false,
-              'date_registered' => $request->date_registered ?? now(), // ← إذا لم يُرسل، ضع تاريخ اليوم
         ])
     );
-
 
 
     return response()->json([
@@ -141,9 +139,48 @@ public function store(Request $request)
     /**
      * Update the specified resource in storage.
      */
+    // ... الكود السابق ...
+
     public function update(Request $request, Customer $customer)
     {
-        //
+        // قواعد التحقق
+        $validated = $request->validate([
+            'customer_name'       => 'required|string|max:255',
+            'arabic_name'         => 'nullable|string|max:255',
+            'customer_legal_name' => 'nullable|string|max:255',
+            'customer_type'       => 'nullable|string',
+            'potential'           => 'nullable|boolean',
+            'legacy_acc_no'       => 'nullable|string|max:255',
+            'date_registered'     => 'nullable|date',
+            'phone'               => 'nullable|string|max:50',
+            'country'             => 'nullable|string|max:255',
+            'arabic_location'     => 'nullable|string|max:255',
+            'city'                => 'nullable|string|max:255',
+            'district'            => 'nullable|string|max:255',
+            'street'              => 'nullable|string|max:255',
+            'post_code'           => 'nullable|string|max:255',
+            'address_block'       => 'nullable|string|max:255',
+            'po_box'              => 'nullable|string|max:255',
+            'building_no'         => 'nullable|string|max:255',
+            'payment_terms'       => 'nullable|string|max:255',
+            'discount'            => 'nullable|numeric|min:0', // أضف هذا السطر
+            'cash'                => 'nullable|boolean',
+            'credit_limit'        => 'nullable|numeric',
+            'vat_profile'         => 'nullable|string|max:255',
+            'trn_tin'             => 'nullable|string|max:255',
+            'registration_no'     => 'nullable|string|max:255',
+            'restrict_deliveries' => 'nullable|boolean',
+            'restrict_orders'     => 'nullable|boolean',
+            'restrict_quotations' => 'nullable|boolean',
+        ]);
+
+        // تحديث بيانات العميل باستخدام البيانات التي تم التحقق منها
+        $customer->update($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'تم تحديث بيانات العميل بنجاح!'
+        ]);
     }
 
     /**
@@ -167,7 +204,7 @@ public function bulkDelete(Request $request)
 public function exportSelected(Request $request)
 {
 
-
+    
     $data = $request->all();
     $all = $data['all'] ?? false;
     $ids = $data['ids'] ?? [];
