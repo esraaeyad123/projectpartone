@@ -6,16 +6,12 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CustomerFileController;
 use App\Http\Controllers\Project\ProjectController;
-use App\Http\Controllers\Project\ProjectContactController;
-use App\Http\Controllers\Quotation\QuotationHeaderController;
-use App\Http\Controllers\ProjectFileController;
 use App\Http\Controllers\Quotation\QuotationLineController;
+use App\Http\Controllers\Project\ProjectContactController;
+use App\Http\Controllers\ProjectFileController;
+use App\Http\Controllers\Quotation\QuotationHeaderController;
 use App\Http\Controllers\Quotation\PriceListController;
 use App\Http\Controllers\Employees\EmployeesController;
-
-
-
-
 
 
 
@@ -84,11 +80,11 @@ Route::post('/projects/delete-multiple', [ProjectController::class, 'deleteMulti
 Route::get('/projects/{project}/contacts', [ProjectContactController::class, 'index']);
 
 // إضافة جهة اتصال جديدة
-Route::post('/project-contacts', [ProjectContactController::class, 'store']);
-Route::put('/project-contacts/{id}', [ProjectContactController::class, 'update']);
+//Route::post('/project-contacts', [ProjectContactController::class, 'store']);
+//Route::put('/project-contacts/{id}', [ProjectContactController::class, 'update']);
 
 // استرجاع جهة اتصال واحدة
-Route::get('/project-contacts/{contact}', [ProjectContactController::class, 'show']);
+//Route::get('/project-contacts/{contact}', [ProjectContactController::class, 'show']);
 Route::post('/project-contacts/delete-multiple', [ProjectContactController::class, 'deleteMultiple']);
 
 Route::prefix('projects/{project}')->group(function () {
@@ -114,6 +110,14 @@ Route::post('/projects/files/delete-multiple', [ProjectFileController::class, 'd
 Route::post('/projects/files/download-multiple', [ProjectFileController::class, 'downloadMultipleFiles'])->name('files.downloadMultiple');
 Route::get('/projects/files/{id}/download', [ProjectFileController::class, 'download'])->name('projects.files.download');
 
+//Route::delete('/contacts/delete-multiple', [ProjectContactController::class, 'deleteMultiple']);
+
+
+//Route::post('/project-contacts', [ProjectContactController::class, 'store']);
+//Route::put('/project-contacts/{id}', [ProjectContactController::class, 'update']);
+//Route::get('/project-contacts/{contact}', [ProjectContactController::class, 'show']);
+//Route::delete('/contacts/delete-multiple', [ProjectContactController::class, 'deleteMultiple']);
+
 Route::get('/quotation', [QuotationHeaderController::class, 'index'])->name('quotation.index');
 Route::get('/quotation/projects', [QuotationHeaderController::class, 'getProjects']);
 Route::get('/quotation/contacts', [QuotationHeaderController::class, 'getContacts']);
@@ -132,7 +136,6 @@ Route::post('/quotation-lines/bulk-add', [QuotationLineController::class, 'bulkA
 Route::get('/quotation-lines/{quotationId}', [QuotationLineController::class, 'getByQuotation']);
 // routes/web.php أو routes/api.php
 Route::post('/quotations/{quotation}/lines/store', [QuotationLineController::class, 'storeLine']);
-
 Route::get('/employees', [EmployeesController::class, 'viewEmployees'])->name('employees.view');
 // routes/web.php
 Route::get('/employees/data', [EmployeesController::class, 'getEmployeesData'])->name('employees.data');

@@ -204,7 +204,7 @@ public function bulkDelete(Request $request)
 public function exportSelected(Request $request)
 {
 
-    
+
     $data = $request->all();
     $all = $data['all'] ?? false;
     $ids = $data['ids'] ?? [];

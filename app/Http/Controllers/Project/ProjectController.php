@@ -58,21 +58,30 @@ return response()->json([
     ]);
 
 }
-
 public function update(Request $request, Project $project)
 {
-    $project->update([
-        'name' => $request->name,
-        'arabic_name' => $request->arabic_name,
-        'registration_date' => $request->registration_date,
-        'customer_id' => $request->customer_id,
-        'owner' => $request->owner,
-        'consultant' => $request->consultant,
-        'contractor' => $request->contractor,
-        'projectArabicLocation' => $request->projectArabicLocation,
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'arabic_name' => 'nullable|string|max:255',
+        'registration_date' => 'nullable|date',
+        'customer_id' => 'nullable|exists:customers,id',
+        'owner_id' => 'nullable|exists:customers,id',
+        'consultant_id' => 'nullable|exists:customers,id',
+        'contractor_id' => 'nullable|exists:customers,id',
+        'projectArabicLocation' => 'nullable|string|max:255',
     ]);
 
-    // 👇 رجّع JSON مع ID
+    $project->update([
+        'name' => $validated['name'],
+        'arabic_name' => $validated['arabic_name'] ?? null,
+        'registration_date' => $validated['registration_date'] ?? null,
+        'customer_id' => $validated['customer_id'] ?? null,
+        'owner_id' => $validated['owner_id'] ?? null,
+        'consultant_id' => $validated['consultant_id'] ?? null,
+        'contractor_id' => $validated['contractor_id'] ?? null,
+        'projectArabicLocation' => $validated['projectArabicLocation'] ?? null,
+    ]);
+
     return response()->json([
         'id' => $project->id,
         'project' => $project,
@@ -82,9 +91,11 @@ public function update(Request $request, Project $project)
 
 
 
-
 public function show(Project $project)
 {
+    // قم بتحميل علاقة جهات الاتصال المرتبطة بالمشروع
+    $project->load('contacts');
+    // الآن، الكائن $project يحتوي على بيانات جهات الاتصال
     return response()->json($project);
 }
 

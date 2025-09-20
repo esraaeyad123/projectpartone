@@ -50,68 +50,98 @@
                     </div>
                 </fieldset>
 
-                <fieldset class="form-section-fieldset">
-                    <legend>Parties Section</legend>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="customer">Customer:</label>
-                            <select id="customer" name="customer_id">
-                                <option value="" disabled selected>[Select Customer]</option>
-                                @foreach($customers as $customer)
-                                    <option value="{{ $customer->id }}">
-                                        {{ $customer->customer_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="owner">Owner:</label>
-                            <select id="owner" name="owner">
-                                <option value="" selected disabled>[EditValue is null]</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="consultant">Consultant:</label>
-                            <select id="consultant" name="consultant">
-                                <option value="" selected disabled>[EditValue is null]</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="contractor">Contractor:</label>
-                            <select id="contractor" name="contractor">
-                                <option value="" selected disabled>[EditValue is null]</option>
-                            </select>
-                        </div>
-                    </div>
-                </fieldset>
+    <fieldset class="form-section-fieldset">
+    <legend>Parties Section</legend>
+
+    <!-- Customer -->
+    <div class="form-row">
+        <div class="form-group">
+            <label for="customer">Customer:</label>
+            <select id="customer" name="customer_id">
+                <option value="" disabled selected>[Select Customer]</option>
+                @foreach($customers as $customer)
+                    <option value="{{ $customer->id }}">
+                        {{ $customer->customer_name }} (ID: {{ $customer->id }})
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    <!-- Owner & Consultant -->
+    <div class="form-row">
+        <div class="form-group">
+            <label for="owner">Owner:</label>
+            <select id="owner" name="owner_id">
+                <option value="" disabled selected>[Select Owner]</option>
+                @foreach($customers as $customer)
+                    @if($customer->customer_type === 'Owner')
+                        <option value="{{ $customer->id }}">
+                            {{ $customer->customer_name }} (ID: {{ $customer->id }})
+                        </option>
+                    @endif
+                @endforeach
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="consultant">Consultant:</label>
+            <select id="consultant" name="consultant_id">
+                <option value="" disabled selected>[Select Consultant]</option>
+                @foreach($customers as $customer)
+                    @if($customer->customer_type === 'Consultant')
+                        <option value="{{ $customer->id }}">
+                            {{ $customer->customer_name }} (ID: {{ $customer->id }})
+                        </option>
+                    @endif
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    <!-- Contractor -->
+    <div class="form-row">
+        <div class="form-group">
+            <label for="contractor">Contractor:</label>
+            <select id="contractor" name="contractor_id">
+                <option value="" disabled selected>[Select Contractor]</option>
+                @foreach($customers as $customer)
+                    @if($customer->customer_type === 'Contractor')
+                        <option value="{{ $customer->id }}">
+                            {{ $customer->customer_name }} (ID: {{ $customer->id }})
+                        </option>
+                    @endif
+                @endforeach
+            </select>
+        </div>
+    </div>
+</fieldset>
+
+
             </div>
             <!-------------------------- Contact Tab -------------------------->
             <div id="contactTab" class="form-tab-content" style="display: none;">
                 <fieldset class="form-section-fieldset">
                     <legend>Contact List</legend>
                     <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
-                        <button type="button" class="btn-secondary" onclick="populateContactFormForEdit('add')">
+                        <button type="button" class="btn-secondary" onclick="window.populateContactFormForEdit('add')">
                             <i class="fas fa-pen"></i> Edit Selected
                         </button>
                         <button type="button" class="btn-danger" onclick="deleteSelectedContacts('#contactsTable')">
                             <i class="fas fa-trash"></i> Delete Selected
                         </button>
-                        <button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelBtn()">
+                        <button title="Export to Excel" onclick="exportContactsExcelBtn('contactsTable')" class="btn-icon">
                             <i class="fa-solid fa-table"></i>
                         </button>
-                        <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTable()">
-                          <i class="fas fa-print"></i>
+                        <button title="Print" onclick="printContactsTable('contactsTable')" class="btn-icon">
+                            <i class="fas fa-print"></i>
                         </button>
                     </div>
                     <div class="table-responsive-container">
                         <table id="contactsTable" class="contacts-table display responsive nowrap" data-ignore-lang>
                             <thead>
                                 <tr data-contact-id="">
-                                    <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this, 'contactsTable')"></th>
+                                    <th><input type="checkbox" id="selectAllContacts" onclick="window.toggleAllContacts(this, 'contactsTable')"></th>
                                     <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
@@ -251,51 +281,69 @@
                     </div>
                 </fieldset>
 
-                <fieldset class="form-section-fieldset">
-                    <legend>Parties Section</legend>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editCustomer">Customer:</label>
-                            <select id="editCustomer" name="customer_id">
-                                <option value="" disabled selected>[Select Customer]</option>
-                                @foreach($customers as $customer)
-                                    <option value="{{ $customer->id }}">
-                                        {{ $customer->customer_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editOwner">Owner:</label>
-                            <select id="editOwner" name="owner">
-                                <option value="" selected disabled>[EditValue is null]</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="editConsultant">Consultant:</label>
-                            <select id="editConsultant" name="consultant">
-                                <option value="" selected disabled>[EditValue is null]</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editContractor">Contractor:</label>
-                            <select id="editContractor" name="contractor">
-                                <option value="" selected disabled>[EditValue is null]</option>
-                            </select>
-                        </div>
-                    </div>
-                </fieldset>
+            <fieldset class="form-section-fieldset">
+    <legend>Parties Section</legend>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="editCustomer">Customer:</label>
+            <select id="editCustomer" name="customer_id">
+                <option value="" disabled selected>[Select Customer]</option>
+                @foreach($customers as $customer)
+                    <option value="{{ $customer->id }}" data-type="{{ $customer->customer_type }}">
+                        {{ $customer->customer_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="editOwner">Owner:</label>
+            <select id="editOwner" name="owner_id">
+                <option value="" disabled selected>[Select Owner]</option>
+                @foreach($customers as $customer)
+                    <option value="{{ $customer->id }}" data-type="{{ $customer->customer_type }}">
+                        {{ $customer->customer_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="editConsultant">Consultant:</label>
+            <select id="editConsultant" name="consultant_id">
+                <option value="" disabled selected>[Select Consultant]</option>
+                @foreach($customers as $customer)
+                    <option value="{{ $customer->id }}" data-type="{{ $customer->customer_type }}">
+                        {{ $customer->customer_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="editContractor">Contractor:</label>
+            <select id="editContractor" name="contractor_id">
+                <option value="" disabled selected>[Select Contractor]</option>
+                @foreach($customers as $customer)
+                    <option value="{{ $customer->id }}" data-type="{{ $customer->customer_type }}">
+                        {{ $customer->customer_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+</fieldset>
             </div>
             <!-------------------------- Edit Contac tTab-------------------------->
             <div id="editContactTab" class="form-tab-content" style="display: none;">
                     <fieldset class="form-section-fieldset">
                     <legend>Contact List</legend>
                     <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
-                    <button type="button" class="btn-secondary" onclick="populateContactFormForEdit('edit')">
+                    <button type="button" class="btn-secondary" onclick="window.populateContactFormForEdit('edit')">
                     <i class="fas fa-pen"></i> Edit Selected
                     </button>
 
@@ -303,12 +351,12 @@
                         <i class="fas fa-trash"></i> Delete Selected
                     </button>
 
-                    <button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelEditBtn()">
+                    <button title="Export to Excel" onclick="exportContactsExcelBtn('contactsTableEdit')" class="btn-icon">
                         <i class="fa-solid fa-table"></i>
                     </button>
-                                
 
-                    <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTableEdit()">
+
+                    <button title="Print" onclick="printContactsTable('contactsTableEdit')" class="btn-icon">
                         <i class="fas fa-print"></i>
                     </button>
                     </div>
@@ -316,7 +364,7 @@
                             <table id="contactsTableEdit" class="contacts-table display responsive nowrap" data-ignore-lang>
                                         <thead>
                                             <tr data-contact-id="">
-                                                <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this, 'contactsTable')"></th>
+                                                <th><input type="checkbox" id="selectAllContacts" onclick="window.toggleAllContacts(this, 'contactsTableEdit')"></th>
                                                 <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                                 <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                                 <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>

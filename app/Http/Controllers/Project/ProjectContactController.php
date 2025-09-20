@@ -36,16 +36,25 @@ public function index($projectId)
 
 
         // إنشاء جهة اتصال جديدة
-   public function store(Request $request)
-{
-    $contact = ProjectContact::create($request->all());
+    // In ProjectContactController.php
 
-  
+public function store(Request $request, $projectId)
+{
+    // Validate the request data here if needed
+    // $request->validate([ 'name' => 'required', 'email' => 'email' ]);
+
+    // Merge the project_id from the route into the request data
+    $data = $request->all();
+    $data['project_id'] = $projectId;
+
+    // Create the contact with the merged data
+    $contact = ProjectContact::create($data);
+
     return response()->json([
-            'success' => true,
-            'message' => '✅ Contact created successfully',
-            'contact' => $contact
-        ]);
+        'success' => true,
+        'message' => '✅ Contact created successfully',
+        'contact' => $contact
+    ]);
 }
 
 
@@ -69,11 +78,11 @@ public function index($projectId)
         //
     }
 
-public function update(Request $request, $id) {
-    $contact = ProjectContact::find($id);
-    if (!$contact) {
-        return response()->json(['message' => 'Contact not found'], 404);
-    }
+public function update(Request $request, Project $project, ProjectContact $contact)
+{
+    // هنا، لا تحتاج للبحث عن جهة الاتصال باستخدام find($id).
+    // Laravel سيقوم بذلك تلقائيًا عبر Route Model Binding.
+    // المتغير $contact أصبح الآن يمثل كائن جهة الاتصال الذي تريد تحديثه.
 
     $contact->name = $request->name;
     $contact->email = $request->email;
@@ -83,13 +92,12 @@ public function update(Request $request, $id) {
     $contact->is_primary = $request->is_primary;
     $contact->save();
 
-      return response()->json([
+    return response()->json([
         'success' => true,
         'message' => '✅ Contact updated successfully',
         'contact' => $contact
     ]);
 }
-
     /**
      * Update the specified resource in storage.
      */

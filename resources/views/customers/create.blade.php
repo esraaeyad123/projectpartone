@@ -22,7 +22,7 @@
                 <fieldset class="form-section-fieldset">
                     <legend>Customer Information</legend>
                     <input type="hidden" id="customerId">
-                        
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="customerId">Customer ID:</label>
@@ -360,14 +360,14 @@
     <form id="editCustomerForm" onsubmit="updateCustomer(event)">
       <input type="hidden" name="_token" value="{{ csrf_token() }}">
       <input type="hidden" id="editCustomerId" name="id">
- 
+
 
 
 
       <!-- ================= CUSTOMER TAB ================= -->
       <div id="editCustomerTab" class="form-tab-content active">
 
-      
+
         <fieldset class="form-section-fieldset">
             <legend>Customer Information</legend>
 
@@ -406,7 +406,7 @@
                 </div>
                 <div class="form-group">
                     <label for="editCustomerType">Customer Type:</label>
-                    <select id="editCustomerType" name="customerType" required>
+                    <select id="editCustomerType" name="customer_type" required>
                         <option value="" selected disabled>Select Type</option>
                         <option value="Contractor">Contractor</option>
                         <option value="Consultant">Consultant</option>
@@ -585,7 +585,7 @@
   <button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelEditBtn()">
     <i class="fa-solid fa-table"></i>
   </button>
-            
+
 
   <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTableEdit()">
       <i class="fas fa-print"></i>
@@ -671,7 +671,7 @@
         <button type="submit" class="btn-success" onclick="updateCustomer(event, true)"><i class="fas fa-save"></i> Update & Close</button>
         <button type="button" class="btn-success" onclick="updateCustomer(event, false)"><i class="fas fa-save"></i> Update</button>
     </div>
-  
+
     </form>
   </div>
 </div>

@@ -13,20 +13,20 @@
                 <button title="Edit" onclick="openEditCustomerModal()"  class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedCustomers()" class="btn-icon"><i class="fas fa-trash"></i></button>
             </div>
-        
+
         <div class="icon-separator"></div>
             <div>
                 <button title="File Manager" class="btn-icon" data-url="{{ route('customer-files.index', ['customerId' => ':id']) }}" onclick="goToCustomerFiles(this)"><i class="fas fa-folder-open"></i></button>
                 <button title="Export to Excel" class="btn-icon" id="exportCustomersExcelBtn" onclick="exportCustomersExcelBtn()"><i class="fa-solid fa-table"></i></button>
                 <button title="Print" class="btn-icon" onclick="printCustomersTable()"><i class="fas fa-print"></i></button>
             </div>
-        
+
         </div>
         <!-------------------------------------------End Buttons----------------------------------------------->
         <!-------------------------------------------StartcustomerTable----------------------------------------------->
         <div class="table-responsive-container">
             <table id="customersTable" class="tablecustomerTable-borderedcustomerTable-striped display responsive nowrap" style="width:100%">
-                <thead> selectCustomer 
+                <thead> selectCustomer
                     <tr>
                         <th><input type="checkbox" id="selectAllCustomers"></th>
                         <th>Customer ID<br><input type="text" class="column-filter" placeholder="Search..."></th>
@@ -224,10 +224,10 @@
 
         // استنساخ صف الرؤوس لإنشاء صف البحث
         $('#customersTable thead tr').clone(true).appendTo('#customersTable thead');
-        
+
         // منع البحث في عمود صندوق الاختيار
         $('#customersTable thead tr:eq(1) th:eq(0)').empty();
-        
+
         // تطبيق الفلترة على كل حقل بحث
        customerTable.columns().every(function() {
             var that = this;
@@ -235,9 +235,9 @@
 
             // ⛔️ تجاوز العمود الأول (الذي يحتوي على مربع الاختيار)
             if (this.index() === 0) {
-                return; 
+                return;
             }
-            
+
             // ⛔️ تجاوز عمود التاريخ
             if ($(this.header()).find('input[data-filter-type="date-from"]').length > 0) {
                 return;
@@ -274,7 +274,7 @@
         });
 
     });
-    // --------------------------------------------------------------------------------------- 
+    // ---------------------------------------------------------------------------------------
     // --------------------Select All & Update 'select all' button----------------------------
     $('#selectAllCustomers').on('change', function() {
         let rows =customerTable.rows({ 'search': 'applied' }).nodes(); // الصفوف الحالية بعد الفلترة
@@ -379,8 +379,8 @@
         $('#contactModal').show();
     }
     // ---------------------------------------------------------------------------------------
-    window.closeContactModal = function() { 
-        $('#contactModal').hide(); 
+    window.closeContactModal = function() {
+        $('#contactModal').hide();
     }
     // ---------------------------------------------------------------------------------------
     window.switchTab = function(tabName) {
@@ -1012,7 +1012,7 @@
             // إذا لم يتم تحديد أي شيء، قم بمعالجة جميع الصفوف المرئية
             rowsToProcess =customerTable.rows({ 'search': 'applied' }).nodes();
         }
-        
+
         // 2. بناء البيانات لـ SheetJS
         const data = [];
         const header = [];
@@ -1022,7 +1022,7 @@
             }
         });
         data.push(header);
-        
+
         $(rowsToProcess).each(function() {
             const rowData = [];
             $(this).find('td').each(function() {
@@ -1061,7 +1061,7 @@
             // إذا لم يتم تحديد أي شيء، قم بمعالجة جميع الصفوف المرئية
             rowsToProcess =customerTable.rows({ 'search': 'applied' }).nodes();
         }
-        
+
         // 2. بناء البيانات لـ SheetJS
         const data = [];
         const header = [];
@@ -1071,7 +1071,7 @@
             }
         });
         data.push(header);
-        
+
         $(rowsToProcess).each(function() {
             const rowData = [];
             $(this).find('td').each(function() {
@@ -1147,14 +1147,14 @@
         });
 
         printContents += `</tbody></table>`;
-        
+
         const printWindow = window.open('', '_blank');
         printWindow.document.write(printContents);
         printWindow.document.close();
         printWindow.focus();
         printWindow.print();
         printWindow.close();
-        
+
         showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
     };
     // ----------------------------------------------------------------------
@@ -1216,14 +1216,14 @@
         });
 
         printContents += `</tbody></table>`;
-        
+
         const printWindow = window.open('', '_blank');
         printWindow.document.write(printContents);
         printWindow.document.close();
         printWindow.focus();
         printWindow.print();
         printWindow.close();
-        
+
         showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
     };
     // ----------------------------------------------------------------------
@@ -1285,19 +1285,19 @@
         });
 
         printContents += `</tbody></table>`;
-        
+
         const printWindow = window.open('', '_blank');
         printWindow.document.write(printContents);
         printWindow.document.close();
         printWindow.focus();
         printWindow.print();
         printWindow.close();
-        
+
         showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
     };
     // ---------------------------End Functions------------------------------
-    //----------------------------------------------------------------------- 
- 
+    //-----------------------------------------------------------------------
+
 </script>
 
 @endsection

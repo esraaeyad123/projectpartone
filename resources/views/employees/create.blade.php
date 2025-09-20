@@ -1,246 +1,137 @@
-<div id="customerModal" class="modal">
-    <div class="modal-content new-customer-modal-design">
-        <span class="close-btn" onclick="closeCustomerModal()">
+<div id="employeeModal" class="modal">
+    <div class="modal-content new-employee-modal-design">
+        <span class="close-btn" onclick="closeEmployeeModal()">
             <i class="fas fa-times"></i>
         </span>
-        <h2 class="modal-title">Add new customer</h2>
+        <h2 class="modal-title">Add new employee 👨‍💼</h2>
 
         <!-- Tabs -->
         <div class="tab-buttons">
-            <button id="customer-btn" onclick="switchTab('customer')" class="active"><i class="fas fa-user"></i> Customer</button>
-            <button id="contact-btn" onclick="switchTab('contact')"><i class="fas fa-address-book"></i> Contacts</button>
-        </div>
+    <button id="employee-btn" onclick="switchEmployeeTab('employee')" class="active">
+        <i class="fas fa-user"></i> Employee
+    </button>
+    <button id="contact-btn" onclick="switchEmployeeTab('contact')">
+        <i class="fas fa-address-book"></i> Contacts
+    </button>
+</div>
+
 
         <!-- Form Start -->
-        <form id="customerForm" onsubmit="saveCustomer(event)">
+        <form id="employeeForm" onsubmit="saveEmployee(event)">
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <input type="hidden" id="employeeId">
 
-            <!-- Customer Tab -->
-            <div id="customerTab" class="form-tab-content active">
-
-                <!-- Customer Info -->
+            <!-- Employee Tab -->
+            <div id="employeeTab" class="form-tab-content active">
                 <fieldset class="form-section-fieldset">
-                    <legend>Customer Information</legend>
-                        <input type="hidden" id="customerId">
+                    <legend>Employee Information</legend>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="customerId">Customer ID:</label>
-                            <input type="text" id="customerId" readonly value="(Generated ID)">
+                            <label for="employeeReference">Employee Reference:</label>
+                            <input type="text" id="employeeReference" readonly
+                                   style="background-color: #e9ecef; cursor: not-allowed;"
+                                   placeholder="Automatically Generated">
                         </div>
-
-                        <div class="form-group-checkbox">
-                            <input type="checkbox" id="potentialCustomer">
-                            <label for="potentialCustomer">Potential</label>
-                        </div>
-
                         <div class="form-group">
-                            <label for="legacyAccNo">Legacy Acc. No.:</label>
-                            <input type="text" id="legacyAccNo">
+                            <label for="initials">Initials:</label>
+                            <select id="initials"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="title">Title:</label>
+                            <input type="text" id="title">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="customerName">Customer Name:</label>
-                            <input type="text" id="customerName" name="customer_name" required>
+                            <label for="firstName">First Name:</label>
+                            <input type="text" id="firstName">
                         </div>
                         <div class="form-group">
-                            <label for="customerArabicName">Arabic Name:</label>
-                            <input type="text" name="arabic_name" id="customerArabicName">
+                            <label for="midName">Mid. Name:</label>
+                            <input type="text" id="midName">
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name:</label>
+                            <input type="text" id="lastName">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="customerLegalName">Legal Name:</label>
-                            <input type="text" id="customerLegalName">
+                            <label for="fullName">Full Name:</label>
+                            <input type="text" id="fullName">
                         </div>
                         <div class="form-group">
-                            <label for="customerType">Customer Type:</label>
-                            <select id="customerType" name="customerType" required>
-                                <option value="" selected disabled>Select Type</option>
-                                <option value="Contractor">Contractor</option>
-                                <option value="Consultant">Consultant</option>
-                                <option value="Supplier">Supplier</option>
-                                <option value="Private">Private</option>
-                                <option value="Owner">Owner</option>
-                                <option value="Other">Other</option>
-                                <option value="Governmental">Governmental</option>
+                            <label for="email">Email:</label>
+                            <input type="email" id="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="supervisor">Supervisor:</label>
+                            <select id="supervisor">
+                                <option value="" selected disabled>[Select Supervisor]</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="registrationDate">Date Registered:</label>
-                            <input type="date" id="registrationDate" value="{{ date('Y-m-d') }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="customerPhone">Phone:</label>
-                            <input type="tel" id="customerPhone" placeholder="e.g., +9665XXXXXXXX">
-                        </div>
-                    </div>
-                </fieldset>
-
-                <!-- Customer Location -->
-                <fieldset class="form-section-fieldset">
-                    <legend>Customer Location</legend>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="customerCountry">Country:</label>
-                            <select id="customerCountry" class="form-control">
-                                <option value="" selected disabled>Select Country</option>
-                                <option value="Saudi Arabia">Saudi Arabia</option>
+                            <label for="businessUnit">Business Unit:</label>
+                            <select id="businessUnit">
+                                <option value="AAM-EHSA" selected>AAM-EHSA</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="customerArabicLocation">Arabic Location:</label>
-                            <input type="text" id="customerArabicLocation">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="customerDistrict">District:</label>
-                            <input type="text" id="customerDistrict">
-                        </div>
-                        <div class="form-group">
-                            <label for="customerCity">City:</label>
-                            <select id="customerCity" name="customerCity" required>
-                                <option value="" selected disabled>Select City</option>
-                                <option value="Ehsa">Ehsa</option>
-                                <option value="Riyadh">Riyadh</option>
-                                <option value="Jeddah">Jeddah</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="customerStreet">Street:</label>
-                            <input type="text" id="customerStreet">
-                        </div>
-                        <div class="form-group">
-                            <label for="customerPostCode">Post Code:</label>
-                            <input type="text" id="customerPostCode">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="customerAddressBlock">Address Block:</label>
-                            <input type="text" id="customerAddressBlock">
-                        </div>
-                        <div class="form-group">
-                            <label for="customerPoBox">PO Box:</label>
-                            <input type="text" id="customerPoBox">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="customerBuildingNo">Building No:</label>
-                            <input type="text" id="customerBuildingNo">
-                        </div>
-                    </div>
-                </fieldset>
-
-                <!-- Terms -->
-                <fieldset class="form-section-fieldset">
-                    <legend>Terms & Other Controls</legend>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="paymentTerms">Payment Terms:</label>
-                            <select id="paymentTerms" name="paymentTerms">
-                                <option value="" selected disabled>Select Payment Terms</option>
-                                <option value="IM - Immediate">IM - Immediate</option>
-                                <option value="PIA - Payment in advance">PIA - Payment in advance</option>
-                                <option value="C.O.D - Cash on delivery">C.O.D - Cash on delivery</option>
-                                <option value="E.O.M - End of month">E.O.M - End of month</option>
+                            <label for="department">Department:</label>
+                            <select id="department">
+                                <option value="" selected disabled>[Select Department]</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="discount">Discount:</label>
-                            <input type="number" id="discount" value="0">
-                        </div>
-                        <div class="form-group-checkbox">
-                            <input type="checkbox" id="isCash">
-                            <label for="isCash">Cash</label>
+                            <label for="ctta">CTTA:</label>
+                            <input type="text" id="ctta">
                         </div>
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="creditLimit">Credit Limit:</label>
-                            <input type="text" id="creditLimit" value="999999999">
-                        </div>
-                        <div class="form-group">
-                            <label for="vatProfile">VAT Profile:</label>
-                            <select id="vatProfile" name="vatProfile" required>
-                                <option value="" disabled>Select VAT Profile</option>
-                                <option value="Standard VAT" selected>Standard VAT</option>
-                                <option value="Exempt Supply">Exempt Supply</option>
-                                <option value="Zero-Rated Supply">Zero-Rated Supply</option>
-                                <option value="Non-VAT Registered">Non-VAT Registered</option>
-                                <option value="Flat Rate Scheme">Flat Rate Scheme</option>
-                                <option value="Reverse Charge">Reverse Charge</option>
-                                <option value="Mixed Supply">Mixed Supply</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="trnTin">TRN/TIN #:</label>
-                            <input type="text" id="trnTin">
-                        </div>
-                        <div class="form-group">
-                            <label for="registrationNo">Registration #:</label>
-                            <input type="text" id="registrationNo">
-                        </div>
-                    </div>
-
-                    <div class="form-row-checkboxes">
                         <div class="form-group-checkbox">
-                            <input type="checkbox" id="restrictDeliveries">
-                            <label for="restrictDeliveries">Restrict Deliveries</label>
-                        </div>
-                        <div class="form-group-checkbox">
-                            <input type="checkbox" id="restrictOrders">
-                            <label for="restrictOrders">Restrict Orders</label>
-                        </div>
-                        <div class="form-group-checkbox">
-                            <input type="checkbox" id="restrictQuotations">
-                            <label for="restrictQuotations">Restrict Quotations</label>
+                            <label>Job Roles</label>
+                            <div class="job-rules-container">
+                                <input type="checkbox" id="officeStaff"><label for="officeStaff">Office Staff</label>
+                                <input type="checkbox" id="laboratoryStaff"><label for="laboratoryStaff">Laboratory Staff</label>
+                                <input type="checkbox" id="siteStaff"><label for="siteStaff">Site Staff</label>
+                                <input type="checkbox" id="drillersStaff"><label for="drillersStaff">Drillers Staff</label>
+                                <input type="checkbox" id="driversStaff"><label for="driversStaff">Drivers Staff</label>
+                            </div>
                         </div>
                     </div>
                 </fieldset>
             </div>
 
             <!-- Contact Tab -->
-            <div id="contactTab" class="form-tab-content" style="display: none;">
+            <div id="contactTab" class="form-tab-content" style="display:none;">
                 <fieldset class="form-section-fieldset">
                     <legend>Contact List</legend>
-                    <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
-                        <button type="button" class="btn-secondary" onclick="populateContactFormForEdit('add')">
+                    <div class="contact-toolbar">
+                        <button type="button" class="btn-secondary" onclick="populateContactFormForEdit('employee')">
                             <i class="fas fa-pen"></i> Edit Selected
                         </button>
-                        <button type="button" class="btn-danger" onclick="deleteSelectedContacts('#contactsTable')">
+                        <button type="button" class="btn-danger" onclick="deleteSelectedContacts('#employeeContactsTable')">
                             <i class="fas fa-trash"></i> Delete Selected
                         </button>
-                        <button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelBtn()">
+                        <button type="button" class="btn-icon" onclick="exportContactsExcelBtn('employeeContactsTable')">
                             <i class="fa-solid fa-table"></i>
                         </button>
-                        <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTable()">
-                          <i class="fas fa-print"></i>
+                        <button type="button" class="btn-icon" onclick="printContactsTable('employeeContactsTable')">
+                            <i class="fas fa-print"></i>
                         </button>
                     </div>
                     <div class="table-responsive-container">
-                        <table id="contactsTable" class="contacts-table display responsive nowrap" data-ignore-lang>
+                        <table id="employeeContactsTable" class="contacts-table display responsive nowrap">
                             <thead>
-                                <tr data-contact-id="">
-                                    <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this, 'contactsTable')"></th>
+                                <tr>
+                                    <th><input type="checkbox" onclick="toggleAllContacts(this,'employeeContactsTable')"></th>
                                     <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
@@ -261,47 +152,47 @@
                 </fieldset>
 
                 <fieldset class="form-section-fieldset">
-                    <legend>Add Contact Person</legend>
-                    <input type="hidden" id="editContactIdAdd">
+                    <legend>Add / Edit Contact Person</legend>
+                    <input type="hidden" id="editContactIdEmployee">
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="contactNameAdd">Contact Name:</label>
-                            <input type="text" id="contactNameAdd" placeholder="Enter contact name">
+                            <label for="contactNameEmployee">Contact Name:</label>
+                            <input type="text" id="contactNameEmployee">
                         </div>
                         <div class="form-group">
-                            <label for="contactEmailAdd">Contact Email:</label>
-                            <input type="email" id="contactEmailAdd" placeholder="e.g., contact@example.com">
+                            <label for="contactEmailEmployee">Contact Email:</label>
+                            <input type="email" id="contactEmailEmployee">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="contactPhoneAdd">Contact Phone:</label>
-                            <input type="tel" id="contactPhoneAdd" placeholder="e.g., +9665XXXXXXXX">
+                            <label for="contactPhoneEmployee">Contact Phone:</label>
+                            <input type="tel" id="contactPhoneEmployee">
                         </div>
                         <div class="form-group">
-                            <label for="contactMobileAdd">Contact Mobile:</label>
-                            <input type="tel" id="contactMobileAdd" placeholder="e.g., +9665XXXXXXXX">
+                            <label for="contactMobileEmployee">Contact Mobile:</label>
+                            <input type="tel" id="contactMobileEmployee">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="contactPositionAdd">Position:</label>
-                            <input type="text" id="contactPositionAdd" placeholder="e.g., Sales Manager">
+                            <label for="contactPositionEmployee">Position:</label>
+                            <input type="text" id="contactPositionEmployee">
                         </div>
                         <div class="form-group-checkbox">
-                            <input type="checkbox" id="isPrimaryContactAdd">
-                            <label for="isPrimaryContactAdd">Primary Contact</label>
+                            <input type="checkbox" id="isPrimaryContactEmployee">
+                            <label for="isPrimaryContactEmployee">Primary Contact</label>
                         </div>
                     </div>
 
                     <div class="contact-toolbar">
-                        <button type="button" class="btn btn-primary" onclick="saveContactForCustomer('add')">
+                        <button type="button" class="btn btn-primary" onclick="saveContactForEmployee()">
                             💾 Save / Update
                         </button>
-                        <button type="button" class="btn-secondary" onclick="clearContactForm('add')">
+                        <button type="button" class="btn-secondary" onclick="clearContactForm('employee')">
                             <i class="fas fa-eraser"></i> Clear Form
                         </button>
                     </div>
@@ -310,355 +201,69 @@
 
             <!-- Modal Buttons -->
             <div class="form-buttons modal-bottom-buttons">
-              <button type="button" class="btn-primary" onclick="closeCustomerModal()"><i class="fas fa-times"></i> Close</button>
-              <button type="button" class="btn-success" onclick="saveCustomer(event, true)"><i class="fas fa-save"></i> Save & Close</button>
-              <button type="button" class="btn-success" onclick="saveCustomer(event, false)"><i class="fas fa-save"></i> Save</button>
-          </div>
+                <button type="button" class="btn-primary" onclick="closeEmployeeModal()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <button type="button" class="btn-success" onclick="saveEmployee(event, true)">
+                    <i class="fas fa-save"></i> Save & Close
+                </button>
+                <button type="button" class="btn-success" onclick="saveEmployee(event, false)">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
         </form>
-        <!-- Form End -->
     </div>
 </div>
 
-<!------------------------------------------------------------------->
-<!------------------------------------------------------------------->
-<!------------------------------------------------------------------->
-
-<div id="modal-container"></div>
-<div id="dynamicContent"></div>
-<div id="customDialogModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeCustomDialog()">&times;</span>
-        <h3 id="customDialogTitle"></h3>
-        <p id="customDialogMessage"></p>
-        <div class="form-buttons" id="customDialogButtons"></div>
-    </div>
-</div>
-<!------------------------------------------------------------------->
-<!------------------------------------------------------------------->
-<!------------------------------------------------------------------->
-
-<!-- Edit Customer Modal -->
-
-<div id="editCustomerModal" class="modal">
-  <div class="modal-content new-customer-modal-design">
-    <span class="close-btn" onclick="closeEditCustomerModal()">
-      <i class="fas fa-times"></i>
-    </span>
-    <h2 class="modal-title">Edit Customer</h2>
-
-    <!-- 🔹 Tab Buttons -->
-    <div class="tab-buttons">
-      <button id="edit-customer-btn" onclick="switchEditTab('customer')" class="active">
-        <i class="fas fa-user"></i> Customer
-      </button>
-      <button id="edit-contact-btn" onclick="switchEditTab('contact')">
-        <i class="fas fa-address-book"></i> Contacts
-      </button>
-    </div>
-
-    <!-- 🔹 Main Form -->
-    <form id="editCustomerForm" onsubmit="updateCustomer(event)">
-      <input type="hidden" name="_token" value="{{ csrf_token() }}">
-      <input type="hidden" id="editCustomerId" name="id">
+<!-------------------------- End Add Employee Modal -------------------------->
 
 
+<!-------------------------- Edit Employee Modal -------------------------->
+<div id="editEmployeeModal" class="modal">
+  <div class="modal-content new-employee-modal-design">
+    <span class="close-btn" onclick="closeEditEmployeeModal()"><i class="fas fa-times"></i></span>
+    <h2 class="modal-title">Edit Employee 👨‍💼</h2>
 
-      <!-- ================= CUSTOMER TAB ================= -->
-      <div id="editCustomerTab" class="form-tab-content active">
-        <fieldset class="form-section-fieldset">
-          <legend>Customer Information</legend>
-          <div class="form-row">
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editPotentialCustomer" name="potential" value="1">
-              <label for="editPotentialCustomer">Potential</label>
-            </div>
-            <div class="form-group">
-              <label for="editLegacyAccNo">Legacy Acc. No.:</label>
-              <input type="text" id="editLegacyAccNo" name="legacy_acc_no">
-            </div>
+    <form id="editEmployeeForm">
+      <input type="hidden" id="editEmployeeId">
+
+      <fieldset class="form-section-fieldset">
+        <legend>Employee Information</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editEmployeeReference">Employee Reference:</label>
+            <input type="text" id="editEmployeeReference" readonly>
           </div>
+        </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCustomerName">Customer Name:</label>
-              <input type="text" id="editCustomerName" name="customer_name" required>
-            </div>
-            <div class="form-group">
-              <label for="editCustomerArabicName">Arabic Name:</label>
-              <input type="text" id="editCustomerArabicName" name="arabic_name">
-            </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editEmployeeName">Full Name:</label>
+            <input type="text" id="editEmployeeName">
           </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCustomerLegalName">Legal Name:</label>
-              <input type="text" id="editCustomerLegalName" name="customer_legal_name">
-            </div>
-            <div class="form-group">
-              <label for="editCustomerType">Customer Type:</label>
-              <select id="editCustomerType" name="customer_type" required>
-                <option value="" disabled>Select Type</option>
-                <option value="Contractor">Contractor</option>
-                <option value="Consultant">Consultant</option>
-                <option value="Supplier">Supplier</option>
-                <option value="Private">Private</option>
-                <option value="Owner">Owner</option>
-                <option value="Other">Other</option>
-                <option value="Governmental">Governmental</option>
-              </select>
-            </div>
+          <div class="form-group">
+            <label for="editEmployeeEmail">Email:</label>
+            <input type="email" id="editEmployeeEmail">
           </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editRegistrationDate">Date Registered:</label>
-              <input type="date" id="editRegistrationDate" name="date_registered">
-            </div>
-            <div class="form-group">
-              <label for="editCustomerPhone">Phone:</label>
-              <input type="tel" id="editCustomerPhone" name="phone" placeholder="e.g., +9665XXXXXXXX">
-            </div>
+          <div class="form-group">
+            <label for="editEmployeeTitle">Title:</label>
+            <input type="text" id="editEmployeeTitle">
           </div>
-        </fieldset>
+        </div>
+      </fieldset>
 
-        <fieldset class="form-section-fieldset">
-          <legend>Customer Location</legend>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCustomerCountry">Country:</label>
-              <select id="editCustomerCountry" name="country">
-                <option value="" disabled>Select Country</option>
-                <option value="Saudi Arabia">Saudi Arabia</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="editCustomerArabicLocation">Arabic Location:</label>
-              <input type="text" id="editCustomerArabicLocation" name="arabic_location">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCustomerDistrict">District:</label>
-              <input type="text" id="editCustomerDistrict" name="district">
-            </div>
-            <div class="form-group">
-              <label for="editCustomerCity">City:</label>
-              <select id="editCustomerCity" name="city">
-                <option value="" disabled>Select City</option>
-                <option value="Ehsa">Ehsa</option>
-                <option value="Riyadh">Riyadh</option>
-                <option value="Jeddah">Jeddah</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="customerStreet">Street:</label>
-              <input type="text" id="editCustomerStreet" name="street">
-            </div>
-            <div class="form-group">
-              <label for="customerPostCode">Post Code:</label>
-              <input type="text" id="editCustomerPostCode" name="post_code">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="customerAddressBlock">Address Block:</label>
-              <input type="text" id="editCustomerAddressBlock" name="address_block">
-            </div>
-            <div class="form-group">
-              <label for="customerPoBox">PO Box:</label>
-              <input type="text" id="editCustomerPoBox" name="po_box">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="customerBuildingNo">Building No:</label>
-              <input type="text" id="editCustomerBuildingNo" name="building_no">
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="form-section-fieldset">
-          <legend>Terms & Other Controls</legend>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="paymentTerms">Payment Terms:</label>
-              <select id="editPaymentTerms" name="payment_terms">
-                <option value="" selected disabled>Select Payment Terms</option>
-                <option value="IM - Immediate">IM - Immediate</option>
-                <option value="PIA - Payment in advance">PIA - Payment in advance</option>
-                <option value="C.O.D - Cash on delivery">C.O.D - Cash on delivery</option>
-                <option value="E.O.M - End of month">E.O.M - End of month</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="discount">Discount:</label>
-              <input type="number" id="editDiscount" name="discount">
-            </div>
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editIsCash" name="cash" value="1">
-              <label for="isCash">Cash</label>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editCreditLimit">Credit Limit:</label>
-              <input type="text" id="editCreditLimit" name="credit_limit">
-            </div>
-            <div class="form-group">
-              <label for="vatProfile">VAT Profile:</label>
-              <select id="editVatProfile" name="vat_profile" required>
-                <option value="" disabled>Select VAT Profile</option>
-                <option value="Standard VAT" selected>Standard VAT</option>
-                <option value="Exempt Supply">Exempt Supply</option>
-                <option value="Zero-Rated Supply">Zero-Rated Supply</option>
-                <option value="Non-VAT Registered">Non-VAT Registered</option>
-                <option value="Flat Rate Scheme">Flat Rate Scheme</option>
-                <option value="Reverse Charge">Reverse Charge</option>
-                <option value="Mixed Supply">Mixed Supply</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editTrnTin">TRN/TIN #:</label>
-              <input type="text" id="editTrnTin" name="trn_tin">
-            </div>
-            <div class="form-group">
-              <label for="editRegistrationNo">Registration #:</label>
-              <input type="text" id="editRegistrationNo" name="registration_no">
-            </div>
-          </div>
-
-          <div class="form-row-checkboxes">
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editRestrictDeliveries" name="restrict_deliveries" value="1">
-              <label for="editRestrictDeliveries">Restrict Deliveries</label>
-            </div>
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editRestrictOrders" name="restrict_orders" value="1">
-              <label for="editRestrictOrders">Restrict Orders</label>
-            </div>
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editRestrictQuotations" name="restrict_quotations" value="1">
-              <label for="editRestrictQuotations">Restrict Quotations</label>
-            </div>
-          </div>
-        </fieldset>
-      </div>
-      <!-- END CUSTOMER TAB -->
-
-      <!-- ================= CONTACT TAB ================= -->
-      <div id="editContactTab" class="form-tab-content" style="display: none;">
-        <fieldset class="form-section-fieldset">
-          <legend>Contact List</legend>
-          <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
-           <button type="button" class="btn-secondary" onclick="populateContactFormForEdit('edit')">
-    <i class="fas fa-pen"></i> Edit Selected
-  </button>
-
-  <button type="button" class="btn-danger" onclick="deleteSelectedContacts('#contactsTableEdit')">
-      <i class="fas fa-trash"></i> Delete Selected
-  </button>
-
-  <button type="button" class="btn-icon" id="exportContactsExcelClient" title="Export to Excel" onclick="exportContactsExcelEditBtn()">
-    <i class="fa-solid fa-table"></i>
-  </button>
-
-
-  <button type="button" class="btn-icon" id="printContactsModalTableBtn" title="Print" onclick="window.printContactsTableEdit()">
-      <i class="fas fa-print"></i>
-  </button>
-          </div>
-          <div class="table-responsive-container">
-                <table id="contactsTableEdit" class="contacts-table display responsive nowrap" data-ignore-lang>
-                            <thead>
-                                <tr data-contact-id="">
-                                    <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this, 'contactsTable')"></th>
-                                    <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                    <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                    <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                    <th>Mobile<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                    <th>Position<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                    <th>Is Primary<br>
-                                        <select class="column-filter">
-                                            <option value="">All</option>
-                                            <option value="Yes">Yes</option>
-                                            <option value="No">No</option>
-                                        </select>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                  </table>
-          </div>
-        </fieldset>
-
-        <fieldset class="form-section-fieldset">
-          <legend>Add/Edit Contact Person</legend>
-          <div class="form-row">
-            <input type="hidden" id="editContactId">
-
-
-            <div class="form-group">
-              <label for="contactNameedit">Contact Name:</label>
-              <input type="text" id="contactNameedit" placeholder="Enter contact name">
-            </div>
-            <div class="form-group">
-              <label for="contactEmailedit">Contact Email:</label>
-              <input type="email" id="contactEmailedit" placeholder="contact@example.com">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="contactPhoneedit">Contact Phone:</label>
-              <input type="tel" id="contactPhoneedit" placeholder="+9665XXXXXXXX">
-            </div>
-            <div class="form-group">
-              <label for="contactMobileedit">Contact Mobile:</label>
-              <input type="tel" id="contactMobileedit" placeholder="+9665XXXXXXXX">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="contactPositionedit">Position:</label>
-              <input type="text" id="contactPositionedit" placeholder="e.g., Sales Manager">
-            </div>
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="isPrimaryContact">
-              <label for="isPrimaryContact">Primary Contact</label>
-            </div>
-          </div>
-
-          <div class="contact-toolbar">
-            <button type="button" class="btn btn-primary" onclick="saveContactForCustomer('edit')">
-              💾 Save / Update
-          </button>
-          <button type="button" class="btn-secondary" onclick="clearContactForm('edit')">
-            <i class="fas fa-eraser"></i> Clear Form
-          </button>
-          </div>
-        </fieldset>
-      </div>
-      <!-- END CONTACT TAB -->
-
-      <!-- 🔹 Modal Footer -->
+      <!---------------- Modal Buttons ---------------->
       <div class="form-buttons modal-bottom-buttons">
-        <button type="button" class="btn-primary" onclick="closeEditCustomerModal()"><i class="fas fa-times"></i> Close</button>
-        <button type="submit" class="btn-success" onclick="updateCustomer(event, true)"><i class="fas fa-save"></i> Update & Close</button>
-        <button type="button" class="btn-success" onclick="updateCustomer(event, false)"><i class="fas fa-save"></i> Update</button>
-    </div>
+        <button type="button" class="btn-primary" onclick="closeEditEmployeeModal()"><i class="fas fa-times"></i> Close</button>
+        <button type="button" class="btn-success" onclick="updateEmployee(true)">
+        <i class="fas fa-save"></i> Update & Close
+        </button>
+        <button type="button" class="btn-primary" onclick="updateEmployee(false)">
+        <i class="fas fa-save"></i> Update
+        </button>
 
+      </div>
     </form>
   </div>
 </div>
-
+<!-------------------------- End Edit Employee Modal -------------------------->

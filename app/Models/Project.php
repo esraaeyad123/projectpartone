@@ -9,22 +9,32 @@ class Project extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'reference',
-        'name',
-        'arabic_name',
-        'registration_date',
-        'region',
-        'customer_id',
-        'owner',
-        'consultant',
-        'contractor',
+    'reference',
+    'name',
+    'arabic_name',
+    'registration_date',
+    'region',
+    'customer_id',
+    'owner_id',
+    'consultant_id',
+    'contractor_id',
     ];
 
-    // علاقة مع العميل
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
+  public function customer() {
+    return $this->belongsTo(Customer::class, 'customer_id');
+}
+
+public function owner() {
+    return $this->belongsTo(Customer::class, 'owner_id');
+}
+
+public function consultant() {
+    return $this->belongsTo(Customer::class, 'consultant_id');
+}
+
+public function contractor() {
+    return $this->belongsTo(Customer::class, 'contractor_id');
+}
 
 
     public function contacts()
@@ -45,7 +55,7 @@ public function files()
         static::creating(function ($project) {
             // توليد Reference
             $lastId = Project::max('id') + 1;
-            $project->reference = 'AAMC-' . str_pad($lastId, 4, '0', STR_PAD_LEFT);
+            $project->reference = 'AAMP-' . str_pad($lastId, 4, '0', STR_PAD_LEFT);
 
             // توليد تاريخ التسجيل
             $project->registration_date = now()->toDateString();
