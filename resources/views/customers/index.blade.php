@@ -551,7 +551,7 @@
                 });
             }
         });
-    };
+    };   
     // ---------------------------------------------------------------------------------------
     window.openEditCustomerModal = function() {
         let selected = $('.customerCheckbox:checked');
@@ -686,6 +686,7 @@
         window.location.href = url;
         //}
     };
+    
     // ---------------------------------------------------------------------------------------
     // لجدول جهات اتصال خاص بالعميل
     $(document).ready(function() {
@@ -768,11 +769,11 @@
 
         // دالة لملء فورم جهة الاتصال لغرض التعديل
         window.populateContactFormForEdit = function(modalType = 'add') {
-            letcustomerTable = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
+            let customerTable = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
             let $tableSelector = (modalType === 'edit') ? '#contactsTableEdit' : '#contactsTable';
             let selectedCheckbox = $(`${$tableSelector} tbody input[type="checkbox"]:checked`);
 
-            if (selectedCheckbox.length === 0) {
+            if (selectedCheckbox.length !== 1) {
                 Swal.fire("تنبيه", "⚠️ الرجاء اختيار جهة اتصال واحدة", "warning");
                 return;
             }
@@ -855,7 +856,7 @@
                     res.contact.is_primary = (res.contact.is_primary == 1 || res.contact.is_primary === true || res.contact.is_primary === '1') ? 1 : 0;
                     Swal.fire(contactId ? "نجاح" : "نجاح", contactId ? "✔️ تم تحديث جهة الاتصال" : "✔️ تم إضافة جهة اتصال جديدة", "success");
 
-                    letcustomerTable = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
+                    let customerTable = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;
 
                     if (contactId) {
                         let rowIndex =customerTable.rows().eq(0).filter(idx =>customerTable.row(idx).data().id == contactId);
@@ -915,8 +916,8 @@
                     success: function(res) {
                         if (res.success) {
                             Swal.fire("تم", res.message, "success");
-                            letcustomerTable = window[tableSelector.replace('#', '')];
-                            if (table) {
+                            let customerTable = window[tableSelector.replace('#', '')];
+                            if (customerTable) {
                                customerTable.rows(function(idx, data, node) {
                                     return ids.includes($(node).attr('data-contact-id'));
                                 }).remove().draw();
@@ -942,16 +943,16 @@
         });
     });
     // ----------------------------------------------------------------------
-    window.toggleAllContacts = function(source,customerTableId) {
-        constcustomerTable = $(`#${tableId}`).DataTable();
-        const rows =customerTable.rows({ 'search': 'applied' }).nodes();
+    window.toggleAllContacts = function(source, tableId) {
+        const table = $(`#${tableId}`).DataTable();
+        const rows = table.rows({ 'search': 'applied' }).nodes();
         $('input.contact-select', rows).prop('checked', source.checked);
     };
     //  دوال التصدير للاكسل
     // ----------------------------------------------------------------------
     window.exportCustomersExcelBtn = function() {
-        constcustomerTableElement = document.getElementById('customersTable');
-        constcustomerTable = $(tableElement).DataTable();
+        const customerTableElement = document.getElementById('customersTable');
+        const customerTable = $(customerTableElement).DataTable();
 
         const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
         let rowsToProcess;
@@ -965,7 +966,7 @@
         // 1. بناء البيانات لـ SheetJS
         const data = [];
         const header = [];
-        $(tableElement).find('thead th').each(function() {
+        $(customerTableElement).find('thead th').each(function() {
             if ($(this).find('input[type="checkbox"]').length === 0) {
                 header.push($(this).text().trim());
             }
@@ -994,12 +995,12 @@
     };
     // ----------------------------------------------------------------------
     window.exportContactsExcelBtn = function() {
-        constcustomerTableElement = document.getElementById('contactsTable');
-        if (!tableElement) {
+        const customerTableElement = document.getElementById('contactsTable');
+        if (!customerTableElement) {
             console.error('Table with ID "contactsTable" not found.');
             return;
         }
-        constcustomerTable = $(tableElement).DataTable();
+        const customerTable = $(customerTableElement).DataTable();
 
         // 1. العثور على الصفوف التي سيتم تصديرها
         const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
@@ -1016,7 +1017,7 @@
         // 2. بناء البيانات لـ SheetJS
         const data = [];
         const header = [];
-        $(tableElement).find('thead th').each(function() {
+        $(customerTableElement).find('thead th').each(function() {
             if ($(this).find('input[type="checkbox"]').length === 0) {
                 header.push($(this).text().trim());
             }
@@ -1043,12 +1044,12 @@
     };
     // ----------------------------------------------------------------------
     window.exportContactsExcelEditBtn = function() {
-        constcustomerTableElement = document.getElementById('contactsTableEdit');
-        if (!tableElement) {
+        const customerTableElement = document.getElementById('contactsTableEdit');
+        if (!customerTableElement) {
             console.error('Table with ID "contactsTableEdit" not found.');
             return;
         }
-        constcustomerTable = $(tableElement).DataTable();
+        const customerTable = $(customerTableElement).DataTable();
 
         // 1. العثور على الصفوف التي سيتم تصديرها
         const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
@@ -1065,7 +1066,7 @@
         // 2. بناء البيانات لـ SheetJS
         const data = [];
         const header = [];
-        $(tableElement).find('thead th').each(function() {
+        $(customerTableElement).find('thead th').each(function() {
             if ($(this).find('input[type="checkbox"]').length === 0) {
                 header.push($(this).text().trim());
             }
@@ -1095,8 +1096,8 @@
     // ----------------------------------------------------------------------
     window.printCustomersTable = function() {
         // تحديد الجدول المطلوب (في هذه الحالة جدول العملاء)
-        constcustomerTableElement = document.getElementById('customersTable');
-        constcustomerTable = $(tableElement).DataTable();
+        const customerTableElement = document.getElementById('customersTable');
+        const customerTable = $(customerTableElement).DataTable(); // ✅ تم التصحيح
 
         // العثور على مربعات التحديد المحددة
         const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
@@ -1122,7 +1123,7 @@
                 <thead><tr>`;
 
         // نسخ رؤوس الأعمدة
-        $(tableElement).find('thead tr:first th').each(function() {
+        $(customerTableElement).find('thead tr:first th').each(function() {
             if ($(this).find('input[type="checkbox"]').length > 0) {
                 return;
             }
@@ -1159,15 +1160,15 @@
     };
     // ----------------------------------------------------------------------
     window.printContactsTable = function() {
-        constcustomerTableElement = document.getElementById('contactsTable');
-        if (!tableElement) {
+        const contactsTableElement = document.getElementById('contactsTable');
+        if (!contactsTableElement) {
             console.error('❌ الجدول بالمعرّف "contactsTable" غير موجود.');
             return;
         }
-        constcustomerTable = $(tableElement).DataTable();
+        const contactsTable = $(contactsTableElement).DataTable();
 
         // 1. العثور على الصفوف التي سيتم طباعتها
-        const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
+        const selectedCheckboxes = contactsTable.$('input[type="checkbox"]:checked');
         let rowsToProcess;
 
         if (selectedCheckboxes.length > 0) {
@@ -1175,13 +1176,13 @@
             rowsToProcess = selectedCheckboxes.parents('tr');
         } else {
             // إذا لم يتم تحديد أي شيء، قم بمعالجة جميع الصفوف المرئية
-            rowsToProcess =customerTable.rows({ 'search': 'applied' }).nodes();
+            rowsToProcess = contactsTable.rows({ 'search': 'applied' }).nodes();
         }
 
         let printContents = `
             <style>
                 body { font-family: Arial, sans-serif; }
-               customerTable { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
                 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
                 th { background-color: #f2f2f2; }
                 h2 { text-align: center; margin-bottom: 20px; }
@@ -1191,7 +1192,7 @@
                 <thead><tr>`;
 
         // 2. نسخ رؤوس الأعمدة
-        $(tableElement).find('thead tr:first th').each(function() {
+        $(contactsTableElement).find('thead tr:first th').each(function() {
             if ($(this).find('input[type="checkbox"]').length > 0) {
                 return;
             }
@@ -1228,12 +1229,12 @@
     };
     // ----------------------------------------------------------------------
     window.printContactsTableEdit = function() {
-        constcustomerTableElement = document.getElementById('contactsTableEdit');
-        if (!tableElement) {
+        const customerTableElement = document.getElementById('contactsTableEdit');
+        if (!customerTableElement) {
             console.error('❌ الجدول بالمعرّف "contactsTableEdit" غير موجود.');
             return;
         }
-        constcustomerTable = $(tableElement).DataTable();
+        const customerTable = $(customerTableElement).DataTable();
 
         // 1. العثور على الصفوف التي سيتم طباعتها
         const selectedCheckboxes =customerTable.$('input[type="checkbox"]:checked');
@@ -1260,7 +1261,7 @@
                 <thead><tr>`;
 
         // 2. نسخ رؤوس الأعمدة
-        $(tableElement).find('thead tr:first th').each(function() {
+        $(customerTableElement).find('thead tr:first th').each(function() {
             if ($(this).find('input[type="checkbox"]').length > 0) {
                 return;
             }

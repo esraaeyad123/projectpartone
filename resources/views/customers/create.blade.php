@@ -240,7 +240,7 @@
                         <table id="contactsTable" class="contacts-table display responsive nowrap" data-ignore-lang>
                             <thead>
                                 <tr data-contact-id="">
-                                    <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this, 'contactsTable')"></th>
+                                    <th><input type="checkbox" id="selectAllContacts" onclick="window.toggleAllContacts(this, 'contactsTable')"></th>
                                     <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
@@ -595,7 +595,7 @@
                 <table id="contactsTableEdit" class="contacts-table display responsive nowrap" data-ignore-lang>
                             <thead>
                                 <tr data-contact-id="">
-                                    <th><input type="checkbox" id="selectAllContacts" onclick="toggleAllContacts(this, 'contactsTable')"></th>
+                                    <th><input type="checkbox" id="selectAllContacts" onclick="window.toggleAllContacts(this, 'contactsTableEdit')"></th>
                                     <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
