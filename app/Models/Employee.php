@@ -47,4 +47,9 @@ class Employee extends Model
             $employee->created_at = now(); // أو $employee->registration_date إذا لديك حقل
         });
     }
+
+    public function files()
+    {
+        return $this->hasMany(EmployeeFile::class);
+    }
 }

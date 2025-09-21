@@ -15,7 +15,7 @@ class ProjectController extends Controller
 {
     if ($request->expectsJson()) {
         // جلب المشاريع مع العميل وجهات الاتصال
-        return Project::with(['contacts', 'customer'])->get();
+        return Project::with(['customer', 'owner', 'consultant', 'contractor'])->get();
     }
 
     $projects = Project::with(['contacts', 'customer'])->get();
@@ -37,15 +37,14 @@ class ProjectController extends Controller
      */
  public function store(Request $request)
 {
-    $validated = $request->validate([
+   $validated = $request->validate([
         'name' => 'required|string|max:255',
         'arabic_name' => 'nullable|string|max:255',
         'registration_date' => 'nullable|date',
-        'region' => 'nullable|string|max:255',
         'customer_id' => 'nullable|exists:customers,id',
-        'owner' => 'nullable|string|max:255',
-        'consultant' => 'nullable|string|max:255',
-        'contractor' => 'nullable|string|max:255',
+        'owner_id' => 'nullable|exists:customers,id',
+        'consultant_id' => 'nullable|exists:customers,id',
+        'contractor_id' => 'nullable|exists:customers,id',
         'projectArabicLocation' => 'nullable|string|max:255',
     ]);
 
@@ -60,7 +59,7 @@ return response()->json([
 }
 public function update(Request $request, Project $project)
 {
-    $validated = $request->validate([
+     $validated = $request->validate([
         'name' => 'required|string|max:255',
         'arabic_name' => 'nullable|string|max:255',
         'registration_date' => 'nullable|date',
@@ -71,16 +70,8 @@ public function update(Request $request, Project $project)
         'projectArabicLocation' => 'nullable|string|max:255',
     ]);
 
-    $project->update([
-        'name' => $validated['name'],
-        'arabic_name' => $validated['arabic_name'] ?? null,
-        'registration_date' => $validated['registration_date'] ?? null,
-        'customer_id' => $validated['customer_id'] ?? null,
-        'owner_id' => $validated['owner_id'] ?? null,
-        'consultant_id' => $validated['consultant_id'] ?? null,
-        'contractor_id' => $validated['contractor_id'] ?? null,
-        'projectArabicLocation' => $validated['projectArabicLocation'] ?? null,
-    ]);
+    $project->update($validated);
+
 
     return response()->json([
         'id' => $project->id,

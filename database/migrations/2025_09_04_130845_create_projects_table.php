@@ -24,7 +24,7 @@ return new class extends Migration
         $table->string('region')->nullable();
 
         // علاقات
-        $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
+        $table->foreignId('customer_id')->nullable()->constrained('customers')->onDelete('cascade');
         $table->foreignId('owner_id')->nullable()->constrained('customers')->onDelete('set null');
         $table->foreignId('consultant_id')->nullable()->constrained('customers')->onDelete('set null');
         $table->foreignId('contractor_id')->nullable()->constrained('customers')->onDelete('set null');

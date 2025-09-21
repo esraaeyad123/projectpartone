@@ -11,7 +11,10 @@ use App\Http\Controllers\Project\ProjectContactController;
 use App\Http\Controllers\ProjectFileController;
 use App\Http\Controllers\Quotation\QuotationHeaderController;
 use App\Http\Controllers\Quotation\PriceListController;
+use App\Http\Controllers\Employees\EmployeesContactController;
 use App\Http\Controllers\Employees\EmployeesController;
+use App\Http\Controllers\Employees\EmployeeFileController;
+
 
 
 
@@ -136,11 +139,68 @@ Route::post('/quotation-lines/bulk-add', [QuotationLineController::class, 'bulkA
 Route::get('/quotation-lines/{quotationId}', [QuotationLineController::class, 'getByQuotation']);
 // routes/web.php أو routes/api.php
 Route::post('/quotations/{quotation}/lines/store', [QuotationLineController::class, 'storeLine']);
-Route::get('/employees', [EmployeesController::class, 'viewEmployees'])->name('employees.view');
-// routes/web.php
+
+
+
+
+
+// عرض صفحة الموظفين
+Route::get('/employees', [EmployeesController::class, 'index'])->name('employees.index');
+
+// جلب بيانات الموظفين للجدول بصيغة JSON
 Route::get('/employees/data', [EmployeesController::class, 'getEmployeesData'])->name('employees.data');
 
+// إنشاء موظف جديد
+Route::post('/employees', [EmployeesController::class, 'store'])->name('employees.store');
 
-Route::post('/employees/store', [EmployeesController::class, 'store'])->name('employees.store');
-Route::put('/employees/{id}', [EmployeesController::class, 'update'])->name('employees.update');
-Route::get('/employees/{id}', [EmployeesController::class, 'getEmployee'])->name('employees.get');
+// تعديل موظف موجود
+Route::put('/employees/{employee}', [EmployeesController::class, 'update'])->name('employees.update');
+
+// جلب موظف واحد (Show)
+Route::get('/employees/{employee}', [EmployeesController::class, 'show'])->name('employees.show');
+
+// حذف موظف
+Route::delete('/employees/{employee}', [EmployeesController::class, 'destroy'])->name('employees.destroy');
+
+// حذف مجموعة موظفين
+Route::post('/employees/delete-multiple', [EmployeesController::class, 'deleteMultiple'])->name('employees.deleteMultiple');
+
+// ======================= Employee Routes =======================
+
+// جلب كل الموظفين
+
+// حذف عدة موظفين دفعة واحدة
+
+// جلب وحفظ وتعديل وحذف جهات الاتصال الخاصة بالموظفين
+Route::prefix('employees/{employee}')->group(function () {
+    // جلب كل جهات الاتصال لموظف محدد
+    Route::get('contacts', [EmployeesContactController::class, 'index']);
+
+    // إنشاء جهة اتصال جديدة لموظف
+    Route::post('contacts', [EmployeesContactController::class, 'store']);
+
+    // تعديل جهة اتصال موجودة لموظف
+    Route::put('contacts/{contact}', [EmployeesContactController::class, 'update']);
+});
+
+
+// حذف عدة جهات اتصال دفعة واحدة
+// هذا لازم يكون قبل أي Route فيه {employee_contact}
+// حذف متعدد لازم ييجي أول
+Route::delete('employee-contacts/delete-multiple', [EmployeesContactController::class, 'deleteMultiple'])
+    ->name('employee-contacts.delete-multiple');
+
+// حذف جهة اتصال واحدة بالـ ID
+Route::delete('employee-contacts/{employee_contact}', [EmployeesContactController::class, 'destroy'])
+    ->name('employee-contacts.destroy');
+
+
+
+Route::get('employees/{employee}/files', [EmployeeFileController::class, 'index']);
+Route::post('employees/{employee}/files', [EmployeeFileController::class, 'store']);
+Route::get('employees/files/{employeeFile}/download', [EmployeeFileController::class, 'download']);
+Route::post('employees/files/download-multiple', [EmployeeFileController::class, 'downloadMultipleFiles']);
+Route::delete('employees/files/{employeeFile}', [EmployeeFileController::class, 'destroy']);
+Route::post('employees/files/delete-multiple', [EmployeeFileController::class, 'destroyMultiple']);
+Route::get('employees/{employee}/files-json', [EmployeeFileController::class, 'filesJson']);
+Route::get('/employees/files/{file}/view', [EmployeeFileController::class, 'viewEmployeeFile'])->name('employees.files.view');

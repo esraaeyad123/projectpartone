@@ -270,27 +270,27 @@
                         </div>
                     </div>
                 </fieldset>
+<fieldset class="form-section-fieldset">
+    <legend>Project Location</legend>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="editProjectArabicLocation">Location:</label>
+            <input type="text" id="editProjectArabicLocation">
+        </div>
+    </div>
+</fieldset>
 
-                <fieldset class="form-section-fieldset">
-                    <legend>Project Location</legend>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editProjectArabicLocation">Location:</label>
-                            <input type="text" id="editProjectArabicLocation">
-                        </div>
-                    </div>
-                </fieldset>
-
-            <fieldset class="form-section-fieldset">
+<fieldset class="form-section-fieldset">
     <legend>Parties Section</legend>
 
+    {{-- Customer --}}
     <div class="form-row">
         <div class="form-group">
             <label for="editCustomer">Customer:</label>
             <select id="editCustomer" name="customer_id">
                 <option value="" disabled selected>[Select Customer]</option>
                 @foreach($customers as $customer)
-                    <option value="{{ $customer->id }}" data-type="{{ $customer->customer_type }}">
+                    <option value="{{ $customer->id }}">
                         {{ $customer->customer_name }}
                     </option>
                 @endforeach
@@ -298,13 +298,14 @@
         </div>
     </div>
 
+    {{-- Owner & Consultant --}}
     <div class="form-row">
         <div class="form-group">
             <label for="editOwner">Owner:</label>
             <select id="editOwner" name="owner_id">
                 <option value="" disabled selected>[Select Owner]</option>
-                @foreach($customers as $customer)
-                    <option value="{{ $customer->id }}" data-type="{{ $customer->customer_type }}">
+                @foreach($customers->where('customer_type', 'Owner') as $customer)
+                    <option value="{{ $customer->id }}">
                         {{ $customer->customer_name }}
                     </option>
                 @endforeach
@@ -314,8 +315,8 @@
             <label for="editConsultant">Consultant:</label>
             <select id="editConsultant" name="consultant_id">
                 <option value="" disabled selected>[Select Consultant]</option>
-                @foreach($customers as $customer)
-                    <option value="{{ $customer->id }}" data-type="{{ $customer->customer_type }}">
+                @foreach($customers->where('customer_type', 'Consultant') as $customer)
+                    <option value="{{ $customer->id }}">
                         {{ $customer->customer_name }}
                     </option>
                 @endforeach
@@ -323,13 +324,14 @@
         </div>
     </div>
 
+    {{-- Contractor --}}
     <div class="form-row">
         <div class="form-group">
             <label for="editContractor">Contractor:</label>
             <select id="editContractor" name="contractor_id">
                 <option value="" disabled selected>[Select Contractor]</option>
-                @foreach($customers as $customer)
-                    <option value="{{ $customer->id }}" data-type="{{ $customer->customer_type }}">
+                @foreach($customers->where('customer_type', 'Contractor') as $customer)
+                    <option value="{{ $customer->id }}">
                         {{ $customer->customer_name }}
                     </option>
                 @endforeach
@@ -337,6 +339,7 @@
         </div>
     </div>
 </fieldset>
+
             </div>
             <!-------------------------- Edit Contac tTab-------------------------->
             <div id="editContactTab" class="form-tab-content" style="display: none;">

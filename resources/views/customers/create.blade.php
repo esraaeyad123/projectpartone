@@ -58,7 +58,7 @@
                         </div>
                         <div class="form-group">
                             <label for="customerType">Customer Type:</label>
-                            <select id="customerType" name="customerType" required>
+                            <select id="customerType" name="customer_type" required>
                                 <option value="" selected disabled>Select Type</option>
                                 <option value="Contractor">Contractor</option>
                                 <option value="Consultant">Consultant</option>

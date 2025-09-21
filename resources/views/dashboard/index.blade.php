@@ -24,7 +24,7 @@
       </div>
       <div class="general-card">
     <i class="fas fa-users"></i>
-    <span data-key="Employees" onclick="window.location.href='{{ route('employees.view') }}'">Employees</span>
+    <span data-key="Employees" onclick="window.location.href='{{ route('employees.index') }}'">Employees</span>
 </div>
       <div class="general-card"><i class="fas fa-file-invoice-dollar"></i><span>Invoices</span></div>
       <div class="general-card"><i class="fas fa-truck"></i><span>Deliveries</span></div>

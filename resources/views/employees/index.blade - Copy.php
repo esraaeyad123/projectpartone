@@ -27,9 +27,7 @@
                     <div>
                         <button title="File Manager" onclick="goToEmployeeFiles()" class="btn-icon"><i class="fas fa-folder-open"></i> </button>
                         <button title="Employee Report" id="generateEmployeeReportBtn" onclick="generateEmployeeReport()" class="btn-icon"><i class="fa-solid fa-file-invoice"></i></button>
-<button title="Export to Excel" id="exportEmployeesExcelBtn" class="btn-icon" onclick="exportEmployeesExcel()">
-    <i class="fa-solid fa-table"></i>
-</button>
+                        <button title="Export to Excel" id="exportEmployeesExcelBtn" class="btn-icon"><i class="fa-solid fa-table"></i></button>
                         <button title="Print" id="printEmployeesTableBtn" onclick="printEmployeesTable()" class="btn-icon"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
@@ -80,7 +78,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 
     <script>
@@ -186,35 +184,30 @@ $(document).ready(function() {
     }
 });
 function loadEmployees() {
-    $.get('/employees', function(employees) {
-        // مسح الجدول قبل إعادة التحميل
-        employeesTable.clear();
-
-        employees.forEach(e => {
-            // إضافة الصف مع checkbox
-            let rowNode = employeesTable.row.add([
-                `<input type="checkbox" class="employee-checkbox" value="${e.id}">`, // 0
-                e.employee_reference || '',  // 1
-                e.initials || '',            // 2
-                e.mid_name || '',            // 3
-                e.full_name || '',           // 4
-                e.first_name || '',          // 5
-                e.last_name || '',           // 6
-                e.email || '',               // 7
-                e.supervisor_id || '',       // 8
-                e.ctta || '',                // 9
-                e.business_unit || '',       // 10
-                e.department || '',          // 11
-                e.title || '',               // 12
-                e.job_rules || '',           // 13
-                ''                            // 14: عمود مخفي
-            ]).draw(false).node();
-
-            // إضافة data-attribute لكل صف
-            $(rowNode).attr('data-employee-id', e.id);
+        $.get('/employees', function(employees) {
+            employeesTable.clear();
+            employees.forEach(e => {
+                employeesTable.row.add([
+                    `<input type="checkbox" class="employee-checkbox" value="${e.id}">`, // 0
+                    e.employee_reference || '',  // 1
+                    e.initials || '',            // 2
+                    e.mid_name || '',            // 3
+                    e.full_name || '',           // 4
+                    e.first_name || '',          // 5
+                    e.last_name || '',           // 6
+                    e.email || '',               // 7
+                    e.supervisor_id || '',       // 8
+                    e.ctta || '',                // 9
+                    e.business_unit || '',       // 10
+                    e.department || '',          // 11
+                    e.title || '',               // 12
+                    e.job_rules || '',           // 13
+                    ''                            // 14: Contacts Data (عمود مخفي)
+                ]);
+            });
+        employeesTable.draw(false); // false حتى لا يتم إعادة ترتيب الجدول
         });
-    });
-}
+    }
 
 // تحديد/إلغاء تحديد جميع الموظفين
 $('#selectAllEmployees').on('change', function() {
@@ -646,35 +639,6 @@ function deleteSelectedEmployees() {
     });
 }
 
-           window.goToEmployeeFiles = function() {
-    const employeesTable = $('#employeesTable').DataTable();
-    if (!employeesTable) {
-        Swal.fire("تنبيه ⚠️", "لم يتم العثور على جدول الموظفين!", "warning");
-        return;
-    }
-
-    // اختيار الصفوف المحددة
-    const selectedCheckboxes = employeesTable.$('input.employee-checkbox:checked');
-
-    if (selectedCheckboxes.length === 0) {
-        Swal.fire("تنبيه ⚠️", "يرجى اختيار موظف واحد!", "warning");
-        return;
-    }
-
-    if (selectedCheckboxes.length > 1) {
-        Swal.fire("تنبيه ⚠️", "يرجى اختيار موظف واحد فقط!", "warning");
-        return;
-    }
-
-    const employeeId = $(selectedCheckboxes[0]).closest('tr').data('employee-id');
-    if (!employeeId) {
-        Swal.fire("خطأ ❌", "لم يتم العثور على ID الموظف!", "error");
-        return;
-    }
-
-    // التوجيه لصفحة ملفات الموظف
-    window.location.href = `/employees/${employeeId}/files`;
-};
 
 //----------------------------------------------------------------------------------------
 //----------------------------------Employee Contacts-------------------------------------
@@ -685,64 +649,66 @@ window.toggleAllEmployeeContacts = function(source, tableId) {
     $('input.contact-select', rows).prop('checked', source.checked);
 };
 
-// --------------------------------------------------------
-// جدول جهات الاتصال للموظف
-// --------------------------------------------------------
 $(document).ready(function() {
-    // جدول الموظف عند إضافة موظف جديد
+    // جدول جهات الاتصال للموظف في إضافة موظف جديد
     window.employeeContactsTable = $('#employeeContactsTable').DataTable({
         columns: [
-            { data: null, render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`, orderable: false },
+            {
+                data: null,
+                render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`,
+                orderable: false
+            },
             { data: 'name' },
             { data: 'email' },
             { data: 'phone' },
             { data: 'mobile' },
             { data: 'position' },
-            { data: 'is_primary', render: d => (d == 1 || d === true || d === '1') ? 'Yes' : 'No' }
+            {
+                data: 'is_primary',
+                render: d => (d == 1 || d === true || d === '1') ? 'Yes' : 'No'
+            }
         ],
         createdRow: function(row, data) {
             $(row).attr('data-contact-id', data.id);
-            $(row).find('input.contact-select').val(data.id); // تأكد من تعيين القيمة
-
         }
     });
 
-    // فلترة الأعمدة
-    $('#employeeContactsTable thead .column-filter').on('keyup change', function() {
+    $('#employeeContactsTable thead .column-filter').on('keyup change', function(){
         let index = $(this).parent().index();
         window.employeeContactsTable.column(index).search(this.value).draw();
     });
 
-    // جدول الموظف عند تعديل موظف
+    // جدول جهات الاتصال للموظف في تعديل موظف
     window.employeeContactsTableEdit = $('#editEmployeeContactsTable').DataTable({
-        responsive: true,
-        columns: [
-            { data: null, render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`, orderable: false },
-            { data: 'name' },
-            { data: 'email' },
-            { data: 'phone' },
-            { data: 'mobile' },
-            { data: 'position' },
-            { data: 'is_primary', render: d => (d == 1 || d === true || d === '1') ? 'Yes' : 'No' }
-        ],
-        createdRow: function(row, data) {
-            $(row).attr('data-contact-id', data.id);
-           $(row).find('input.contact-select').val(data.id); // تأكد من تعيين القيمة
+    responsive: true,
+    columns: [
+        { data: null, render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`, orderable: false },
+        { data: 'name' },
+        { data: 'email' },
+        { data: 'phone' },
+        { data: 'mobile' },
+        { data: 'position' },
+        { data: 'is_primary', render: d => (d == 1 || d === true || d === '1') ? 'Yes' : 'No' }
+    ],
+    createdRow: function(row, data) {
+        $(row).attr('data-contact-id', data.id);
+    }
+});
 
-        }
-    });
-
-    $('#editEmployeeContactsTable thead .column-filter').on('keyup change', function() {
+    $('#employeeContactsTableEdit thead .column-filter').on('keyup change', function(){
         let index = $(this).parent().index();
         window.employeeContactsTableEdit.column(index).search(this.value).draw();
     });
 });
 
-// --------------------------------------------------------
-// دوال مساعدة خارج ready
+
+
+
+ // --------------------------------------------------------
+// ✅ دوال مساعدة للموظفين
 // --------------------------------------------------------
 
-// تعبئة جدول جهات الاتصال عند تعديل الموظف
+// دالة لتعبئة جدول جهات الاتصال للموظفين في وضع التعديل
 window.populateEmployeeContactsTableEdit = function(contacts) {
     if (!window.employeeContactsTableEdit) {
         console.error("employeeContactsTableEdit is not initialized!");
@@ -752,20 +718,24 @@ window.populateEmployeeContactsTableEdit = function(contacts) {
     window.employeeContactsTableEdit.rows.add(contacts).draw();
 };
 
-// مسح فورم جهة الاتصال
-// مسح فورم جهة الاتصال
+// دالة لمسح حقول فورم جهة الاتصال للموظفين (إضافة أو تعديل)
 window.clearEmployeeContactForm = function(modalType = 'add') {
     if (modalType === 'edit') {
-        $('#editContactIdEmployee, #editContactNameEmployee, #editContactEmailEmployee, #editContactPhoneEmployee, #editContactMobileEmployee, #editContactPositionEmployee').val('');
+        $('#editContactIdEmployee').val('');
+        $('#editContactNameEmployee').val('');
+        $('#editContactEmailEmployee').val('');
+        $('#editContactPhoneEmployee').val('');
+        $('#editContactMobileEmployee').val('');
+        $('#editContactPositionEmployee').val('');
         $('#editIsPrimaryContactEmployee').prop('checked', false);
     } else {
-        $('#employeeContactIdAdd, #employeeContactName, #employeeContactEmail, #employeeContactPhone, #employeeContactMobile, #employeeContactPosition').val('');
-        $('#isPrimaryContactEmployee').prop('checked', false);
+        $('#editEmployeeContactIdAdd').val('');
+        $('#employeeContactNameAdd, #employeeContactEmailAdd, #employeeContactPhoneAdd, #employeeContactMobileAdd, #employeeContactPositionAdd').val('');
+        $('#isPrimaryEmployeeContactAdd').prop('checked', false);
     }
 };
 
-
-// حفظ أو تعديل جهة الاتصال للموظف
+// دالة لحفظ أو تحديث جهة الاتصال للموظف
 window.saveEmployeeContact = function(modalType = 'add') {
     let employeeId = (modalType === 'edit') ? $('#editEmployeeId').val() : $('#employeeId').val();
     if (!employeeId) {
@@ -773,11 +743,7 @@ window.saveEmployeeContact = function(modalType = 'add') {
         return;
     }
 
-    // اختيار ID الصحيح من الفورم
-    let contactId = (modalType === 'edit')
-        ? ($('#editContactIdEmployee').val() || '').trim()
-        : ($('#employeeContactIdAdd').val() || '').trim();
-
+    let contactId = (modalType === 'edit') ? ($('#editEmployeeContactId').val() || '').trim() : ($('#editContactIdEmployee').val() || '').trim();
     let url = contactId ? `/employees/${employeeId}/contacts/${contactId}` : `/employees/${employeeId}/contacts`;
     let method = contactId ? 'PUT' : 'POST';
 
@@ -787,9 +753,7 @@ window.saveEmployeeContact = function(modalType = 'add') {
         phone: (modalType === 'edit') ? $('#editContactPhoneEmployee').val() || '' : $('#employeeContactPhone').val() || '',
         mobile: (modalType === 'edit') ? $('#editContactMobileEmployee').val() || '' : $('#employeeContactMobile').val() || '',
         position: (modalType === 'edit') ? $('#editContactPositionEmployee').val() || '' : $('#employeeContactPosition').val() || '',
-        is_primary: (modalType === 'edit')
-            ? ($('#editIsPrimaryContactEmployee').is(':checked') ? 1 : 0)
-            : ($('#isPrimaryContactEmployee').is(':checked') ? 1 : 0),
+        is_primary: (modalType === 'edit') ? ($('#editIsPrimaryContactEmployee').is(':checked') ? 1 : 0) : ($('#editIsPrimaryContactEmployee').is(':checked') ? 1 : 0),
         _token: $('meta[name="csrf-token"]').attr('content')
     };
 
@@ -826,9 +790,9 @@ window.saveEmployeeContact = function(modalType = 'add') {
 };
 
 
-// حذف جهات الاتصال المحددة للموظفين
-        // ✅ دالة لحذف الموظفين المحددين
-window.deleteSelectedEmployeeContacts = function(tableSelector) {
+// دالة لحذف جهات الاتصال المحددة للموظفين
+// خارج أي ready
+function deleteSelectedContacts(tableSelector) {
     if (!tableSelector) {
         Swal.fire("خطأ", "⚠️ لم يتم تحديد الجدول", "error");
         return;
@@ -857,7 +821,7 @@ window.deleteSelectedEmployeeContacts = function(tableSelector) {
         if (!result.isConfirmed) return;
 
         $.ajax({
-            url: `/employee-contacts/delete-multiple`, // تأكد أن هذا المسار معرف في Laravel
+            url: `/contacts/delete-multiple`,
             type: 'DELETE',
             data: {
                 ids: ids,
@@ -865,55 +829,65 @@ window.deleteSelectedEmployeeContacts = function(tableSelector) {
             },
             success: function(res) {
                 if (res.success) {
-                    Swal.fire("تم", "✔️ تم حذف جهات الاتصال بنجاح", "success");
-
-                    // ✅ استخدام DataTable مباشرة من الـ selector
-                    let table = $(tableSelector).DataTable();
-
-                    // إزالة الصفوف المحذوفة من الجدول بدون إعادة تحميل الصفحة
-                    table.rows(function(idx, data, node) {
-                        return ids.includes($(node).attr('data-contact-id'));
-                    }).remove().draw(false);
+                    Swal.fire("تم", res.message, "success");
+                    let projectTable = window[tableSelector.replace('#', '')];
+                    if (projectTable) {
+                        projectTable.rows(function(idx, data, node) {
+                            return ids.includes($(node).attr('data-contact-id'));
+                        }).remove().draw(false);
+                    }
                 } else {
                     Swal.fire("خطأ", res.message || "❌ لم يتم الحذف", "error");
                 }
             },
             error: function(xhr) {
-                Swal.fire("خطأ", xhr.responseJSON?.message || "❌ خطأ في الاتصال بالسيرفر", "error");
+                let msg = '❌ خطأ في الاتصال بالسيرفر';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    msg = xhr.responseJSON.message;
+                }
+                Swal.fire("خطأ", msg, "error");
             }
         });
     });
-};
+}
 
 
+// دالة لتعبئة الفورم عند تعديل جهة اتصال موظف
 
-// تعبئة الفورم عند الضغط على "Edit Selected"
-
+// دالة تعبئة فورم جهة الاتصال عند الضغط على زر "Edit Selected"
 window.populateEmployeeContactFormForEdit = function(modalType = 'add') {
-    const table = (modalType === 'edit') ? window.employeeContactsTableEdit : window.employeeContactsTable;
+    // تحديد الجدول وكائن DataTable بناءً على نوع المودال
+    let employeeTable;
+    let $tableSelector;
+    if (modalType === 'edit') {
+        employeeTable = window.employeeContactsTableEdit;
+        $tableSelector = '#editEmployeeContactsTable';
+    } else {
+        employeeTable = window.employeeContactsTable;
+        $tableSelector = '#employeeContactsTable';
+    }
 
     // جلب الصفوف المحددة
-    const selectedRows = table.rows().nodes().to$().find('input.contact-select:checked');
+    const selectedCheckboxes = $(`${$tableSelector} tbody input[type="checkbox"]:checked`);
 
-    if (selectedRows.length === 0) {
+    // تحقق من عدد الصفوف المحددة
+    if (selectedCheckboxes.length === 0) {
         Swal.fire("تنبيه", "⚠️ الرجاء اختيار جهة اتصال واحدة للتعديل", "warning");
         return;
     }
-    if (selectedRows.length > 1) {
+    if (selectedCheckboxes.length > 1) {
         Swal.fire("تنبيه", "⚠️ الرجاء اختيار جهة اتصال واحدة فقط للتعديل", "warning");
         return;
     }
 
-    // الحصول على بيانات الصف المحدد من DataTable API
-    const rowIndex = table.row(selectedRows.closest('tr')).index();
-    const rowData = table.row(rowIndex).data();
-
+    // تعبئة الفورم بالبيانات
+    const rowData = employeeTable.row(selectedCheckboxes.closest('tr')).data();
+     console.log(rowData)
     if (!rowData) {
         Swal.fire("خطأ", "❌ لم يتم العثور على بيانات جهة الاتصال", "error");
         return;
     }
 
-    // تعبئة الفورم حسب نوع المودال
     if (modalType === 'edit') {
         $('#editContactIdEmployee').val(rowData.id);
         $('#editContactNameEmployee').val(rowData.name);
@@ -923,16 +897,15 @@ window.populateEmployeeContactFormForEdit = function(modalType = 'add') {
         $('#editContactPositionEmployee').val(rowData.position);
         $('#editIsPrimaryContactEmployee').prop('checked', rowData.is_primary == 1 || rowData.is_primary === true);
     } else {
-        $('#employeeContactIdAdd').val(rowData.id);
-        $('#employeeContactNameAdd').val(rowData.name);
-        $('#employeeContactEmailAdd').val(rowData.email);
-        $('#employeeContactPhoneAdd').val(rowData.phone);
-        $('#employeeContactMobileAdd').val(rowData.mobile);
-        $('#employeeContactPositionAdd').val(rowData.position);
-        $('#isPrimaryEmployeeContactAdd').prop('checked', rowData.is_primary == 1 || rowData.is_primary === true);
+        $('#editContactIdAddEmployee').val(rowData.id);
+        $('#employeeContactName').val(rowData.name);
+        $('#employeeContactEmail').val(rowData.email);
+        $('#employeeContactPhone').val(rowData.phone);
+        $('#employeeContactMobile').val(rowData.mobile);
+        $('#employeeContactPosition').val(rowData.position);
+        $('#isPrimaryContactEmployee').prop('checked', rowData.is_primary == 1 || rowData.is_primary === true);
     }
 };
-
 
 //----------------------------------------------------------------------------------------
 //----------------------------------Print & Excel Employees--------------------------------
@@ -1006,7 +979,7 @@ window.printEmployeesTable = function() {
 };
 
 //----------------------------------------------------------------------------------------
-  window.exportEmployeesExcel = function() {
+window.exportEmployeesExcel = function() {
     const tableElement = document.getElementById('employeesTable');
     if (!tableElement) {
         showAlert('⚠️ لم يتم العثور على جدول الموظفين.', 'warning');
@@ -1014,31 +987,33 @@ window.printEmployeesTable = function() {
     }
 
     const employeesTable = $(tableElement).DataTable();
-    let rowsData = [];
-
     const selectedCheckboxes = employeesTable.$('input[type="checkbox"]:checked');
-    if (selectedCheckboxes.length > 0) {
-        selectedCheckboxes.each(function() {
-            const row = $(this).closest('tr');
-            const data = employeesTable.row(row).data();
-            rowsData.push(data);
-        });
-    } else {
-        rowsData = employeesTable.rows({ search: 'applied' }).data().toArray();
-    }
+    let rowsToProcess;
 
-    if (rowsData.length === 0) {
-        showAlert('⚠️ لا توجد بيانات لتصديرها.', 'warning');
-        return;
+    if (selectedCheckboxes.length > 0) {
+        rowsToProcess = selectedCheckboxes.parents('tr');
+    } else {
+        rowsToProcess = employeesTable.rows({ 'search': 'applied' }).nodes();
     }
 
     // بناء بيانات Excel
-    const header = Object.keys(rowsData[0]);
-    const data = [header];
+    const data = [];
+    const header = [];
+    $(tableElement).find('thead th').each(function() {
+        if ($(this).find('input[type="checkbox"]').length === 0 && $(this).text().trim() !== '') {
+            header.push($(this).text().trim());
+        }
+    });
+    data.push(header);
 
-    rowsData.forEach(row => {
-        const rowArray = header.map(h => row[h]);
-        data.push(rowArray);
+    $(rowsToProcess).each(function() {
+        const rowData = [];
+        $(this).find('td').each(function() {
+            if ($(this).find('input[type="checkbox"]').length === 0 && $(this).find('.icon-toolbar').length === 0) {
+                rowData.push($(this).text().trim());
+            }
+        });
+        data.push(rowData);
     });
 
     const ws = XLSX.utils.aoa_to_sheet(data);
@@ -1048,7 +1023,6 @@ window.printEmployeesTable = function() {
 
     showAlert('تم تصدير بيانات الموظفين بنجاح إلى ملف Excel.', 'success');
 };
-
 
 
    </script>
