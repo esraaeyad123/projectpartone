@@ -26,10 +26,9 @@
                     <div class="icon-separator"></div>
                     <div>
                         <button title="File Manager" onclick="goToEmployeeFiles()" class="btn-icon"><i class="fas fa-folder-open"></i> </button>
-                        <button title="Employee Report" id="generateEmployeeReportBtn" onclick="generateEmployeeReport()" class="btn-icon"><i class="fa-solid fa-file-invoice"></i></button>
-<button title="Export to Excel" id="exportEmployeesExcelBtn" class="btn-icon" onclick="exportEmployeesExcel()">
-    <i class="fa-solid fa-table"></i>
-</button>
+                        <button title="Export to Excel" id="exportEmployeesExcelBtn" class="btn-icon" onclick="exportEmployeesExcel()">
+                         <i class="fa-solid fa-table"></i>
+                        </button>
                         <button title="Print" id="printEmployeesTableBtn" onclick="printEmployeesTable()" class="btn-icon"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
@@ -1049,6 +1048,135 @@ window.printEmployeesTable = function() {
     showAlert('تم تصدير بيانات الموظفين بنجاح إلى ملف Excel.', 'success');
 };
 
+// ---------------------- طباعة جدول جهات الاتصال ----------------------
+window.printContactsTable = function(tableId) {
+        const tableElement = document.getElementById(tableId);
+        if (!tableElement) {
+            showAlert('⚠️ لم يتم العثور على جدول جهات الاتصال.', 'warning');
+            return;
+        }
+
+        const contactsTable = $(tableElement).DataTable();
+        const selectedCheckboxes = contactsTable.$('input[type="checkbox"]:checked');
+        let rowsToProcess;
+
+        if (selectedCheckboxes.length > 0) {
+            rowsToProcess = selectedCheckboxes.parents('tr');
+        } else {
+            rowsToProcess = contactsTable.rows({ 'search': 'applied' }).nodes();
+        }
+
+        let printContents = `
+            <html>
+            <head>
+                <title>طباعة قائمة جهات الاتصال</title>
+                <style>
+                    .contactsTable { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                    body { font-family: 'Arial', sans-serif; }
+                    h2 { text-align: center; margin-bottom: 20px; }
+                </style>
+            </head>
+            <body>
+                <h2>قائمة جهات الاتصال</h2>
+                <table>
+                    <thead><tr>`;
+
+        $(tableElement).find('thead tr:first th').each(function() {
+            if ($(this).find('input[type="checkbox"]').length > 0 || $(this).text().trim() === '') {
+                return;
+            }
+            const headerClone = $(this).clone();
+            headerClone.find('input, select, .btn, i').remove();
+            const columnTitle = headerClone.text().trim();
+            printContents += '<th>' + columnTitle + '</th>';
+        });
+
+        printContents += `</tr></thead><tbody>`;
+
+        $(rowsToProcess).each(function() {
+            printContents += '<tr>';
+            $(this).find('td').each(function() {
+                if ($(this).find('input[type="checkbox"]').length > 0 || $(this).find('.icon-toolbar').length > 0) {
+                    return;
+                }
+                printContents += '<td>' + $(this).text().trim() + '</td>';
+            });
+            printContents += '</tr>';
+        });
+
+        printContents += `</tbody></table></body></html>`;
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(printContents);
+        printWindow.document.close();
+        printWindow.focus();
+
+        // تأكد من أن أمر الطباعة يتم استدعاؤه بعد تحميل المحتوى بالكامل.
+        printWindow.onload = function() {
+            printWindow.print();
+            printWindow.close();
+        };
+
+        // قم بتغيير مكان استدعاء showAlert
+        // أضف رسالة النجاح في نهاية الدالة.
+        showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
+    };
+
+// ---------------------- تصدير جدول جهات الاتصال إلى Excel ----------------------
+window.exportContactsExcelBtn = function(tableId) {
+    const contactsTableElement = document.getElementById(tableId);
+    if (!contactsTableElement) {
+        showAlert('⚠️ لم يتم العثور على جدول جهات الاتصال.', 'warning');
+        return;
+    }
+
+    const contactsTable = $(contactsTableElement).DataTable();
+
+    const selectedCheckboxes = contactsTable.$('input[type="checkbox"]:checked');
+    let rowsToProcess;
+
+    if (selectedCheckboxes.length > 0) {
+        rowsToProcess = selectedCheckboxes.parents('tr');
+    } else {
+        rowsToProcess = contactsTable.rows({ 'search': 'applied' }).nodes();
+    }
+
+    // 1. بناء البيانات
+    const data = [];
+    const header = [];
+    $(contactsTableElement).find('thead th').each(function() {
+        if ($(this).find('input[type="checkbox"]').length === 0 && $(this).text().trim() !== '') {
+            header.push($(this).text().trim());
+        }
+    });
+    data.push(header);
+
+    $(rowsToProcess).each(function() {
+        const rowData = [];
+        $(this).find('td').each(function() {
+            if ($(this).find('input[type="checkbox"]').length === 0 && $(this).find('.icon-toolbar').length === 0) {
+                rowData.push($(this).text().trim());
+            }
+        });
+        data.push(rowData);
+    });
+
+    // 2. إنشاء ملف Excel
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "جهات_الاتصال");
+
+    // 3. تغيير اسم الملف حسب نوع الجدول
+    const fileName = (tableId === 'editEmployeeContactsTable')
+        ? 'contacts-data-edit.xlsx'
+        : 'contacts-data-add.xlsx';
+
+    XLSX.writeFile(wb, fileName);
+
+    // ✅ رسالة نجاح
+    showAlert('✅ تم تصدير البيانات بنجاح إلى ملف Excel.', 'success');
+};
 
 
    </script>

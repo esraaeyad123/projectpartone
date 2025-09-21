@@ -120,12 +120,12 @@
     <i class="fas fa-trash"></i> Delete Selected
 </button>
 
-            <button type="button" class="btn-icon" onclick="exportContactsExcelBtn('employeeContactsTable')">
-              <i class="fa-solid fa-table"></i>
-            </button>
-            <button type="button" class="btn-icon" onclick="printContactsTable('employeeContactsTable')">
-              <i class="fas fa-print"></i>
-            </button>
+<button type="button" class="btn-icon" onclick="exportContactsExcelBtn('employeeContactsTable')">
+  <i class="fa-solid fa-table"></i>
+</button>
+<button type="button" class="btn-icon" onclick="printContactsTable('employeeContactsTable')">
+  <i class="fas fa-print"></i>
+</button>
           </div>
           <div class="table-responsive-container">
             <table id="employeeContactsTable" class="contacts-table display responsive nowrap">
@@ -309,7 +309,7 @@
         <fieldset class="form-section-fieldset">
           <legend>Contact List</legend>
           <div class="contact-toolbar">
-            <button type="button" class="btn-secondary" onclick="populateEmployeeContactFormForEdit('employee')">
+            <button type="button" class="btn-secondary" onclick="populateEmployeeContactFormForEdit('edit')">
               <i class="fas fa-pen"></i> Edit Selected
             </button>
             <!-- HTML الزر -->
@@ -317,12 +317,14 @@
     <i class="fas fa-trash"></i> Delete Selected
 </button>
 
-            <button type="button" class="btn-icon" onclick="exportContactsExcelBtn('editEmployeeContactsTable')">
-              <i class="fa-solid fa-table"></i>
-            </button>
-            <button type="button" class="btn-icon" onclick="printContactsTable('editEmployeeContactsTable')">
-              <i class="fas fa-print"></i>
-            </button>
+           <!-- داخل مودال التعديل -->
+<button type="button" class="btn-icon" onclick="exportContactsExcelBtn('editEmployeeContactsTable')">
+  <i class="fa-solid fa-table"></i>
+</button>
+<button type="button" class="btn-icon" onclick="printContactsTable('editEmployeeContactsTable')">
+  <i class="fas fa-print"></i>
+</button>
+
           </div>
           <div class="table-responsive-container">
             <table id="editEmployeeContactsTable" class="contacts-table display responsive nowrap">

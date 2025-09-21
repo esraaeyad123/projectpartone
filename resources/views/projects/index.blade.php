@@ -129,6 +129,7 @@
         window.projectsTable = $('#projectsTable').DataTable({
             responsive: true,
             autoWidth: false,
+            processing: true,
             scrollX: true,
             columnDefs: [
                 { orderable: false, targets: [0] } // عمود الشيكبوكس وعمود الأزرار
