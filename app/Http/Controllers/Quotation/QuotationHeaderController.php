@@ -151,9 +151,9 @@ public function getContacts(Request $request)
     /**
      * Store a newly created resource in storage.
      */
-   public function saveHeader(Request $request)
-    {
-       $validated = $request->validate([
+    public function saveHeader(Request $request)
+{
+    $validated = $request->validate([
         'id'             => 'nullable|integer|exists:quotation_headers,id',
         'customer_id'    => 'required|integer|exists:customers,id',
         'project_id'     => 'required|integer|exists:projects,id',
@@ -190,26 +190,33 @@ public function getContacts(Request $request)
         'overall_status'   => 'nullable|string|max:255',
         'last_confirmation'=> 'nullable|date',
         'last_confirmed'   => 'nullable|date',
-       'project_details'  => 'nullable|string',
-
+        'project_details'  => 'nullable|string',
     ]);
 
-    // إذا كان هناك id، قم بالتحديث، وإلا قم بالإنشاء
+    if (!empty($validated['id'])) {
+        // ✅ تحديث
+        $quotation = QuotationHeader::findOrFail($validated['id']);
+        $quotation->update($validated);
+        $message = 'Quotation updated successfully!';
+    } else {
+        // ✅ إنشاء جديد
         $quotation = QuotationHeader::create($validated);
-
+        $message = 'Quotation created successfully!';
+    }
 
     return response()->json([
-       'success'       => true,
-        'quotation_id' => $quotation->id,
-        'message'      => 'Quotation saved successfully!'
+        'success'       => true,
+        'quotation_id'  => $quotation->id,
+        'message'       => $message,
     ]);
- }
+}
+
 
     /**
      * Display the specified resource.
      */
-public function show($id)
-{
+    public function show($id)
+      {
     $quotation = QuotationHeader::with(['customer','project','contact'])->findOrFail($id);
 
     return response()->json([
@@ -256,6 +263,11 @@ public function show($id)
         'last_confirmation' => $quotation->last_confirmation,
         'last_confirmed' => $quotation->last_confirmed,
         'project_details' => $quotation->project_details,
+        'isNew' => !$quotation->quote_file, // مثال: إذا لم يكن هناك ملف، اعتبره جديد
+            'isSent' => $quotation->file_status === 'sent', // مثال: حالة الإرسال
+            'isActive' => $quotation->overall_status === 'active',
+            'isApproved' => $quotation->overall_status === 'approved',
+            'isRejected' => $quotation->overall_status === 'rejected',
     ]);
 }
 

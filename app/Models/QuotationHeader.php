@@ -30,6 +30,28 @@ class QuotationHeader extends Model
 
     ];
 
+    protected $appends = ['isNew', 'isSent', 'isActive', 'isApproved', 'isRejected'];
+
+    public function getIsNewAttribute() {
+        return !$this->quote_file;
+    }
+
+    public function getIsSentAttribute() {
+        return $this->file_status === 'sent';
+    }
+
+    public function getIsActiveAttribute() {
+        return $this->overall_status === 'active';
+    }
+
+    public function getIsApprovedAttribute() {
+        return $this->overall_status === 'approved';
+    }
+
+    public function getIsRejectedAttribute() {
+        return $this->overall_status === 'rejected';
+    }
+
     // العلاقات
     public function customer()
     {

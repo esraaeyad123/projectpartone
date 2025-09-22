@@ -120,7 +120,6 @@ Route::get('/projects/files/{id}/download', [ProjectFileController::class, 'down
 //Route::put('/project-contacts/{id}', [ProjectContactController::class, 'update']);
 //Route::get('/project-contacts/{contact}', [ProjectContactController::class, 'show']);
 //Route::delete('/contacts/delete-multiple', [ProjectContactController::class, 'deleteMultiple']);
-
 Route::get('/quotation', [QuotationHeaderController::class, 'index'])->name('quotation.index');
 Route::get('/quotation/projects', [QuotationHeaderController::class, 'getProjects']);
 Route::get('/quotation/contacts', [QuotationHeaderController::class, 'getContacts']);

@@ -1610,7 +1610,6 @@ function saveQuotationHeader(isEdit = false, quotationId = null) {
 
 
 
-
 function saveQuotationHeader() {
     return new Promise((resolve, reject) => {
         try {
@@ -1640,7 +1639,7 @@ function saveQuotationHeader() {
                 file_status: DOM.quoteFileStatus.value.trim(),
                 declined: DOM.quoteDeclined.checked ? 1 : 0,
                 declined_message: DOM.quoteDeclinedMessage.value.trim() || '',
-                project_details:DOM.quoteProjectDetails.value.trim() || '',
+                project_details: DOM.quoteProjectDetails.value.trim() || '',
                 total_lines: parseFloat(DOM.financialTotalLines.value) || 0,
                 discount_amount: parseFloat(DOM.financialDiscountAmount.value) || 0,
                 tax_amount: parseFloat(DOM.financialTaxAmount.value) || 0,
@@ -1680,17 +1679,20 @@ function saveQuotationHeader() {
                     return reject(new Error(msg));
                 }
 
-                showToast(isEdit ? "✅ Quotation updated successfully!" : "✅ Quotation created successfully!", "success");
+                // 🔹 تحديث currentQuotationId مباشرة بعد الحفظ
+                currentQuotationId = data.quotation_id;
 
-                // تحديث الـ dataset في حالة إنشاء جديد
-                if (!isEdit && DOM.quotationModal) {
+                // 🔹 تحديث dataset للـ modal
+                if (DOM.quotationModal) {
                     DOM.quotationModal.dataset.quotationId = data.quotation_id;
                     DOM.quotationModal.dataset.mode = 'edit';
                 }
 
-                // **هنا نضيف تحديث جدول DataTable بعد الإضافة أو التعديل**
+                showToast(isEdit ? "✅ Quotation updated successfully!" : "✅ Quotation created successfully!", "success");
+
+                // 🔹 تحديث جدول DataTable بعد الحفظ
                 if (typeof quotationDataTable !== 'undefined' && quotationDataTable !== null) {
-                    quotationDataTable.ajax.reload(null, false); // false => لا تعود إلى الصفحة الأولى
+                    quotationDataTable.ajax.reload(null, false);
                 }
 
                 resolve(data);
@@ -1708,6 +1710,7 @@ function saveQuotationHeader() {
         }
     });
 }
+
 
 
 
