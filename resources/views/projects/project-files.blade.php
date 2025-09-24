@@ -91,7 +91,7 @@
 
 
 
-   
+
     <script>
     //-------------------------------------------------------------------------------
     // =================== تعريف المتغيرات ===================
@@ -579,7 +579,7 @@
         });
 
         dropZone.addEventListener('click', () => fileInput.click());
-        
+
         // تأكد من حذف هذا المستمع لمنع الرفع المزدوج من اختيار الملف
         // fileInput.addEventListener('change', function() {
         //     processAndUploadFiles(this.files);

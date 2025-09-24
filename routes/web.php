@@ -14,6 +14,11 @@ use App\Http\Controllers\Quotation\PriceListController;
 use App\Http\Controllers\Employees\EmployeesContactController;
 use App\Http\Controllers\Employees\EmployeesController;
 use App\Http\Controllers\Employees\EmployeeFileController;
+use App\Http\Controllers\Test\TestController;
+use App\Http\Controllers\Test\TestFileController;
+use App\Http\Controllers\Test\UncertaintyController;
+
+
 
 
 
@@ -138,11 +143,6 @@ Route::post('/quotation-lines/bulk-add', [QuotationLineController::class, 'bulkA
 Route::get('/quotation-lines/{quotationId}', [QuotationLineController::class, 'getByQuotation']);
 // routes/web.php أو routes/api.php
 Route::post('/quotations/{quotation}/lines/store', [QuotationLineController::class, 'storeLine']);
-
-
-
-
-
 // عرض صفحة الموظفين
 Route::get('/employees', [EmployeesController::class, 'index'])->name('employees.index');
 
@@ -203,3 +203,35 @@ Route::delete('employees/files/{employeeFile}', [EmployeeFileController::class, 
 Route::post('employees/files/delete-multiple', [EmployeeFileController::class, 'destroyMultiple']);
 Route::get('employees/{employee}/files-json', [EmployeeFileController::class, 'filesJson']);
 Route::get('/employees/files/{file}/view', [EmployeeFileController::class, 'viewEmployeeFile'])->name('employees.files.view');
+
+
+// إنشاء كل روابط CRUD للـ Test
+Route::resource('tests', TestController::class);
+Route::get('/tests/{testId}/files', [TestFileController::class, 'files'])
+    ->name('tests.files');
+Route::post('/tests/delete-multiple', [TestController::class, 'deleteMultiple']);
+Route::post('/uncertainty-history', [UncertaintyController::class, 'store'])->name('uncertainty-history.store');
+Route::delete('/uncertainty-history/{id}', [UncertaintyController::class, 'destroy'])->name('uncertainty-history.destroy');
+Route::get('/uncertainty-history/{testId}', [UncertaintyController::class, 'index'])->name('uncertainty-history.index');
+
+// رفع ملف واحد للاختبار
+Route::post('/tests/{test}/files', [TestFileController::class, 'store'])->name('tests.files.store');
+
+Route::post('/tests/{test}/files', [TestFileController::class, 'store'])
+    ->name('tests.files.store');
+
+Route::get('/tests/{test}/files-json', [TestFileController::class, 'filesJson'])
+    ->name('tests.files.json');
+
+// عرض ملف
+Route::get('/tests/files/{file}/view', [TestFileController::class, 'view'])
+    ->name('tests.files.view');
+
+
+// تحميل ملف
+Route::get('/tests/files/{file}/download', [TestFileController::class, 'download'])
+    ->name('tests.files.download');
+
+// حذف ملف
+Route::delete('/tests/files/{file}', [TestFileController::class, 'destroy'])
+    ->name('tests.files.destroy');

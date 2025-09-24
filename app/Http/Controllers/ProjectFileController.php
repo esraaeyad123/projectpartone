@@ -118,6 +118,19 @@ public function downloadMultipleFiles(Request $request)
     return response()->download($tempFile, $zipName)->deleteFileAfterSend(true);
 }
 
+   public function view($id)
+{
+    $file = ProjectFile::findOrFail($id);
+
+    $disk = Storage::disk('public');
+
+    if (!$disk->exists($file->file_path)) {
+        abort(404, 'الملف غير موجود.');
+    }
+
+    // عرض الملف مباشرة في المتصفح
+    return response()->file($disk->path($file->file_path));
+}
 
   public function destroy(ProjectFile $file)
     {

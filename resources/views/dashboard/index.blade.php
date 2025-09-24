@@ -70,11 +70,10 @@
         <span data-key="Department">Department</span>
       </div>
 
-      <div class="general-card" onclick="window.location.href=''">
-        <i class="fas fa-flask"></i>
-        <span data-key="Test & Services Category">Test & Services Category</span>
-      </div>
-
+     <div class="general-card" onclick="window.location.href='{{ route('tests.index') }}'">
+  <i class="fas fa-flask"></i>
+  <span data-key="Test & Services Category">Test & Services Category</span>
+</div>
       <div class="general-card" onclick="window.location.href=''">
         <i class="fas fa-tools"></i>
         <span data-key="Equipment">Equipment</span>
@@ -82,7 +81,7 @@
     </div>
 </section>
 
-  
+
 
 
 @endsection
