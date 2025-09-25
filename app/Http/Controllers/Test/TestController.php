@@ -59,6 +59,7 @@ public function store(Request $request)
         'template_name'    => 'nullable|string|max:255',
         'template_type'    => 'nullable|string|max:255',
         'file_template'    => 'nullable|string|max:255',
+        'built_in_template'    => 'nullable|string|max:255',
         'report_designation' => 'nullable|string|max:255',
         'report_title'     => 'nullable|string|max:255',
         'built_in_template'=> 'nullable|string|max:255',
@@ -144,6 +145,8 @@ public function show($id)
         'show_to_customer' => 'nullable|boolean',
         'third_party'      => 'nullable|boolean',
         'active_status'    => 'nullable|boolean',
+        'built_in_template'    => 'nullable|string|max:255',
+
     ]);
 
     // تحديث الاختبار

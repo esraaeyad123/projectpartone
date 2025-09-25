@@ -28,24 +28,27 @@
                         <label for="serviceGroup">Service Group:</label>
                         <select id="serviceGroup">
                             <option value="">اختر مجموعة الخدمة</option>
-                            <option value="soil">Soil</option>
-                            <option value="concrete">Concrete</option>
-                            <option value="water">Water</option>
-                            <option value="environmental">Environmental</option>
-                            <option value="mechanical">Mechanical</option>
-                            <option value="electrical">Electrical</option>
+                            <option value="ASPHALT">ASPHALT</option>
+                            <option value="Aggregate">Aggregate</option>
+                            <option value="CONCRETE Testing">CONCRETE Testing</option>
+                            <option value="GROUT">GROUT</option>
+                            <option value="OTHER">OTHER</option>
+                            <option value="SOIL">SOIL</option>
+                            <option value="SOIL Testing">SOIL Testing</option>
+                            <option value="Soil">Soil</option>
+                            <option value="TILES">TILES</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="department">Department:</label>
-                         <select id="department">
+                        <select id="department">
                             <option value="">اختر مجموعة </option>
-                            <option value="soil">Soil</option>
-                            <option value="concrete">Concrete</option>
-                            <option value="water">Water</option>
-                            <option value="environmental">Environmental</option>
-                            <option value="mechanical">Mechanical</option>
-                            <option value="electrical">Electrical</option>
+                            <option value="Administration">Administration</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Geeotechnical">Geeotechnical</option>
+                            <option value="Materials Testing">Materials Testing</option>
+                            <option value="Special Project">Special Project</option>
+                            <option value="Survey">Survey</option>
                         </select>
                     </div>
                     <div class="form-group-checkbox">
@@ -64,26 +67,23 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="type">Type:</label>
-                           <select id="type">
+                        <select id="type">
                             <option value="">اختر نوع النشاط</option>
-                            <option value="soilTesting">Soil Testing</option>
-                            <option value="concreteTesting">Concrete Testing</option>
-                            <option value="materialTesting">Material Testing</option>
-                            <option value="environmentalAnalysis">Environmental Analysis</option>
-                            <option value="mechanicalTesting">Mechanical Testing</option>
-                            <option value="electricalTesting">Electrical Testing</option>
+                            <option value="Test">Test</option>
+                            <option value="Service">Service</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="activityType">Activity Type:</label>
                         <select id="activityType">
                             <option value="">اختر نوع النشاط</option>
-                            <option value="soilTesting">Soil Testing</option>
-                            <option value="concreteTesting">Concrete Testing</option>
-                            <option value="materialTesting">Material Testing</option>
-                            <option value="environmentalAnalysis">Environmental Analysis</option>
-                            <option value="mechanicalTesting">Mechanical Testing</option>
-                            <option value="electricalTesting">Electrical Testing</option>
+                            <option value="Environmental">Environmental</option>
+                            <option value="Calibration">Calibration</option>
+                            <option value="Survey">Survey</option>
+                            <option value="Reporting">Reporting</option>
+                            <option value="Chemical">Chemical</option>
+                            <option value="Laboratory Testing">Laboratory Testing</option>
+                            <option value="Field Testing">Field Testing</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -95,14 +95,20 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="location">Location / Sub Location:</label>
-                         <select id="location">
+                        <select id="location">
                             <option value="">اختر نوع النشاط</option>
-                            <option value="soilTesting">Soil Testing</option>
-                            <option value="concreteTesting">Concrete Testing</option>
-                            <option value="materialTesting">Material Testing</option>
-                            <option value="environmentalAnalysis">Environmental Analysis</option>
-                            <option value="mechanicalTesting">Mechanical Testing</option>
-                            <option value="electricalTesting">Electrical Testing</option>
+                            <option value="Default Section">Default Section</option>
+                            <option value="Soil Section">Soil Section</option>
+                            <option value="Aggregate Section">Aggregate Section</option>
+                            <option value="Concrete Section">Concrete Section</option>
+                            <option value="Chemical Section">Chemical Section</option>
+                            <option value="Steel Section">Steel Section</option>
+                            <option value="Asphalt Section">Asphalt Section</option>
+                            <option value="Non-Destructive Testing">Non-Destructive Testing</option>
+                            <option value="Adminxture">Adminxture</option>
+                            <option value="Water">Water</option>
+                            <option value="Full Time Services">Full Time Services</option>
+                            <option value="CEMENTETIOUS">CEMENTETIOUS</option>
                         </select>
                     </div>
                 </div>
@@ -137,25 +143,35 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="builtInTemplateType">Built-in Template :</label>
+                        <select id="builtInTemplateType">
+                            <option value="">اختر نوع القالب</option>
+                            <option value="Drying Shinkage of Aggregate Concrete">Drying Shinkage of Aggregate Concrete</option>
+                            <option value="Electrical Ressistivity">Electrical Ressistivity</option>
+                            <option value="Epoxy Coated Steel Bar">Epoxy Coated Steel Bar</option>
+                            <option value="Field Desity NG Test">Field Desity NG Test </option>
+                            <option value="Field Desity SDG Test">Field Desity SDG Test </option>
+                            <option value="Field Desity Sand Cone Test">Field Desity Sand Cone Test </option>
+                            <option value="Flexural Strength of Concrete Beam">Flexural Strength of Concrete Beam</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="fileTemplate">File Template:</label>
-                        <input type="text" id="fileTemplate" >
+                        <input type="text" id="fileTemplate">
                     </div>
                     <div class="form-group">
                         <label for="reportDesignation">Report Designation:</label>
-                        <input type="text" id="reportDesignation" >
+                        <input type="text" id="reportDesignation">
                     </div>
                     <div class="form-group">
                         <label for="reportTitle">Report Title:</label>
-                        <input type="text" id="reportTitle" >
+                        <input type="text" id="reportTitle">
                     </div>
-                    <div class="form-group">
-                        <label for="element">Element:</label>
-                        <select id="element">
-                            <option value="">اختر العنصر</option>
-                            <option value="civil">Civil</option>
-                            <option value="mechanical">Mechanical</option>
-                            <option value="electrical">Electrical</option>
-                        </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group-checkbox">
+                        <input type="checkbox" id="element">
+                        <label for="element">Element</label>
                     </div>
                 </div>
 
@@ -165,7 +181,7 @@
                         <label for="useUncertainty">Use Uncertainty in Report</label>
                     </div>
                 </div>
-            </fieldset> <!-- ✅ إغلاق مفقود -->
+            </fieldset>
 
             <!-- 4. Unit Price -->
             <fieldset class="form-section-fieldset">
@@ -178,16 +194,16 @@
                 </div>
             </fieldset>
 
-             <div class="form-row">
-    <div class="form-group">
-        <label for="value">Uncertainty:</label>
-        <input type="text" id="value" name="value" placeholder="±2%, ±0.5 MPa">
-    </div>
-    <div class="form-group">
-        <label for="date_recorded">Date:</label>
-        <input type="date" id="date_recorded" name="date_recorded" value="{{ date('Y-m-d') }}">
-    </div>
-</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="value">Uncertainty:</label>
+                    <input type="text" id="value" name="value" placeholder="±2%, ±0.5 MPa">
+                </div>
+                <div class="form-group">
+                    <label for="date_recorded">Date:</label>
+                    <input type="date" id="date_recorded" name="date_recorded" value="{{ date('Y-m-d') }}">
+                </div>
+            </div>
 
             <!-- أزرار الحفظ والإغلاق -->
             <div class="form-buttons modal-bottom-buttons">
@@ -221,8 +237,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="editTestCode">Test Code:</label>
-                       <input type="text" id="editTestCode" readonly style="background-color: #e9ecef; cursor: not-allowed;" placeholder = "Automatically Generated">
-
+                        <input type="text" id="editTestCode" readonly style="background-color: #e9ecef; cursor: not-allowed;" placeholder="Automatically Generated">
                     </div>
                     <div class="form-group">
                         <label for="editShortName">Short Name:</label>
@@ -235,17 +250,28 @@
                         <label for="editServiceGroup">Service Group:</label>
                         <select id="editServiceGroup">
                             <option value="">اختر مجموعة الخدمة</option>
-                            <option value="soil">Soil</option>
-                            <option value="concrete">Concrete</option>
-                            <option value="water">Water</option>
-                            <option value="environmental">Environmental</option>
-                            <option value="mechanical">Mechanical</option>
-                            <option value="electrical">Electrical</option>
+                            <option value="ASPHALT">ASPHALT</option>
+                            <option value="Aggregate">Aggregate</option>
+                            <option value="CONCRETE Testing">CONCRETE Testing</option>
+                            <option value="GROUT">GROUT</option>
+                            <option value="OTHER">OTHER</option>
+                            <option value="SOIL">SOIL</option>
+                            <option value="SOIL Testing">SOIL Testing</option>
+                            <option value="Soil">Soil</option>
+                            <option value="TILES">TILES</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="editDepartment">Department:</label>
-                        <input type="text" id="editDepartment">
+                        <select id="editDepartment">
+                            <option value="">اختر مجموعة </option>
+                            <option value="Administration">Administration</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Geeotechnical">Geeotechnical</option>
+                            <option value="Materials Testing">Materials Testing</option>
+                            <option value="Special Project">Special Project</option>
+                            <option value="Survey">Survey</option>
+                        </select>
                     </div>
                     <div class="form-group-checkbox">
                         <input type="checkbox" id="editGenerateReport">
@@ -263,18 +289,23 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="editType">Type:</label>
-                        <input type="text" id="editType">
+                        <select id="editType">
+                            <option value="">اختر نوع النشاط</option>
+                            <option value="Test">Test</option>
+                            <option value="Service">Service</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="editActivityType">Activity Type:</label>
                         <select id="editActivityType">
                             <option value="">اختر نوع النشاط</option>
-                            <option value="soilTesting">Soil Testing</option>
-                            <option value="concreteTesting">Concrete Testing</option>
-                            <option value="materialTesting">Material Testing</option>
-                            <option value="environmentalAnalysis">Environmental Analysis</option>
-                            <option value="mechanicalTesting">Mechanical Testing</option>
-                            <option value="electricalTesting">Electrical Testing</option>
+                            <option value="Environmental">Environmental</option>
+                            <option value="Calibration">Calibration</option>
+                            <option value="Survey">Survey</option>
+                            <option value="Reporting">Reporting</option>
+                            <option value="Chemical">Chemical</option>
+                            <option value="Laboratory Testing">Laboratory Testing</option>
+                            <option value="Field Testing">Field Testing</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -286,7 +317,21 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="editLocation">Location / Sub Location:</label>
-                        <input type="text" id="editLocation">
+                        <select id="editLocation">
+                            <option value="">اختر نوع النشاط</option>
+                            <option value="Default Section">Default Section</option>
+                            <option value="Soil Section">Soil Section</option>
+                            <option value="Aggregate Section">Aggregate Section</option>
+                            <option value="Concrete Section">Concrete Section</option>
+                            <option value="Chemical Section">Chemical Section</option>
+                            <option value="Steel Section">Steel Section</option>
+                            <option value="Asphalt Section">Asphalt Section</option>
+                            <option value="Non-Destructive Testing">Non-Destructive Testing</option>
+                            <option value="Adminxture">Adminxture</option>
+                            <option value="Water">Water</option>
+                            <option value="Full Time Services">Full Time Services</option>
+                            <option value="CEMENTETIOUS">CEMENTETIOUS</option>
+                        </select>
                     </div>
                 </div>
             </fieldset>
@@ -320,6 +365,19 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="editBuiltInTemplateType">Built-in Template :</label>
+                        <select id="editBuiltInTemplateType">
+                            <option value="">اختر نوع القالب</option>
+                            <option value="Drying Shinkage of Aggregate Concrete">Drying Shinkage of Aggregate Concrete</option>
+                            <option value="Electrical Ressistivity">Electrical Ressistivity</option>
+                            <option value="Epoxy Coated Steel Bar">Epoxy Coated Steel Bar</option>
+                            <option value="Field Desity NG Test">Field Desity NG Test</option>
+                            <option value="Field Desity SDG Test">Field Desity SDG Test</option>
+                            <option value="Field Desity Sand Cone Test">Field Desity Sand Cone Test</option>
+                            <option value="Flexural Strength of Concrete Beam">Flexural Strength of Concrete Beam</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="editFileTemplate">File Template:</label>
                         <input type="text" id="editFileTemplate">
                     </div>
@@ -331,17 +389,13 @@
                         <label for="editReportTitle">Report Title:</label>
                         <input type="text" id="editReportTitle">
                     </div>
-                    <div class="form-group">
-                        <label for="editElement">Element:</label>
-                        <select id="editElement">
-                            <option value="">اختر العنصر</option>
-                            <option value="civil">Civil</option>
-                            <option value="mechanical">Mechanical</option>
-                            <option value="electrical">Electrical</option>
-                        </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group-checkbox">
+                        <input type="checkbox" id="editElement">
+                        <label for="editElement">Element</label>
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group-checkbox">
                         <input type="checkbox" id="editUseUncertainty">
@@ -362,35 +416,31 @@
             </fieldset>
 
             <!-- 5. Uncertainty History -->
-         <fieldset class="form-section-fieldset">
-    <legend>Uncertainty History</legend>
-    <div class="form-row">
-        <div class="form-group">
-            <label for="editUncertainty">Uncertainty:</label>
-            <input type="text" id="editUncertainty" placeholder="±2%, ±0.5 MPa">
-        </div>
-        <div class="form-group">
-            <label for="editUncertaintyDate">Date:</label>
-            <input type="date" id="editUncertaintyDate" value="{{ date('Y-m-d') }}">
-        </div>
-    </div>
-    <div class="form-group">
-        <button type="button" class="btn-success" onclick="addUncertaintyHistory()">
-            Add
-        </button>
-    </div>
-    <table id="editUncertaintyHistory" class="contacts-table display responsive nowrap">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Uncertainty</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</fieldset>
-
-
+            <fieldset class="form-section-fieldset">
+                <legend>Uncertainty History</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editUncertainty">Uncertainty:</label>
+                        <input type="text" id="editUncertainty" placeholder="±2%, ±0.5 MPa">
+                    </div>
+                    <div class="form-group">
+                        <label for="editUncertaintyDate">Date:</label>
+                        <input type="date" id="editUncertaintyDate" value="{{ date('Y-m-d') }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn-success" onclick="addUncertaintyHistory()">Add</button>
+                </div>
+                <table id="editUncertaintyHistory" class="contacts-table display responsive nowrap">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Uncertainty</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </fieldset>
 
             <!-- Buttons -->
             <div class="form-buttons modal-bottom-buttons">

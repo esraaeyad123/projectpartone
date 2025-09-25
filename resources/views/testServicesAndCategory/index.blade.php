@@ -213,63 +213,6 @@ let tempUncertainties = [];
 
 
 // -------------------- Save Test --------------------
-function saveTest2(closeAfterSave) {
-    const testId = $('#testId').val();
-    const shortName = $('#shortName').val().trim();
-
-    if (!shortName) {
-        Swal.fire("تحذير", "⚠️ الرجاء إدخال الاسم المختصر للاختبار.", "warning");
-        return;
-    }
-
-    const formData = {
-        short_name: shortName,
-        service_group: $('#serviceGroup').val() || null,
-        department: $('#department').val() || null,
-        generate_report: $('#generateReport').is(':checked') ? 1 : 0,
-        description: $('#description').val() || null,
-        type: $('#type').val() || null,
-        activity_type: $('#activityType').val() || null,
-        date_added: $('#dateAdded').val() || null,
-        location: $('#location').val() || null,
-        test_method: $('#testMethod').val() || null,
-        template_name: $('#templateName').val() || null,
-        template_type: $('#templateType').val() || null,
-        file_template: $('#fileTemplate').val() || null,
-        report_designation: $('#reportDesignation').val() || null,
-        report_title: $('#reportTitle').val() || null,
-        built_in_template: $('#builtInTemplate').val() || null,
-        element: $('#element').val() || null,
-        uncertainty: $('#uncertainty').val() || null,
-        use_uncertainty: $('#useUncertainty').is(':checked') ? 1 : 0,
-        unit_price: $('#unitPrice').val() || null,
-        _token: $('meta[name="csrf-token"]').attr('content') ,
-
-    };
-
-    const url = testId ? `/tests/${testId}` : '/tests';
-    const method = testId ? 'PUT' : 'POST';
-
-    $.ajax({
-        url: url,
-        type: method,
-        data: formData,
-        success: function(response) {
-            Swal.fire({
-                icon: 'success',
-                title: 'تم الحفظ بنجاح ✅',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            $('#testId').val(response.id);
-            loadTests();
-            if (closeAfterSave) closeAddTestModal();
-        },
-        error: function(xhr) {
-            Swal.fire('خطأ ❌', 'حدث خطأ أثناء حفظ الاختبار', 'error');
-        }
-    });
-}
 
 function saveTest(closeAfterSave = true) {
     const valueInput = document.getElementById('value');
@@ -299,7 +242,7 @@ function saveTest(closeAfterSave = true) {
         file_template: document.getElementById('fileTemplate').value,
         report_designation: document.getElementById('reportDesignation').value,
         report_title: document.getElementById('reportTitle').value,
-        built_in_template: null,
+        built_in_template: document.getElementById('builtInTemplateType').value,
         element: document.getElementById('element').value,
         uncertainty: valueInput ? valueInput.value : null,
         use_uncertainty: document.getElementById('useUncertainty').checked ? 1 : 0,
@@ -347,15 +290,16 @@ function editTestselecteModal() {
 }
 
 
-  function editTestModal(id) {
+ function editTestModal(id) {
     $.get(`/tests/${id}`, function(test) {
         if (!test || !test.id) {
             Swal.fire('خطأ ❌','لم يتم العثور على بيانات الاختبار!','error');
             return;
         }
 
-        // تعبئة الحقول
+        // ✅ تعبئة الحقول الأساسية
         $('#editTestId').val(test.id);
+        $('#editTestCode').val(test.test_code || ''); // Test Code
         $('#editShortName').val(test.short_name || '');
         $('#editServiceGroup').val(test.service_group || '');
         $('#editDepartment').val(test.department || '');
@@ -368,27 +312,30 @@ function editTestselecteModal() {
         $('#editTestMethod').val(test.test_method || '');
         $('#editTemplateName').val(test.template_name || '');
         $('#editTemplateType').val(test.template_type || '');
+        $('#editBuiltInTemplateType').val(test.built_in_template || ''); // ✅ built-in
         $('#editFileTemplate').val(test.file_template || '');
         $('#editReportDesignation').val(test.report_designation || '');
         $('#editReportTitle').val(test.report_title || '');
-        $('#editElement').val(test.element || '');
+        $('#editElement').prop('checked', test.element ? true : false); // ✅ checkbox
         $('#editUseUncertainty').prop('checked', test.use_uncertainty ? true : false);
         $('#editUnitPrice').val(test.unit_price || 0);
 
-        // 🔥 جلب سجل الـ uncertainties وعرضه
+        // ✅ جلب سجل الـ uncertainties
         loadUncertainties(test.id, 'edit');
 
-        // فتح المودال
+        // ✅ فتح المودال
         $('#editTestModal').show();
     }).fail(function(err) {
         Swal.fire('خطأ ❌','حدث خطأ أثناء تحميل بيانات الاختبار','error');
     });
 }
 
-
 function saveEditTest(closeAfterSave) {
     const testId = $('#editTestId').val();
-    if (!testId) { Swal.fire('خطأ ❌','لا يوجد معرف للاختبار للتعديل','error'); return; }
+    if (!testId) {
+        Swal.fire('خطأ ❌','لا يوجد معرف للاختبار للتعديل','error');
+        return;
+    }
 
     const formData = {
         short_name: $('#editShortName').val(),
@@ -406,9 +353,9 @@ function saveEditTest(closeAfterSave) {
         file_template: $('#editFileTemplate').val(),
         report_designation: $('#editReportDesignation').val(),
         report_title: $('#editReportTitle').val(),
-        built_in_template: $('#editBuiltInTemplate').val(),
-        element: $('#editElement').val(),
-        uncertainty: $('#editUncertainty').val(),
+        built_in_template: $('#editBuiltInTemplateType').val(), // ✅ صحيح
+        element: $('#editElement').is(':checked') ? 1 : 0, // ✅ checkbox
+        uncertainty: $('#editUncertainty').val(), // ✅ آخر قيمة فقط
         use_uncertainty: $('#editUseUncertainty').is(':checked') ? 1 : 0,
         unit_price: $('#editUnitPrice').val(),
         _token: $('meta[name="csrf-token"]').attr('content')
@@ -428,6 +375,7 @@ function saveEditTest(closeAfterSave) {
         }
     });
 }
+
 
 // -------------------- Delete Selected Tests --------------------
 function deleteSelectedTests() {
@@ -476,41 +424,7 @@ function deleteSelectedTests() {
         document.getElementById('addTestModal').style.display = 'none';
     }
 
-    // فتح مودال التعديل
-   function openEditTestModal(testData) {
-    // إعادة تهيئة الفورم
-    let form = document.getElementById('editTestForm');
-    if (form) form.reset();
 
-    if (!testData) return;
-
-    // تعبئة الحقول بالمعلومات القادمة من السيرفر
-    document.getElementById('editTestId').value = testData.id || '';
-    document.getElementById('editTestCode').value = testData.test_code || '';
-    document.getElementById('editShortName').value = testData.short_name || '';
-    document.getElementById('editServiceGroup').value = testData.service_group || '';
-    document.getElementById('editDepartment').value = testData.department || '';
-    document.getElementById('editGenerateReport').checked = testData.generate_report ? true : false;
-    document.getElementById('editDescription').value = testData.description || '';
-    document.getElementById('editType').value = testData.type || '';
-    document.getElementById('editActivityType').value = testData.activity_type || '';
-    document.getElementById('editDateAdded').value = testData.date_added || '';
-    document.getElementById('editLocation').value = testData.location || '';
-    document.getElementById('editTestMethod').value = testData.test_method || '';
-    document.getElementById('editTemplateName').value = testData.template_name || '';
-    document.getElementById('editTemplateType').value = testData.template_type || '';
-    document.getElementById('editFileTemplate').value = testData.file_template || '';
-    document.getElementById('editReportDesignation').value = testData.report_designation || '';
-    document.getElementById('editReportTitle').value = testData.report_title || '';
-    document.getElementById('editBuiltInTemplate').value = testData.built_in_template || '';
-    document.getElementById('editElement').value = testData.element || '';
-    document.getElementById('editUseUncertainty').checked = testData.use_uncertainty ? true : false;
-    document.getElementById('editUnitPrice').value = testData.unit_price || 0;
-    loadUncertainties(testData.id, 'edit');
-
-    // فتح المودال
-    document.getElementById('editTestModal').style.display = 'block';
-}
 
 
     // إغلاق مودال التعديل
