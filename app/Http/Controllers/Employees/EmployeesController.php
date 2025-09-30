@@ -113,11 +113,26 @@ public function destroy(Employee $employee)
 
 public function deleteMultiple(Request $request)
 {
-    $ids = $request->ids;
-    if ($ids && is_array($ids)) {
-        Employee::whereIn('id', $ids)->delete();
-        return response()->json(['message' => 'Deleted successfully']);
+    // 1. استلام مصفوفة المعرّفات (التي اسمها 'ids' في طلب AJAX)
+    $ids = $request->input('ids');
+
+    // 2. التحقق من وجود المعرّفات وأنها مصفوفة (لمنع الأخطاء)
+    if (!is_array($ids) || empty($ids)) {
+        return response()->json(['message' => 'No IDs provided for deletion.'], 400);
     }
-    return response()->json(['message' => 'No employees selected'], 400);
+
+    // 3. استخدام دالة destroy() في Eloquent لحذف كافة الصفوف بالمعرّفات المحددة
+    $deletedCount = \App\Models\Employee::destroy($ids);
+
+    // 4. إرجاع استجابة نجاح (Success 200)
+    if ($deletedCount > 0) {
+        return response()->json([
+            'message' => 'Employees deleted successfully.', 
+            'deleted_count' => $deletedCount
+        ], 200);
+    }
+
+    // في حال لم يتم حذف أي شيء (ربما المعرّفات غير موجودة)
+    return response()->json(['message' => 'No employees were deleted.'], 404);
 }
 }
