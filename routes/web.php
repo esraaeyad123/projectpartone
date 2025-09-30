@@ -17,6 +17,7 @@ use App\Http\Controllers\Employees\EmployeeFileController;
 use App\Http\Controllers\Test\TestController;
 use App\Http\Controllers\Test\TestFileController;
 use App\Http\Controllers\Test\UncertaintyController;
+use App\Http\Controllers\Equipment\EquipmentController;
 
 
 
@@ -235,3 +236,6 @@ Route::get('/tests/files/{file}/download', [TestFileController::class, 'download
 // حذف ملف
 Route::delete('/tests/files/{file}', [TestFileController::class, 'destroy'])
     ->name('tests.files.destroy');
+
+
+Route::resource('equipment', EquipmentController::class);

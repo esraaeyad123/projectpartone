@@ -74,7 +74,7 @@
   <i class="fas fa-flask"></i>
   <span data-key="Test & Services Category">Test & Services Category</span>
 </div>
-      <div class="general-card" onclick="window.location.href=''">
+      <div class="general-card"  onclick="window.location.href='{{ route('equipment.index') }}'">
         <i class="fas fa-tools"></i>
         <span data-key="Equipment">Equipment</span>
       </div>
