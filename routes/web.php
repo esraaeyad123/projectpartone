@@ -144,26 +144,30 @@ Route::post('/quotation-lines/bulk-add', [QuotationLineController::class, 'bulkA
 Route::get('/quotation-lines/{quotationId}', [QuotationLineController::class, 'getByQuotation']);
 // routes/web.php أو routes/api.php
 Route::post('/quotations/{quotation}/lines/store', [QuotationLineController::class, 'storeLine']);
-// عرض صفحة الموظفين
-Route::get('/employees', [EmployeesController::class, 'index'])->name('employees.index');
 
-// جلب بيانات الموظفين للجدول بصيغة JSON
+
+
+
+// ======================= Employee Routes (التصحيح النهائي) =======================
+
+// 🌟🌟 (1) يجب أن يكون DELETE ليتطابق مع _method: 'DELETE' في AJAX
+Route::delete('/employees/delete-multiple', [EmployeesController::class, 'deleteMultiple'])->name('employees.deleteMultiple');
+
+// (2) المسار الخاص بجلب بيانات الجدول
 Route::get('/employees/data', [EmployeesController::class, 'getEmployeesData'])->name('employees.data');
 
-// إنشاء موظف جديد
+// (3) المسار الرئيسي (index)
+Route::get('/employees', [EmployeesController::class, 'index'])->name('employees.index');
+
+// (4) إنشاء موظف جديد
 Route::post('/employees', [EmployeesController::class, 'store'])->name('employees.store');
 
-// تعديل موظف موجود
-Route::put('/employees/{employee}', [EmployeesController::class, 'update'])->name('employees.update');
+// (5) المسارات التي تستخدم متغير {employee} يجب أن تكون في النهاية وذات قيد رقمي
+Route::get('/employees/{employee}', [EmployeesController::class, 'show'])->name('employees.show')->where('employee', '[0-9]+');
+Route::put('/employees/{employee}', [EmployeesController::class, 'update'])->name('employees.update')->where('employee', '[0-9]+');
+Route::delete('/employees/{employee}', [EmployeesController::class, 'destroy'])->name('employees.destroy')->where('employee', '[0-9]+');
 
-// جلب موظف واحد (Show)
-Route::get('/employees/{employee}', [EmployeesController::class, 'show'])->name('employees.show');
 
-// حذف موظف
-Route::delete('/employees/{employee}', [EmployeesController::class, 'destroy'])->name('employees.destroy');
-
-// حذف مجموعة موظفين
-Route::post('/employees/delete-multiple', [EmployeesController::class, 'deleteMultiple'])->name('employees.deleteMultiple');
 
 // ======================= Employee Routes =======================
 

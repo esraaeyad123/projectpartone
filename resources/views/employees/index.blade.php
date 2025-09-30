@@ -36,32 +36,49 @@
                 <div class="table-responsive-container">
                     <table id="employeesTable" class="table table-bordered table-striped display responsive nowrap" style="width:100%">
                         <thead>
-                            <tr>
-                                <th><input type="checkbox" id="selectAllEmployees"></th>
-                                <th>Employee Reference<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                <th>Initials<br><select class="column-filter"><option value="">All</option></select></th>
-                                <th>Mid. Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                <th>Full Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                <th>First Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                <th>Last Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                <th>Supervisor<br><select class="column-filter"><option value="">All</option></select></th>
-                                <th>CTTA<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                <th>Business Unit<br><select class="column-filter"><option value="">All</option></select></th>
-                                <th>Department<br><select class="column-filter"><option value="">All</option></select></th>
-                                <th>Title<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                <th>Job Rules<br>
-                                    <select class="column-filter">
-                                        <option value="">All</option>
-                                        <option value="Office Staff">Office Staff</option>
-                                        <option value="Laboratory Staff">Laboratory Staff</option>
-                                        <option value="Site Staff">Site Staff</option>
-                                        <option value="Drillers Staff">Drillers Staff</option>
-                                        <option value="Drivers Staff">Drivers Staff</option>
-                                    </select>
-                                </th>
-                                <th class="d-none">Contacts Data</th>
-                            </tr>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllEmployees"></th>
+                                    <th>Employee Reference<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    
+                                    <th>Initials<br>
+                                        <select class="column-filter">
+                                            <option value="">All</option>
+                                            <option value="Mr.">Mr.</option>
+                                            <option value="Ms.">Ms.</option>
+                                            <option value="Mrs.">Mrs.</option>
+                                            <option value="Dr.">Dr.</option>
+                                            <option value="Eng.">Eng.</option>
+                                            <option value="Prof.">Prof.</option>
+                                        </select>
+                                    </th>
+                                    
+                                    <th>First Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Mid. Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Last Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Full Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Supervisor<br><select class="column-filter"><option value="">All</option></select></th>
+                                    <th>CTTA<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Business Unit<br>
+                                        <select class="column-filter">
+                                            <option value="">All</option>
+                                            <option value="AAM-JED">AAM-JED</option>
+                                            <option value="AAM-EHSA">AAM-EHSA</option>
+                                        </select>
+                                    </th>
+                                    <th>Department<br><select class="column-filter"><option value="">All</option></select></th>
+                                    <th>Title<br><input type="text" placeholder="Search..." class="column-filter"></th>
+                                    <th>Job Rules<br>
+                                        <select class="column-filter">
+                                            <option value="">All</option>
+                                            <option value="Office Staff">Office Staff</option>
+                                            <option value="Laboratory Staff">Laboratory Staff</option>
+                                            <option value="Site Staff">Site Staff</option>
+                                            <option value="Drillers Staff">Drillers Staff</option>
+                                            <option value="Drivers Staff">Drivers Staff</option>
+                                        </select>
+                                    </th>
+                                </tr>
                         </thead>
                         <tbody>
                         </tbody>
@@ -82,8 +99,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 
-    <script>
-        //====================== Start Script ======================
+<script>
+//====================== Start Script ======================
 function showAlert(message, type) {
     Swal.fire({
         title: type === 'success' ? 'Success!' : (type === 'error' ? 'Error!' : 'Warning!'),
@@ -109,8 +126,37 @@ function showConfirm(message, callback, title = 'Confirm', confirmButtonText = '
         }
     });
 }
+//----------------------------------------------------------------------------------------
+function updateFullName(prefix) {
+    // الحل: نستخدم ( || '' ) لضمان أن القيمة ستكون سلسلة نصية فارغة
+    // إذا أعادت .val() قيمة null أو undefined، مما يضمن عمل .trim() بأمان.
+    const firstName = ($('#' + prefix + 'FirstName').val() || '').trim();
+    const midName = ($('#' + prefix + 'MidName').val() || '').trim();
+    const lastName = ($('#' + prefix + 'LastName').val() || '').trim();
+    
+    let fullNameParts = [];
+    
+    // إضافة الأجزاء غير الفارغة
+    if (firstName) fullNameParts.push(firstName);
+    if (midName) fullNameParts.push(midName);
+    if (lastName) fullNameParts.push(lastName);
 
+    // وضع النتيجة في حقل Full Name
+    $('#' + prefix + 'FullName').val(fullNameParts.join(' '));
+}
+//----------------------------------------------------------------------------------------
 $(document).ready(function() {
+
+
+    // ربط دالة التحديث بحقول الإدخال في مودال الإضافة (Add Modal)
+    $('#firstName, #midName, #lastName').on('keyup change', function() {
+        updateFullName('');
+    });
+
+    // ربط دالة التحديث بحقول الإدخال في مودال التعديل (Edit Modal)
+    $('#editFirstName, #editMidName, #editLastName').on('keyup change', function() {
+        updateFullName('edit');
+    });
 
     var dateColumnIndex = null; // لو عندك عمود تاريخ للتصفية غير null
 
@@ -142,9 +188,23 @@ $(document).ready(function() {
         if (dateColumnIndex !== null && this.index() === dateColumnIndex) return;
 
         $('input, select', this.header()).on('keyup change', function() {
-            var val = $.fn.dataTable.util.escapeRegex($(this).val());
-            if (column.search() !== val) {
-                column.search(val).draw();
+            var val = $(this).val(); // جلب القيمة الأصلية
+            var searchVal = '';
+            var isSelect = $(this).is('select');
+            
+            // 1. إذا كان حقلاً منسدلاً (Select) وتم اختيار قيمة (ليست "All")
+            if (isSelect && val) {
+                // نستخدم التعابير النمطية (^ و $) لفرض تطابق تام للقيمة المختارة
+                searchVal = '^' + $.fn.dataTable.util.escapeRegex(val) + '$';
+            } else {
+                // لحقول الإدخال النصية أو خيار "All"
+                searchVal = $.fn.dataTable.util.escapeRegex(val);
+            }
+
+            // 2. تطبيق البحث، مع تفعيل خاصية Regex إذا كانت مطبقة
+            if (column.search() !== searchVal) {
+                // نمرر true كباراميتر ثانٍ لتفعيل Regex، و false لتعطيل Smart Search
+                column.search(searchVal, true, false).draw(); 
             }
         });
     });
@@ -184,6 +244,7 @@ $(document).ready(function() {
         });
     }
 });
+//----------------------------------------------------------------------------------------
 function loadEmployees() {
     $.get('/employees', function(employees) {
         // مسح الجدول قبل إعادة التحميل
@@ -195,10 +256,13 @@ function loadEmployees() {
                 `<input type="checkbox" class="employee-checkbox" value="${e.id}">`, // 0
                 e.employee_reference || '',  // 1
                 e.initials || '',            // 2
-                e.mid_name || '',            // 3
-                e.full_name || '',           // 4
-                e.first_name || '',          // 5
-                e.last_name || '',           // 6
+                 // الترتيب الصحيح للأسماء
+                // ---------------------------------
+                e.first_name || '',          // 3: First Name (كان e.mid_name)
+                e.mid_name || '',            // 4: Mid. Name (كان e.full_name)
+                e.last_name || '',           // 5: Last Name (كان e.first_name)
+                e.full_name || '',           // 6: Full Name (كان e.last_name)
+                // ---------------------------------
                 e.email || '',               // 7
                 e.supervisor_id || '',       // 8
                 e.ctta || '',                // 9
@@ -214,11 +278,15 @@ function loadEmployees() {
         });
     });
 }
-
 // تحديد/إلغاء تحديد جميع الموظفين
 $('#selectAllEmployees').on('change', function() {
     let rows = employeesTable.rows({ 'search': 'applied' }).nodes();
     $('input.employee-checkbox', rows).prop('checked', this.checked);
+});
+// تحديث خانة "تحديد الكل" عند تحديد أي موظف فردي
+$('#employeesTable tbody').on('change', 'input.employee-checkbox', function() {
+    let allChecked = $('.employee-checkbox').length === $('.employee-checkbox:checked').length;
+    $('#selectAllEmployees').prop('checked', allChecked);
 });
 
 window.populateEmployeeContactsTableEdit = function(contacts) {
@@ -229,23 +297,16 @@ window.populateEmployeeContactsTableEdit = function(contacts) {
     window.employeeContactsTableEdit.clear();
     window.employeeContactsTableEdit.rows.add(contacts).draw();
 };
-// تحديث خانة "تحديد الكل" عند تحديد أي موظف فردي
-$('#employeesTable tbody').on('change', 'input.employee-checkbox', function() {
-    let allChecked = $('.employee-checkbox').length === $('.employee-checkbox:checked').length;
-    $('#selectAllEmployees').prop('checked', allChecked);
-});
-
-
-
+//----------------------------------------------------------------------------------------
 function openEmployeeContactModal() {
     clearContactForm('employee');
     $('#employeeContactModal').show();
 }
-
+//----------------------------------------------------------------------------------------
 function closeEmployeeContactModal() {
     $('#employeeContactModal').hide();
 }
-
+//----------------------------------------------------------------------------------------
 function clearContactForm(type) {
     if (type === 'employee') {
         $('#editContactIdEmployee').val('');
@@ -265,9 +326,7 @@ function clearContactForm(type) {
         $('#isPrimaryContactAdd').prop('checked', false);
     }
 }
-
-
-
+//----------------------------------------------------------------------------------------
 // نسخة للتعديل Edit Employee Modal
 function switchEmployeeTab(tabName, modalType = 'add') {
     let container = (modalType === 'edit') ? '#editEmployeeModal' : '#employeeModal';
@@ -293,17 +352,17 @@ function openEmployeeModal() {
     $('#employeeId').val('');       // مسح الـ ID
     $('#employeeModal').show();     // إظهار المودال
 }
-
+//----------------------------------------------------------------------------------------
 // غلق مودال إضافة موظف
 function closeEmployeeModal() {
     $('#employeeModal').hide();
 }
-
+//----------------------------------------------------------------------------------------
 // غلق مودال تعديل موظف
 function closeEditEmployeeModal() {
     $('#editEmployeeModal').hide();
 }
-
+//----------------------------------------------------------------------------------------
 // الحصول على جميع الـ IDs المحددة من جدول الموظفين
 function getSelectedEmployeeIds() {
     let ids = [];
@@ -312,38 +371,52 @@ function getSelectedEmployeeIds() {
     });
     return ids;
 }
-
+//----------------------------------------------------------------------------------------
 // ==================== Save Employee ====================
-   function saveEmployee(closeAfterSave) {
+function saveEmployee(closeAfterSave) {
     const employeeId = $('#employeeId').val();
-    const fullName = $('#fullName').val().trim();
+    
+    // 1. جلب وتنظيف حقول الاسم الأساسية
+    const firstName = ($('#firstName').val() || '').trim();
+    const midName = ($('#midName').val() || '').trim();
+    const lastName = ($('#lastName').val() || '').trim();
+    
+    // 2. إعادة بناء Full Name بشكل موثوق
+    let fullNameParts = [];
+    if (firstName) fullNameParts.push(firstName);
+    if (midName) fullNameParts.push(midName);
+    if (lastName) fullNameParts.push(lastName);
+    const generatedFullName = fullNameParts.join(' ').trim(); 
 
-    if (!fullName) {
-        Swal.fire("تحذير", "⚠️ الرجاء إدخال الاسم الكامل للموظف.", "warning");
-        return;
+    // 3. التحقق من الحقول الإلزامية (الاسم الأول والأخير)
+    if (!firstName || !lastName) {
+        Swal.fire("تحذير", "⚠️ الرجاء إدخال الاسم الأول والأخير.", "warning");
+        return; 
     }
-
+    
     // تحديد URL والطريقة
-    const url = employeeId ? `/employees/${employeeId}` : '/employees';
-    const method = employeeId ? 'PUT' : 'POST';
+    const url = '/employees';
+    const method = 'POST';
 
-    // بناء بيانات النموذج للإرسال
+    // 4. بناء بيانات النموذج للإرسال
     const formData = {
-        initials: $('#initials').val() || null,
-        first_name: $('#firstName').val(),
-        mid_name: $('#midName').val() || null,
-        last_name: $('#lastName').val(),
-        full_name: fullName,
-        email: $('#email').val() || null,
-        title: $('#title').val() || null,
-        supervisor_id: $('#supervisorId').val() || null,
+        initials: $('#initials').val() || null, 
+        first_name: firstName,
+        mid_name: midName || null,
+        last_name: lastName,
+        full_name: generatedFullName, // إرسال الاسم الكامل المُعاد بناؤه
+        
+        // ... باقي الحقول مع تنظيف القيم ...
+        email: ($('#email').val() || '').trim() || null,
+        title: ($('#title').val() || '').trim() || null,
+        supervisor_id: $('#supervisor').val() || null,
         ctta: $('#ctta').val() || null,
         business_unit: $('#businessUnit').val() || null,
         department: $('#department').val() || null,
-        job_roles: getSelectedJobRoles(), // بدون prefix يستخدم checkboxes الإضافة
+        job_roles: getSelectedJobRoles(), 
         _token: $('meta[name="csrf-token"]').attr('content')
     };
-
+    
     $.ajax({
         url: url,
         type: method,
@@ -357,24 +430,32 @@ function getSelectedEmployeeIds() {
                 showConfirmButton: false
             });
 
-            $('#employeeId').val(response.id); // لو كان إنشاء جديد
-            loadEmployees(); // دالة تحميل جدول الموظفين
+            // الخطوة الحاسمة: تحديث حقل Full Name في المودال (لجعله مرئياً)
+            $('#fullName').val(generatedFullName); 
+
+            $('#employeeId').val(response.id); 
+            loadEmployees(); 
             if (closeAfterSave) closeEmployeeModal();
         },
         error: function(xhr) {
-            console.error(xhr.responseText);
-            Swal.fire({
+           console.error(xhr.responseText);
+           const errorResponse = xhr.responseJSON;
+           
+           // تحسين عرض رسالة الخطأ من الخادم
+           const validationErrors = errorResponse && errorResponse.errors 
+               ? Object.values(errorResponse.errors).map(e => e.join(', ')).join('<br>')
+               : errorResponse && errorResponse.message ? errorResponse.message : 'حدث خطأ غير معروف أثناء الحفظ.';
+           
+           Swal.fire({
                 icon: 'error',
-                title: 'خطأ ❌',
-                text: 'حدث خطأ أثناء حفظ الموظف',
+                title: 'خطأ في الخادم ❌',
+                html: validationErrors,
                 confirmButtonText: 'حسناً'
             });
         }
     });
 }
-
-
-//=================================================================================
+//----------------------------------------------------------------------------------------
 // فتح مودال تعديل موظف
 function openEditEmployeeModal(id) {
     // جلب بيانات الموظف
@@ -390,6 +471,7 @@ function openEditEmployeeModal(id) {
 
         // تعبئة الحقول في المودال
         $('#editEmployeeId').val(employee.id);
+        $('#editInitials').val(employee.initials); 
         $('#editEmployeeReference').val(employee.employee_reference || '');
         $('#editFullName').val(employee.full_name || '');
         $('#editEmail').val(employee.email || '');
@@ -447,26 +529,45 @@ function openEditEmployeeModal(id) {
         });
     });
 }
-
-
-
-//=================================================================================
+//----------------------------------------------------------------------------------------
 // تحديث الموظف من مودال التعديل
-   function updateEmployee(closeAfterSave = true) {
+function updateEmployee(closeAfterSave = true) {
     const employeeId = $('#editEmployeeId').val();
     if (!employeeId) return;
 
+    // 1. جلب وتنظيف حقول الاسم الأساسية
+    const firstName = ($('#editFirstName').val() || '').trim();
+    const midName = ($('#editMidName').val() || '').trim();
+    const lastName = ($('#editLastName').val() || '').trim();
+
+    // 2. إعادة بناء Full Name بشكل موثوق
+    let fullNameParts = [];
+    if (firstName) fullNameParts.push(firstName);
+    if (midName) fullNameParts.push(midName);
+    if (lastName) fullNameParts.push(lastName);
+    const generatedFullName = fullNameParts.join(' ').trim(); 
+    
+    // 3. التحقق من الحقول الإلزامية (الاسم الأول والأخير)
+    if (!firstName || !lastName) {
+        Swal.fire("تحذير", "⚠️ الرجاء إدخال الاسم الأول والأخير.", "warning");
+        return; 
+    }
+
+    // 4. بناء بيانات النموذج للإرسال
     const formData = {
-        first_name: $('#editFirstName').val().trim(),
-        mid_name: $('#editMidName').val().trim() || null,
-        last_name: $('#editLastName').val().trim(),
-        full_name: $('#editFullName').val().trim(),
-        email: $('#editEmail').val().trim() || null,
-        title: $('#editTitle').val().trim() || null,
+        initials: $('#editInitials').val() || null, 
+        first_name: firstName,
+        mid_name: midName || null,
+        last_name: lastName,
+        full_name: generatedFullName, // إرسال الاسم الكامل المُعاد بناؤه
+        
+        // ... باقي الحقول مع تنظيف القيم ...
+        email: ($('#editEmail').val() || '').trim() || null,
+        title: ($('#editTitle').val() || '').trim() || null,
         supervisor_id: $('#editSupervisor').val() || null,
+        ctta: $('#editCTTA').val() || null,
         business_unit: $('#editBusinessUnit').val() || null,
         department: $('#editDepartment').val() || null,
-        ctta: $('#editCTTA').val() || null,
         job_roles: getSelectedJobRoles('edit'), // prefix "edit" => checkboxes التعديل
         _token: $('meta[name="csrf-token"]').attr('content')
     };
@@ -483,23 +584,31 @@ function openEditEmployeeModal(id) {
                 showConfirmButton: false
             });
 
+            // الخطوة الحاسمة: تحديث حقل Full Name في المودال (لجعله مرئياً)
+            $('#editFullName').val(generatedFullName); 
+
             loadEmployees();
             if (closeAfterSave) closeEditEmployeeModal();
         },
         error: function(xhr) {
             console.error(xhr.responseText);
+            const errorResponse = xhr.responseJSON;
+
+            // تحسين عرض رسالة الخطأ من الخادم
+            const validationErrors = errorResponse && errorResponse.errors 
+                ? Object.values(errorResponse.errors).map(e => e.join(', ')).join('<br>')
+                : errorResponse && errorResponse.message ? errorResponse.message : 'حدث خطأ غير معروف أثناء التعديل.';
+            
             Swal.fire({
                 icon: 'error',
-                title: 'خطأ ❌',
-                text: 'حدث خطأ أثناء تعديل الموظف',
+                title: 'خطأ في الخادم ❌',
+                html: validationErrors,
                 confirmButtonText: 'حسناً'
             });
         }
     });
 }
-
-
-//=================================================================================
+//----------------------------------------------------------------------------------------
 // جلب قيم الوظائف المحددة من checkboxes
   function getSelectedJobRoles(prefix = '') {
     const roles = [];
@@ -520,8 +629,7 @@ function openEditEmployeeModal(id) {
     }
     return roles.join(', ');
 }
-
-
+//----------------------------------------------------------------------------------------
 function handleEditEmployee() {
     const selectedIds = getSelectedEmployeeIds(); // دالة موجودة لجلب الـ IDs
     if(selectedIds.length === 0) {
@@ -543,109 +651,81 @@ function handleEditEmployee() {
 
     const employeeId = selectedIds[0];
     openEditEmployeeModal(employeeId);
-       }
-
-       // دالة عامة لجلب الوظائف حسب prefix
-
-
-function deleteEmployee(id) {
-    Swal.fire({
-        title: 'هل أنت متأكد؟',
-        text: "سيتم حذف الموظف ولا يمكنك التراجع عن هذا الإجراء!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'نعم، احذف!',
-        cancelButtonText: 'إلغاء'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: `/employees/${id}`,
-                type: 'DELETE',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function() {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'تم الحذف ✅',
-                        text: 'تم حذف الموظف بنجاح.',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    loadEmployees(); // تحديث جدول الموظفين مباشرة بدون إعادة تحميل الصفحة
-                },
-                error: function(xhr) {
-                    console.error("Error deleting employee:", xhr.responseText);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'خطأ ❌',
-                        text: 'حدث خطأ أثناء محاولة حذف الموظف.',
-                        confirmButtonText: 'حسناً'
-                    });
-                }
-            });
-        }
-    });
 }
-
+//----------------------------------------------------------------------------------------
+/**
+ * تقوم بحذف الموظفين المحددين وإزالتهم من جدول DataTables مباشرة دون تحديث الصفحة.
+ * تعتمد على المسار المُعرَّف في web.php: POST /employees/delete-multiple
+ */
 function deleteSelectedEmployees() {
-    let selectedIds = getSelectedEmployeeIds(); // دالة موجودة مسبقاً للحصول على الـ IDs
-
-    if (selectedIds.length === 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'تنبيه ⚠️',
-            text: 'يرجى اختيار موظف واحد على الأقل!',
-            confirmButtonText: 'حسناً'
-        });
+    // يجب التأكد من أن employeesTable هو متغير عام يشير إلى جدول DataTables.
+    if (typeof employeesTable === 'undefined' || employeesTable === null) {
+        Swal.fire("خطأ", "لم يتم تهيئة جدول الموظفين (employeesTable).", "error");
         return;
     }
 
+    // 1. جمع معرّفات الموظفين المحددين ومراجع الصفوف
+    const selectedIds = [];
+    const rowsToDelete = [];
+
+    // DataTables API لجلب الصفوف المحددة بناءً على checkbox
+    employeesTable.$('.employee-checkbox:checked').each(function() {
+        const row = $(this).closest('tr');
+        // هنا نفترض أن قيمة checkbox هي Employee ID (كما هو في كود loadEmployees المُعدَّل)
+        const id = $(this).val(); 
+        
+        selectedIds.push(id);
+        rowsToDelete.push(row);
+    });
+
+    if (selectedIds.length === 0) {
+        Swal.fire("تحذير", "⚠️ الرجاء تحديد موظف واحد على الأقل للحذف.", "warning");
+        return;
+    }
+
+    // 2. تأكيد عملية الحذف باستخدام Swal.fire
     Swal.fire({
-        title: 'هل أنت متأكد؟',
-        text: `سيتم حذف ${selectedIds.length} موظف/موظفين ولا يمكنك التراجع عن هذا الإجراء!`,
-        icon: 'warning',
+        title: "هل أنت متأكد؟",
+        text: `أنت على وشك حذف ${selectedIds.length} موظف/موظفين. لا يمكن التراجع عن هذا الإجراء!`,
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'نعم، احذف!',
-        cancelButtonText: 'إلغاء'
+        confirmButtonText: "نعم، احذف!",
+        cancelButtonText: "إلغاء",
+        reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
+            
+            // 3. إرسال طلب AJAX للحذف
             $.ajax({
-                url: '/employees/delete-multiple', // رابط الحذف في السيرفر
-                type: 'POST',
+                // المسار الصحيح والمُعرَّف في web.php هو /employees/delete-multiple
+                url: `/employees/delete-multiple`, 
+                type: 'POST', 
                 data: {
                     ids: selectedIds,
-                    _token: $('meta[name="csrf-token"]').attr('content')
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    _method: 'DELETE' // لإجبار Laravel على التعامل معه كـ DELETE
                 },
-                success: function() {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'تم الحذف ✅',
-                        text: 'تم حذف الموظفين المحددين بنجاح!',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    loadEmployees(); // تحديث جدول الموظفين مباشرة بدون إعادة تحميل الصفحة
+                success: function(response) {
+                    
+                    // 🌟 الخطوة الحاسمة: إزالة الصفوف من DataTables مباشرة
+                    employeesTable.rows(rowsToDelete).remove().draw(false); 
+                    
+                    // إزالة تحديد كل المربعات بعد الحذف
+                    $('#selectAllEmployees').prop('checked', false); 
+                    
+                    Swal.fire("تم الحذف! ✅", "تم حذف الموظف/الموظفين بنجاح.", "success");
                 },
                 error: function(xhr) {
-                    console.error("Error deleting employees:", xhr.responseText);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'خطأ ❌',
-                        text: 'حدث خطأ أثناء محاولة حذف الموظفين.',
-                        confirmButtonText: 'حسناً'
-                    });
+                    Swal.fire("خطأ ❌", "حدث خطأ أثناء محاولة حذف الموظفين. يرجى مراجعة الخادم.", "error");
+                    // يمكنك إظهار رسالة الخطأ للمطورين في الكونسول
+                    console.error("AJAX Error:", xhr.responseText);
                 }
             });
         }
     });
 }
-
-           window.goToEmployeeFiles = function() {
+//----------------------------------------------------------------------------------------
+window.goToEmployeeFiles = function() {
     const employeesTable = $('#employeesTable').DataTable();
     if (!employeesTable) {
         Swal.fire("تنبيه ⚠️", "لم يتم العثور على جدول الموظفين!", "warning");
@@ -674,7 +754,6 @@ function deleteSelectedEmployees() {
     // التوجيه لصفحة ملفات الموظف
     window.location.href = `/employees/${employeeId}/files`;
 };
-
 //----------------------------------------------------------------------------------------
 //----------------------------------Employee Contacts-------------------------------------
 //----------------------------------------------------------------------------------------
@@ -1005,7 +1084,7 @@ window.printEmployeesTable = function() {
 };
 
 //----------------------------------------------------------------------------------------
-  window.exportEmployeesExcel = function() {
+window.exportEmployeesExcel = function() {
     const tableElement = document.getElementById('employeesTable');
     if (!tableElement) {
         showAlert('⚠️ لم يتم العثور على جدول الموظفين.', 'warning');

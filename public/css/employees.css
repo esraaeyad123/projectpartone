@@ -496,3 +496,106 @@ body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button {
 body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
     background-color: #666 !important;
 }
+
+/* مثال للتنسيق الذي قد تحتاجه */
+
+/* لضمان أن الحاوية تأخذ العرض الكامل */
+.job-roles-container-wrapper {
+    width: 100%; /* يجب أن تأخذ العرض الكامل داخل form-row */
+    padding-top: 10px; /* لإضافة مسافة من الأعلى */
+}
+
+/* لتمكين تخطيط شبكي/مرن داخل job-rules-container */
+.job-rules-container.grid-layout {
+    display: flex;
+    flex-direction: column; /* يضع الصفوف عموديًا فوق بعضها */
+    gap: 8px; /* مسافة بين الصفوف */
+}
+
+/* لتمكين الترتيب الأفقي داخل كل صف */
+.job-roles-row {
+    display: flex;
+    flex-wrap: wrap; /* يسمح بالانتقال إلى سطر جديد إذا ضاق العرض */
+    gap: 25px; /* مسافة بين مربعات الاختيار في الصف الواحد */
+}
+
+/* تحسين شكل مربع الاختيار والعنوان */
+.job-rules-container label {
+    margin-left: 5px;
+    margin-right: 0; /* إزالة الهامش القديم */
+}
+
+.job-rules-container input[type="checkbox"] {
+    /* تنسيقات إضافية لمربع الاختيار */
+}
+
+/* ------------------------------------------------ */
+/* تنسيقات Job Roles الإبداعية (Creative Boxes) */
+/* ------------------------------------------------ */
+
+/* ترتيب الخيارات في شبكة مرنة */
+.job-roles-creative-grid {
+    display: flex;
+    flex-wrap: wrap; /* للسماح بكسر السطر إذا ضاق العرض */
+    gap: 10px; /* المسافة بين البوكسات */
+    width: 100%;
+}
+
+/* إخفاء مربع الاختيار الافتراضي */
+.hidden-checkbox {
+    display: none;
+}
+
+/* تنسيق البوكس نفسه (البطاقة) */
+.checkbox-label {
+    display: flex;
+    flex-direction: column; /* الأيقونة والاسم فوق بعض */
+    align-items: center;
+    justify-content: center;
+    
+    /* شكل وحجم البوكس */
+    padding: 15px 10px;
+    min-width: 100px; /* لضمان حجم مقبول للبوكسات */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    
+    /* الألوان الافتراضية */
+    background-color: #f8f9fa;
+    color: #495057;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* تنسيق الأيقونة داخل البوكس */
+.checkbox-label i {
+    font-size: 24px;
+    margin-bottom: 5px;
+    color: #6c757d; /* لون الأيقونة الافتراضي */
+}
+
+/* حالة عند تمرير الماوس */
+.checkbox-label:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+}
+
+/* حالة عند الاختيار (تم النقر على البوكس) */
+.hidden-checkbox:checked + .checkbox-label {
+    /* لون الخلفية عند الاختيار */
+    background-color: #007bff; /* أزرق مثلاً */
+    color: #fff; /* النص باللون الأبيض */
+    border-color: #007bff;
+}
+
+/* تنسيق الأيقونة عند الاختيار */
+.hidden-checkbox:checked + .checkbox-label i {
+    color: #fff;
+}
+
+/* تنسيق لمنع ظهور البوكسات في صف جديد إذا كان العرض مناسباً */
+.form-group-checkbox.full-width-group {
+    flex: 1 1 100%;
+}

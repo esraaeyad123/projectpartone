@@ -1,10 +1,8 @@
-<!-- =================== Add Employee Modal =================== -->
 <div id="employeeModal" class="modal">
   <div class="modal-content new-employee-modal-design">
     <span class="close-btn" onclick="closeEmployeeModal()"><i class="fas fa-times"></i></span>
-    <h2 class="modal-title">Add new employee 👨‍💼</h2>
+    <h2 class="modal-title">Add New Employee 👨‍💼</h2>
 
-    <!-- Tabs -->
     <div class="tab-buttons">
       <button id="employee-btn" onclick="switchEmployeeTab('employee')" class="active">
         <i class="fas fa-user"></i> Employee
@@ -14,30 +12,34 @@
       </button>
     </div>
 
-    <!-- Form Start -->
-    <form id="employeeForm" onsubmit="saveEmployee(event)">
-      <input type="hidden" name="_token" value="{{ csrf_token() }}">
+    <form id="employeeForm"> <input type="hidden" name="_token" value="{{ csrf_token() }}">
       <input type="hidden" id="employeeId">
 
-      <!-- Employee Tab -->
       <div id="employeeTab" class="form-tab-content active">
+
         <fieldset class="form-section-fieldset">
-          <legend>Employee Information</legend>
+          <legend>Employee Personal Information</legend>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="employeeReference">Employee Reference:</label>
-              <input type="text" id="employeeReference" readonly
-                     style="background-color: #e9ecef; cursor: not-allowed;"
-                     placeholder="Automatically Generated">
-            </div>
-            <div class="form-group">
               <label for="initials">Initials:</label>
-              <select id="initials"></select>
+              <select id="initials">
+                <option value="" selected disabled>Select Initials</option>
+                <option value="Mr.">Mr.</option>
+                <option value="Ms.">Ms.</option>
+                <option value="Mrs.">Mrs.</option>
+                <option value="Dr.">Dr.</option>
+                <option value="Eng.">Eng.</option>
+                <option value="Prof.">Prof.</option>
+              </select>
             </div>
             <div class="form-group">
               <label for="title">Title:</label>
               <input type="text" id="title">
+            </div>
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input type="email" id="email">
             </div>
           </div>
 
@@ -57,75 +59,120 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group full-width-group">
               <label for="fullName">Full Name:</label>
-              <input type="text" id="fullName">
+              <input type="text" id="fullName" readonly style="background-color: #f0f0f0;">
             </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section-fieldset">
+          <legend>Employment Information</legend>
+
+          <div class="form-row">
             <div class="form-group">
-              <label for="email">Email:</label>
-              <input type="email" id="email">
+              <label for="employeeReference">Employee Reference:</label>
+              <input type="text" id="employeeReference" readonly
+                     style="background-color: #e9ecef; cursor: not-allowed;"
+                     placeholder="Automatically Generated">
             </div>
             <div class="form-group">
               <label for="supervisor">Supervisor:</label>
               <select id="supervisor">
-                <option value="" selected disabled>[Select Supervisor]</option>
+                <option value="" selected disabled>Select Supervisor</option>
               </select>
             </div>
-          </div>
-
-          <div class="form-row">
             <div class="form-group">
               <label for="businessUnit">Business Unit:</label>
               <select id="businessUnit">
-                <option value="AAM-EHSA" selected>AAM-EHSA</option>
+                  <option value="" disabled selected>Select Unit</option> <option value="AAM-JED">AAM-JED</option>
+                  <option value="AAM-EHSA">AAM-EHSA</option>
               </select>
-            </div>
-            <div class="form-group">
-              <label for="department">Department:</label>
-              <select id="department">
-                <option value="" selected disabled>[Select Department]</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="ctta">CTTA:</label>
-              <input type="text" id="ctta">
-            </div>
+          </div>
           </div>
 
           <div class="form-row">
-            <div class="form-group-checkbox">
-              <label>Job Roles</label>
-              <div class="job-rules-container">
-                <input type="checkbox" id="officeStaff"><label for="officeStaff">Office Staff</label>
-                <input type="checkbox" id="laboratoryStaff"><label for="laboratoryStaff">Laboratory Staff</label>
-                <input type="checkbox" id="siteStaff"><label for="siteStaff">Site Staff</label>
-                <input type="checkbox" id="drillersStaff"><label for="drillersStaff">Drillers Staff</label>
-                <input type="checkbox" id="driversStaff"><label for="driversStaff">Drivers Staff</label>
+            <div class="form-group">
+              <label for="department">Department:</label>
+              <select id="department">
+                <option value="" selected disabled>Select Department</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="CTTA">CTTA:</label>
+              <input type="text" id="CTTA">
+            </div>
+            <div class="form-group-placeholder">
+              </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group-checkbox full-width-group job-roles-container-wrapper" style="padding-top: 10px;">
+              <label for="" style="display: block; font-weight: bold; margin-bottom: 10px;">Job Roles:</label> 
+              <div class="job-roles-creative-grid">
+                
+                <div class="role-box">
+                    <input type="checkbox" id="officeStaff" class="hidden-checkbox">
+                    <label for="officeStaff" class="checkbox-label">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Office Staff</span>
+                    </label>
+                </div>
+
+                <div class="role-box">
+                    <input type="checkbox" id="laboratoryStaff" class="hidden-checkbox">
+                    <label for="laboratoryStaff" class="checkbox-label">
+                        <i class="fas fa-flask"></i>
+                        <span>Laboratory Staff</span>
+                    </label>
+                </div>
+
+                <div class="role-box">
+                    <input type="checkbox" id="siteStaff" class="hidden-checkbox">
+                    <label for="siteStaff" class="checkbox-label">
+                        <i class="fas fa-hard-hat"></i>
+                        <span>Site Staff</span>
+                    </label>
+                </div>
+
+                <div class="role-box">
+                    <input type="checkbox" id="drillerStaff" class="hidden-checkbox">
+                    <label for="drillerStaff" class="checkbox-label">
+                        <i class="fas fa-hammer"></i> <span>Driller Staff</span>
+                    </label>
+                </div>
+
+                <div class="role-box">
+                    <input type="checkbox" id="driversStaff" class="hidden-checkbox">
+                    <label for="driversStaff" class="checkbox-label">
+                        <i class="fas fa-truck"></i>
+                        <span>Drivers Staff</span>
+                    </label>
+                </div>
+
               </div>
             </div>
           </div>
         </fieldset>
+
       </div>
 
-      <!-- Contact Tab -->
-      <div id="contactTab" class="form-tab-content" style="display:none;">
+      <div id="contactTab" class="form-tab-content" style="display: none;">
         <fieldset class="form-section-fieldset">
           <legend>Contact List</legend>
           <div class="contact-toolbar">
-            <button type="button" class="btn-secondary" onclick="populateEmployeeContactFormForEdit('employee')">
+            <button type="button" class="btn-secondary" onclick="populateEmployeeContactForm('add')">
               <i class="fas fa-pen"></i> Edit Selected
             </button>
-           <!-- HTML الزر -->
-<button type="button" class="btn-danger" onclick="deleteSelectedEmployees('#employeeContactsTable')">
-    <i class="fas fa-trash"></i> Delete Selected
-</button>
-
-<button type="button" class="btn-icon" onclick="exportContactsExcelBtn('employeeContactsTable')">
-  <i class="fa-solid fa-table"></i>
-</button>
-<button type="button" class="btn-icon" onclick="printContactsTable('employeeContactsTable')">
-  <i class="fas fa-print"></i>
-</button>
+            <button type="button" class="btn-danger" onclick="deleteSelectedEmployeeContacts('#employeeContactsTable')">
+              <i class="fas fa-trash"></i> Delete Selected
+            </button>
+            <button type="button" class="btn-icon" onclick="exportContactsExcelBtn('employeeContactsTable')">
+              <i class="fa-solid fa-table"></i>
+            </button>
+            <button type="button" class="btn-icon" onclick="printContactsTable('employeeContactsTable')">
+              <i class="fas fa-print"></i>
+            </button>
           </div>
           <div class="table-responsive-container">
             <table id="employeeContactsTable" class="contacts-table display responsive nowrap">
@@ -153,34 +200,34 @@
 
         <fieldset class="form-section-fieldset">
           <legend>Add / Edit Contact Person</legend>
-          <input type="hidden" id="employeeContactIdAdd">
+          <input type="hidden" id="contactIdEmployee">
 
           <div class="form-row">
             <div class="form-group">
-              <label for="employeeContactName">Contact Name:</label>
-              <input type="text" id="employeeContactName">
+              <label for="contactNameEmployee">Contact Name:</label>
+              <input type="text" id="contactNameEmployee">
             </div>
             <div class="form-group">
-              <label for="employeeContactEmail">Contact Email:</label>
-              <input type="email" id="employeeContactEmail">
+              <label for="contactEmailEmployee">Contact Email:</label>
+              <input type="email" id="contactEmailEmployee">
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="employeeContactPhone">Contact Phone:</label>
-              <input type="tel" id="employeeContactPhone">
+              <label for="contactPhoneEmployee">Contact Phone:</label>
+              <input type="tel" id="contactPhoneEmployee">
             </div>
             <div class="form-group">
-              <label for="employeeContactMobile">Contact Mobile:</label>
-              <input type="tel" id="employeeContactMobile">
+              <label for="contactMobileEmployee">Contact Mobile:</label>
+              <input type="tel" id="contactMobileEmployee">
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="employeeContactPosition">Position:</label>
-              <input type="text" id="employeeContactPosition">
+              <label for="contactPositionEmployee">Position:</label>
+              <input type="text" id="contactPositionEmployee">
             </div>
             <div class="form-group-checkbox">
               <input type="checkbox" id="isPrimaryContactEmployee">
@@ -189,29 +236,31 @@
           </div>
 
           <div class="contact-toolbar">
-            <button type="button" class="btn btn-primary" onclick="saveEmployeeContact('employee')">
+            <button type="button" class="btn btn-primary" onclick="saveEmployeeContact('add')">
               💾 Save / Update
             </button>
-            <button type="button" class="btn-secondary" onclick="clearContactForm('employee')">
+            <button type="button" class="btn btn-secondary" onclick="clearEmployeeContactForm('add')">
               <i class="fas fa-eraser"></i> Clear Form
             </button>
           </div>
         </fieldset>
       </div>
 
-      <!-- Modal Buttons -->
       <div class="form-buttons modal-bottom-buttons">
-        <button type="button" class="btn-primary" onclick="closeEmployeeModal()"><i class="fas fa-times"></i> Close</button>
-        <button type="button" class="btn-success" onclick="saveEmployee(true)"><i class="fas fa-save"></i> Save & Close</button>
-        <button type="button" class="btn-success" onclick="saveEmployee(false)"><i class="fas fa-save"></i> Save</button>
+        <button type="button" class="btn-primary" onclick="closeEmployeeModal()">
+          <i class="fas fa-times"></i> Close
+        </button>
+        <button type="button" class="btn-success" onclick="saveEmployee(true)">
+          <i class="fas fa-save"></i> Save & Close
+        </button>
+        <button type="button" class="btn-success" onclick="saveEmployee(false)">
+          <i class="fas fa-save"></i> Save
+        </button>
       </div>
     </form>
   </div>
 </div>
 
-
-
-<!-- =================== Edit Employee Modal =================== -->
 <div id="editEmployeeModal" class="modal">
   <div class="modal-content new-employee-modal-design">
     <span class="close-btn" onclick="closeEditEmployeeModal()">
@@ -219,7 +268,6 @@
     </span>
     <h2 class="modal-title">Edit Employee 📝</h2>
 
-    <!-- Tabs -->
     <div class="tab-buttons">
       <button type="button" id="edit-employee-btn"
               onclick="switchEmployeeTab('employee', 'edit')"
@@ -232,29 +280,34 @@
       </button>
     </div>
 
-    <!-- Form Start -->
     <form id="editEmployeeForm">
       <input type="hidden" id="editEmployeeId">
 
-      <!-- Employee Tab -->
       <div id="editEmployeeTab" class="form-tab-content active">
+
         <fieldset class="form-section-fieldset">
-          <legend>Employee Information</legend>
+          <legend>Employee Personal Information</legend>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="editEmployeeReference">Employee Reference:</label>
-              <input type="text" id="editEmployeeReference" readonly
-                     style="background-color: #e9ecef; cursor: not-allowed;"
-                     placeholder="Automatically Generated">
-            </div>
-            <div class="form-group">
               <label for="editInitials">Initials:</label>
-              <select id="editInitials"></select>
+              <select id="editInitials">
+                <option value="" selected disabled>Select Initials</option>
+                <option value="Mr.">Mr.</option>
+                <option value="Ms.">Ms.</option>
+                <option value="Mrs.">Mrs.</option>
+                <option value="Dr.">Dr.</option>
+                <option value="Eng.">Eng.</option>
+                <option value="Prof.">Prof.</option>
+              </select>
             </div>
             <div class="form-group">
               <label for="editTitle">Title:</label>
               <input type="text" id="editTitle">
+            </div>
+            <div class="form-group">
+              <label for="editEmail">Email:</label>
+              <input type="email" id="editEmail">
             </div>
           </div>
 
@@ -274,37 +327,104 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group full-width-group">
               <label for="editFullName">Full Name:</label>
-              <input type="text" id="editFullName">
+              <input type="text" id="editFullName" readonly style="background-color: #f0f0f0;">
             </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section-fieldset">
+          <legend>Employment Information</legend>
+
+          <div class="form-row">
             <div class="form-group">
-              <label for="editEmail">Email:</label>
-              <input type="email" id="editEmail">
+              <label for="editEmployeeReference">Employee Reference:</label>
+              <input type="text" id="editEmployeeReference" readonly
+                     style="background-color: #e9ecef; cursor: not-allowed;"
+                     placeholder="Automatically Generated">
             </div>
             <div class="form-group">
               <label for="editSupervisor">Supervisor:</label>
               <select id="editSupervisor">
-                <option value="" selected disabled>[Select Supervisor]</option>
+                <option value="" selected disabled>Select Supervisor</option>
               </select>
             </div>
+            <div class="form-group">
+              <label for="editBusinessUnit">Business Unit:</label>
+              <select id="editBusinessUnit">
+                  <option value="" disabled selected>Select Unit
+                  </option> <option value="AAM-JED">AAM-JED</option>
+                  <option value="AAM-EHSA">AAM-EHSA</option>
+              </select>
           </div>
-                <div class="form-row">
-            <div class="form-group-checkbox">
-              <label>Job Roles</label>
-              <div class="job-rules-container">
-                <input type="checkbox" id="editOfficeStaff"><label for="editOfficeStaff">Office Staff</label>
-                <input type="checkbox" id="editLaboratoryStaff"><label for="editLaboratoryStaff">Laboratory Staff</label>
-                <input type="checkbox" id="editSiteStaff"><label for="editSiteStaff">Site Staff</label>
-                <input type="checkbox" id="editDrillersStaff"><label for="editDrillersStaff">Drillers Staff</label>
-                <input type="checkbox" id="editDriversStaff"><label for="editDriversStaff">Drivers Staff</label>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editDepartment">Department:</label>
+              <select id="editDepartment">
+                <option value="" selected disabled>Select Department</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editCTTA">CTTA:</label>
+              <input type="text" id="editCTTA">
+            </div>
+            <div class="form-group-placeholder">
+              </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group-checkbox full-width-group job-roles-container-wrapper" style="padding-top: 10px;">
+              <label for="" style="display: block; font-weight: bold; margin-bottom: 10px;">Job Roles:</label> 
+              <div class="job-roles-creative-grid">
+                
+                <div class="role-box">
+                    <input type="checkbox" id="editOfficeStaff" class="hidden-checkbox">
+                    <label for="editOfficeStaff" class="checkbox-label">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Office Staff</span>
+                    </label>
+                </div>
+
+                <div class="role-box">
+                    <input type="checkbox" id="editLaboratoryStaff" class="hidden-checkbox">
+                    <label for="editLaboratoryStaff" class="checkbox-label">
+                        <i class="fas fa-flask"></i>
+                        <span>Laboratory Staff</span>
+                    </label>
+                </div>
+
+                <div class="role-box">
+                    <input type="checkbox" id="editSiteStaff" class="hidden-checkbox">
+                    <label for="editSiteStaff" class="checkbox-label">
+                        <i class="fas fa-hard-hat"></i>
+                        <span>Site Staff</span>
+                    </label>
+                </div>
+
+                <div class="role-box">
+                    <input type="checkbox" id="editDrillerStaff" class="hidden-checkbox">
+                    <label for="editDrillerStaff" class="checkbox-label">
+                        <i class="fas fa-hammer"></i> <span>Driller Staff</span>
+                    </label>
+                </div>
+
+                <div class="role-box">
+                    <input type="checkbox" id="editDriversStaff" class="hidden-checkbox">
+                    <label for="editDriversStaff" class="checkbox-label">
+                        <i class="fas fa-truck"></i>
+                        <span>Drivers Staff</span>
+                    </label>
+                </div>
+
               </div>
             </div>
           </div>
         </fieldset>
       </div>
 
-      <!-- Contact Tab -->
       <div id="editContactTab" class="form-tab-content" style="display: none;">
         <fieldset class="form-section-fieldset">
           <legend>Contact List</legend>
@@ -312,19 +432,15 @@
             <button type="button" class="btn-secondary" onclick="populateEmployeeContactFormForEdit('edit')">
               <i class="fas fa-pen"></i> Edit Selected
             </button>
-            <!-- HTML الزر -->
-<button type="button" class="btn-danger" onclick="deleteSelectedEmployeeContacts('#editEmployeeContactsTable')">
-    <i class="fas fa-trash"></i> Delete Selected
-</button>
-
-           <!-- داخل مودال التعديل -->
-<button type="button" class="btn-icon" onclick="exportContactsExcelBtn('editEmployeeContactsTable')">
-  <i class="fa-solid fa-table"></i>
-</button>
-<button type="button" class="btn-icon" onclick="printContactsTable('editEmployeeContactsTable')">
-  <i class="fas fa-print"></i>
-</button>
-
+            <button type="button" class="btn-danger" onclick="deleteSelectedEmployeeContacts('#editEmployeeContactsTable')">
+              <i class="fas fa-trash"></i> Delete Selected
+            </button>
+            <button type="button" class="btn-icon" onclick="exportContactsExcelBtn('editEmployeeContactsTable')">
+              <i class="fa-solid fa-table"></i>
+            </button>
+            <button type="button" class="btn-icon" onclick="printContactsTable('editEmployeeContactsTable')">
+              <i class="fas fa-print"></i>
+            </button>
           </div>
           <div class="table-responsive-container">
             <table id="editEmployeeContactsTable" class="contacts-table display responsive nowrap">
@@ -391,17 +507,16 @@
             <button type="button" class="btn btn-primary" onclick="saveEmployeeContact('edit')">
               💾 Save / Update
             </button>
-          <button type="button" class="btn btn-secondary" onclick="clearEmployeeContactForm('edit')">
-  <i class="fas fa-eraser"></i> Clear Form
-</button>
-
+            <button type="button" class="btn btn-secondary" onclick="clearEmployeeContactForm('edit')">
+              <i class="fas fa-eraser"></i> Clear Form
+            </button>
           </div>
         </fieldset>
       </div>
 
-      <!-- Modal Buttons -->
       <div class="form-buttons modal-bottom-buttons">
-        <button type="button" class="btn-primary" onclick="closeEditEmployeeModal()">
+
+      <button type="button" class="btn-primary" onclick="closeEditEmployeeModal()">
           <i class="fas fa-times"></i> Close
         </button>
         <button type="button" class="btn-success" onclick="updateEmployee(true)">
@@ -410,6 +525,7 @@
         <button type="button" class="btn-success" onclick="updateEmployee(false)">
           <i class="fas fa-save"></i> Update
         </button>
+        
       </div>
     </form>
   </div>
