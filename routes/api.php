@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Project\ProjectController;
+use App\Http\Controllers\Project\ProjectContactController;
 
 
 /*
@@ -26,3 +27,6 @@ Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('custom
 Route::post('/projects/{projectId}/contacts', [ProjectContactController::class, 'store']);
 Route::put('/projects/{projectId}/contacts/{contactId}', [ProjectContactController::class, 'update']);
 
+Route::get('/api/projects', function () {
+    return App\Models\Project::select('id', 'name')->get();
+});

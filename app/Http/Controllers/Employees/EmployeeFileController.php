@@ -142,42 +142,52 @@ class EmployeeFileController extends Controller
 
 
     // حذف ملف واحد
-    public function destroy(EmployeeFile $file)
-    {
-        try {
-            if (Storage::disk('public')->exists($file->path)) {
-                Storage::disk('public')->delete($file->path);
-            }
-            $file->delete();
+   // حذف ملف واحد من قاعدة البيانات فقط
+// حذف ملف واحد من قاعدة البيانات فقط
+public function destroy($fileId)
+{
+    try {
+        $file = EmployeeFile::findOrFail($fileId);
+        $file->delete(); // حذف السجل من قاعدة البيانات فقط
 
-            return response()->json(['success' => true]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف الملف  بنجاح'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+
+// حذف ملفات متعددة من قاعدة البيانات فقط
+public function destroyMultiple(Request $request)
+{
+    $fileIds = $request->input('file_ids', []);
+
+    if (empty($fileIds)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'لم يتم تحديد ملفات للحذف.'
+        ], 400);
     }
 
-    // حذف ملفات متعددة
-    public function destroyMultiple(Request $request)
-    {
-        $fileIds = $request->input('file_ids', []);
+    try {
+        EmployeeFile::whereIn('id', $fileIds)->delete(); // حذف السجلات مباشرة
 
-        if (empty($fileIds)) {
-            return response()->json(['success' => false, 'message' => 'لم يتم تحديد ملفات للحذف.'], 400);
-        }
-
-        $files = EmployeeFile::whereIn('id', $fileIds)->get();
-
-        try {
-            foreach ($files as $file) {
-                if (Storage::disk('public')->exists($file->path)) {
-                    Storage::disk('public')->delete($file->path);
-                }
-                $file->delete();
-            }
-
-            return response()->json(['success' => true]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف الملفات المحددة  بنجاح'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
     }
+}
+
+
 }

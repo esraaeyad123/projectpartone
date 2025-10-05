@@ -475,28 +475,6 @@ function loadUncertainties(testId, mode = 'edit') {
 // إضافة Uncertainty جديدة
 // ==========================
 
-function addUncertaintyHistory(mode = 'edit') {
-    const tableId = mode === 'edit' ? 'editUncertaintyHistory' : 'uncertaintyHistory';
-    const testId = mode === 'edit' ? $('#editTestId').val() : $('#testId').val();
-    const value = document.getElementById(mode === 'edit' ? 'editUncertainty' : 'uncertainty').value;
-    const date = document.getElementById(mode === 'edit' ? 'editUncertaintyDate' : 'uncertaintyDate').value;
-
-    if (!value || !date || !testId) return alert('يرجى إدخال القيمة، التاريخ وارتباط الاختبار');
-
-    fetch('/uncertainty-history', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({ test_id: testId, value, date_recorded: date })
-    })
-    .then(res => res.json())
-    .then(() => loadUncertainties(testId, mode))
-    .catch(err => console.error(err));
-}
-
-
 function toDateInput(value) {
     if (!value) return '';
     return value.split('T')[0].split(' ')[0];

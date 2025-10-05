@@ -18,6 +18,7 @@ use App\Http\Controllers\Test\TestController;
 use App\Http\Controllers\Test\TestFileController;
 use App\Http\Controllers\Test\UncertaintyController;
 use App\Http\Controllers\Equipment\EquipmentController;
+use App\Http\Controllers\Equipment\EquipmentFileController;
 
 
 
@@ -242,4 +243,15 @@ Route::delete('/tests/files/{file}', [TestFileController::class, 'destroy'])
     ->name('tests.files.destroy');
 
 
-Route::resource('equipment', EquipmentController::class);
+Route::resource('equipments', EquipmentController::class);
+Route::post('/equipments/bulk-delete', [EquipmentController::class, 'deleteMultiple']);
+Route::post('/equipments/{id}/uncertainty-history', [EquipmentController::class, 'addUncertainty']);
+
+Route::get('/equipments/{equipment}/files', [EquipmentFileController::class, 'index']);
+Route::post('/equipments/{equipment}/files', [EquipmentFileController::class, 'store']);
+Route::delete('/equipments/files/{id}', [EquipmentFileController::class, 'destroy']);
+Route::get('/equipments/{equipment}/files-json', [EquipmentFileController::class, 'filesJson']);
+// عرض ملف Equipment
+Route::get('/equipments/files/{file}/view', [EquipmentFileController::class, 'viewEquipmentFile']);
+// تنزيل ملف Equipment
+Route::get('/equipments/files/{file}/download', [EquipmentFileController::class, 'download']);

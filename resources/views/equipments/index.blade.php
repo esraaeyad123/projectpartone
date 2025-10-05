@@ -84,1116 +84,762 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
-
-    //====================== Start Script ======================
-    function showAlert(message, type) {
-        Swal.fire({
-            title: type === 'success' ? 'Success!' : (type === 'error' ? 'Error!' : 'Warning!'),
-            text: message,
-            icon: type,
-            confirmButtonText: 'OK'
-        });
-    }
-    function showConfirm(message, callback, title = 'Confirm', confirmButtonText = 'Yes', cancelButtonText = 'No') {
-        Swal.fire({
-            title: title,
-            text: message,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: confirmButtonText,
-            cancelButtonText: cancelButtonText
-        }).then((result) => {
-            if (result.isConfirmed) {
-                callback();
-            }
-        });
-    }
-    // ================== تهيأة وتحميل وبحث الجدول==================
-    $(document).ready(function() {
-
-        // index العمود اللي فيه التاريخ (يبدأ من 0)
-        var dateColumnIndex = 4; // عندك العمود السابع "date_registered"
-
-        // تهيئة Flatpickr على الحقول
-        flatpickr(".flatpickr-input", {
-            dateFormat: "Y-m-d",
-            locale: "en",
-            allowInput: true
-        });
-
-        // تهيئة الجدول مرة واحدة
-        window.projectsTable = $('#projectsTable').DataTable({
-            responsive: true,
-            autoWidth: false,
-            processing: true,
-            scrollX: true,
-            columnDefs: [
-                { orderable: false, targets: [0] } // عمود الشيكبوكس وعمود الأزرار
-            ]
-        });
-
-        // تحميل البيانات للمرة الأولى
-        loadProjects();
-
-        function parseDateToNumber(str) {
-            if (!str) return null;
-            str = String(str).trim().split(' ')[0]; // نشيل الوقت لو موجود
-            var parts = str.split('-'); // flatpickr يخرج Y-m-d
-            if (parts.length !== 3) return null;
-
-            var y = parts[0], m = parts[1], d = parts[2];
-            return parseInt(y + m.padStart(2, '0') + d.padStart(2, '0'), 10);
-        }
-        // ---------------------------------------------------------------------------------------
-        // الكود الجديد لتفعيل البحث في الأعمدة
-        // فلتر مخصص للتواريخ
-        $.fn.dataTable.ext.search.push(function(settings, data) {
-            if (settings.nTable.id !== 'projectsTable') return true;
-
-            var minVal = $('input[data-filter-type="date-from"]').val();
-            var maxVal = $('input[data-filter-type="date-to"]').val();
-
-            var minNum = minVal ? parseDateToNumber(minVal) : null;
-            var maxNum = maxVal ? parseDateToNumber(maxVal) : null;
-            var rowNum = parseDateToNumber(data[dateColumnIndex]);
-
-            if (rowNum === null) return (minNum === null && maxNum === null);
-
-            if (minNum === null && maxNum === null) return true;
-            if (minNum === null && rowNum <= maxNum) return true;
-            if (maxNum === null && rowNum >= minNum) return true;
-            if (rowNum >= minNum && rowNum <= maxNum) return true;
-
-            return false;
-        });
-
-        $('input[data-filter-type="date-from"], input[data-filter-type="date-to"]').on('change keyup', function() {
-            projectsTable.draw();
-        });
-
-
-        // استنساخ صف الرؤوس لإنشاء صف البحث
-        $('#projectsTable thead tr').clone(true).appendTo('#projectsTable thead');
-
-        // منع البحث في عمود صندوق الاختيار
-        $('#projectsTable thead tr:eq(1) th:eq(0)').empty();
-
-        // تطبيق الفلترة على كل حقل بحث
-       projectsTable.columns().every(function() {
-            var that = this;
-            var column =projectsTable.column(this.index());
-
-            // ⛔️ تجاوز العمود الأول (الذي يحتوي على مربع الاختيار)
-            if (this.index() === 0) {
-                return;
-            }
-
-            // ⛔️ تجاوز عمود التاريخ
-            if ($(this.header()).find('input[data-filter-type="date-from"]').length > 0) {
-                return;
-            }
-            // معالجة البحث لجميع أنواع الحقول
-            $('input, select', this.header()).on('keyup change', function() {
-                var val = $.fn.dataTable.util.escapeRegex($(this).val());
-
-                if (column.search() !== val) {
-                    column.search(val).draw();
-                }
-            });
-        });
-
+/****************************
+ * Alerts
+ ****************************/
+function showAlert(message, type) {
+    Swal.fire({
+        title: type === 'success' ? 'Success!' : (type === 'error' ? 'Error!' : 'Warning!'),
+        text: message,
+        icon: type,
+        confirmButtonText: 'OK'
     });
-    // ---------------------------------------------------------------------------------------
-    function loadProjects() {
-        $.get('/projects', function(projects) {
-            // تنظيف الجدول
-            projectsTable.clear();
+}
 
-            // إضافة البيانات الجديدة
-            projects.forEach(p => {
-                projectsTable.row.add([
-                    `<input type="checkbox" class="project-checkbox" value="${p.id}">`,
-                    p.reference || '',
-                    p.name || '',
-                    p.arabic_name || '',
-                    p.registration_date || '',
-                    p.region || '',
-                    p.customer ? p.customer.customer_name : '',
-                    p.owner || '',
-                    p.consultant || '',
-                    p.contractor || '',
-                ]);
-            });
+/****************************
+ * Confirm
+ ****************************/
+function showConfirm(message, callback, title = 'Confirm', confirmButtonText = 'Yes', cancelButtonText = 'No') {
+    Swal.fire({
+        title: title,
+        text: message,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: confirmButtonText,
+        cancelButtonText: cancelButtonText
+    }).then((result) => {
+        if (result.isConfirmed) callback();
+    });
+}
 
-            projectsTable.draw();
+/****************************
+ * DataTable تجهيز جدول المعدات
+ ****************************/
+$(document).ready(function() {
+    var dateColumnIndex = 9; // العمود العاشر (تاريخ التسجيل)
+
+    flatpickr(".flatpickr-input", { dateFormat: "Y-m-d", locale: "en", allowInput: true });
+
+    window.equipmentsTable = $('#equipmentsTable').DataTable({
+        responsive: true,
+        autoWidth: false,
+        processing: true,
+        scrollX: true,
+        columnDefs: [{ orderable: false, targets: [0] }]
+    });
+
+    loadEquipments();
+
+    function parseDateToNumber(str) {
+        if (!str) return null;
+        str = String(str).trim().split(' ')[0];
+        var parts = str.split('-');
+        if (parts.length !== 3) return null;
+        return parseInt(parts[0] + parts[1].padStart(2, '0') + parts[2].padStart(2, '0'), 10);
+    }
+
+    // فلترة التاريخ
+    $.fn.dataTable.ext.search.push(function(settings, data) {
+        if (settings.nTable.id !== 'equipmentsTable') return true;
+        var minVal = $('input[data-filter-type="date-from"]').val();
+        var maxVal = $('input[data-filter-type="date-to"]').val();
+        var minNum = minVal ? parseDateToNumber(minVal) : null;
+        var maxNum = maxVal ? parseDateToNumber(maxVal) : null;
+        var rowNum = parseDateToNumber(data[dateColumnIndex]);
+        if (rowNum === null) return (minNum === null && maxNum === null);
+        if (minNum === null && rowNum <= maxNum) return true;
+        if (maxNum === null && rowNum >= minNum) return true;
+        if (rowNum >= minNum && rowNum <= maxNum) return true;
+        return false;
+    });
+
+    $('input[data-filter-type="date-from"], input[data-filter-type="date-to"]').on('change keyup', function() {
+        equipmentsTable.draw();
+    });
+});
+
+/****************************
+ * تحميل بيانات المعدات
+ ****************************/
+function loadEquipments() {
+    $.get('/equipments', function(equipments) {
+        equipmentsTable.clear();
+        equipments.forEach(eq => {
+            equipmentsTable.row.add([
+                `<input type="checkbox" class="equipment-checkbox" value="${eq.id}">`,
+                eq.equipment_reference || '',
+                eq.description || '',
+                eq.serial_number || '',
+                eq.model || '',
+                eq.make || '',
+                eq.department || '',
+                eq.custodian || '',
+                eq.location || '',
+                eq.registration_date || '',
+            ]);
         });
-    }
-    //----------------------------------------------------------------------------------------
-    // --------------------Select All & Update 'select all' button----------------------------
-    $('#selectAllProjects').on('change', function() {
-        let rows = projectsTable.rows({ 'search': 'applied' }).nodes();
-        $('input.project-checkbox', rows).prop('checked', this.checked);
+        equipmentsTable.draw();
     });
-    $('#projectsTable tbody').on('change', 'input.project-checkbox', function() {
-        let allChecked = $('.project-checkbox').length === $('.project-checkbox:checked').length;
-        $('#selectAllProjects').prop('checked', allChecked);
-    });
-    //----------------------------------------------------------------------------------------
-    function switchTab(tabName) {
-        $('.form-tab-content').hide();
-        $('.tab-buttons button').removeClass('active');
+}
 
-        if (tabName === 'project') {
-            $('#projectTab').show();
-            $('#project-btn').addClass('active');
-        } else if (tabName === 'contact') {
-            $('#contactTab').show();
-            $('#contact-btn').addClass('active');
-        } else if (tabName === 'edit-project') {
-            $('#editProjectTab').show();
-            $('#edit-project-btn').addClass('active');
-        } else if (tabName === 'edit-contact') {
-            $('#editContactTab').show();
-            $('#edit-contact-btn').addClass('active');
-        }
-    }
-    //----------------------------------------------------------------------------------------
-    function deleteProject(id) {
+/****************************
+ * تحديد الكل Checkboxes
+ ****************************/
+$('#selectAllEquipments').on('change', function() {
+    let rows = equipmentsTable.rows({ 'search': 'applied' }).nodes();
+    $('input.equipment-checkbox', rows).prop('checked', this.checked);
+});
+
+$('#equipmentsTable tbody').on('change', 'input.equipment-checkbox', function() {
+    let allChecked = $('.equipment-checkbox').length === $('.equipment-checkbox:checked').length;
+    $('#selectAllEquipments').prop('checked', allChecked);
+});
+
+/****************************
+ * حذف جهاز واحد
+ ****************************/
+function deleteEquipment(id) {
+    showConfirm("سيتم حذف الجهاز ولا يمكنك التراجع عن هذا الإجراء!", function() {
+        $.ajax({
+            url: `/equipments/${id}`,
+            type: 'DELETE',
+            data: { _token: $('meta[name="csrf-token"]').attr('content') },
+            success: function() { showAlert('تم حذف الجهاز بنجاح ✅', 'success'); loadEquipments(); },
+            error: function(xhr) { console.error(xhr.responseText); showAlert('خطأ أثناء حذف الجهاز', 'error'); }
+        });
+    }, "هل أنت متأكد؟");
+}
+
+/****************************
+ * حذف أجهزة متعددة
+ ****************************/
+function getSelectedEquipmentIds() {
+    let ids = [];
+    $('.equipment-checkbox:checked').each(function() { ids.push($(this).val()); });
+    return ids;
+}
+
+function deleteSelectedEquipments() {
+    let ids = getSelectedEquipmentIds();
+    if (ids.length === 0) return showAlert('الرجاء اختيار جهاز واحد على الأقل', 'warning');
+
+    showConfirm(`سيتم حذف ${ids.length} جهاز/أجهزة!`, function() {
+        $.ajax({
+            url: `/equipments/bulk-delete`,
+            type: 'POST',
+            data: { _token: $('meta[name="csrf-token"]').attr('content'), ids: ids },
+            success: function() { showAlert('تم حذف الأجهزة المحددة ✅', 'success'); loadEquipments(); },
+            error: function(xhr) { console.error(xhr.responseText); showAlert('خطأ أثناء حذف الأجهزة', 'error'); }
+        });
+    }, "هل أنت متأكد؟");
+}
+
+/****************************
+ * فتح / إغلاق Modals
+ ****************************/
+function openEquipmentModal() { document.getElementById('equipmentModal').style.display = 'block'; }
+function closeEquipmentModal() { document.getElementById('equipmentModal').style.display = 'none'; }
+function openEditEquipmentModal() { document.getElementById('editEquipmentModal').style.display = 'block'; }
+function closeEditEquipmentModal() { document.getElementById('editEquipmentModal').style.display = 'none'; }
+
+/****************************
+ * تعديل المعدات
+ ****************************/
+// ======================= فتح مودال تعديل الجهاز =======================
+// --- فتح مودال تعديل الجهاز وتعبئة البيانات ---
+function editEquipmentModal(id) {
+    if (!id) return console.warn('No Equipment ID provided');
+
+     if (!id) {
         Swal.fire({
-            title: 'هل أنت متأكد؟',
-            text: "سيتم حذف المشروع ولا يمكنك التراجع عن هذا الإجراء!",
             icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'نعم، احذف!',
-            cancelButtonText: 'إلغاء'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/projects/${id}`,
-                    type: 'DELETE',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'تم الحذف ✅',
-                            text: 'تم حذف المشروع بنجاح.',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                        loadProjects();
-                    },
-                    error: function(xhr) {
-                        console.error("Error deleting project:", xhr.responseText);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'خطأ ❌',
-                            text: 'حدث خطأ أثناء محاولة حذف المشروع.',
-                            confirmButtonText: 'حسناً'
-                        });
-                    }
-                });
-            }
+            title: 'تنبيه ⚠️',
+            text: 'يرجى اختيار جهاز واحد!',
+            confirmButtonText: 'حسناً'
         });
-    }
-    //----------------------------------------------------------------------------------------
-    function openProjectModal() {
-        $('#projectForm')[0].reset();
-        $('#projectId').val('');
-        $('#projectModal').show();
-    }
-    //----------------------------------------------------------------------------------------
-    function closeProjectModal() {
-        $('#projectModal').hide();
-    }
-    //----------------------------------------------------------------------------------------
-    function closeEditProjectModal() {
-        $('#editProjectModal').hide();
-    }
-    //----------------------------------------------------------------------------------------
-    function getSelectedProjectIds() {
-        let ids = [];
-        $('.project-checkbox:checked').each(function() {
-            ids.push($(this).val());
-        });
-        return ids;
-    }
-    //----------------------------------------------------------------------------------------
-    function saveProject(closeAfterSave) {
-    const projectId = $('#projectId').val();
-    const projectName = $('#projectName').val().trim();
-
-    if (!projectName) {
-        Swal.fire("تحذير", "⚠️ الرجاء إدخال اسم للمشروع.", "warning");
         return;
     }
 
-    // الحصول على القيم من الـ selects
-    const customerId = $('#customer').val() || null;
-    const ownerId = $('#owner').val() || null;
-    const consultantId = $('#consultant').val() || null;
-    const contractorId = $('#contractor').val() || null;
+    $.get(`/equipments/${id}`, function(equipment) {
+        if (!equipment || !equipment.id) return showAlert('لم يتم العثور على بيانات الجهاز!', 'error');
 
-    // التأكد من اختيار جهة واحدة على الأقل
-    if (!customerId && !ownerId && !consultantId && !contractorId) {
-        Swal.fire("تحذير", "⚠️ الرجاء اختيار جهة واحدة على الأقل للمشروع.", "warning");
-        return;
-    }
+        // --- تعبئة بيانات Equipment ---
+        $('#editEquipmentId').val(equipment.id);
+        $('#edit_equipment_reference').val(equipment.equipment_reference);
+        $('#edit_description').val(equipment.description);
+        $('#edit_serial_number').val(equipment.serial_number);
+        $('#edit_legacy_id').val(equipment.legacy_id);
+        $('#edit_alternative_id').val(equipment.alternative_id);
+        $('#edit_asset_tag').val(equipment.asset_tag);
+        $('#edit_size').val(equipment.size || '');
+        $('#edit_type').val(equipment.type);
+        $('#edit_make').val(equipment.make);
+        $('#edit_model').val(equipment.model);
+        $('#edit_tolerance_basis').val(equipment.tolerance_basis);
+        $('#edit_tolerance').val(equipment.tolerance);
+        $('#edit_range_capacity').val(equipment.range_capacity);
+        $('#edit_range_unit').val(equipment.range_unit);
+        $('#edit_resolution').val(equipment.resolution);
+        $('#edit_resolution_unit').val(equipment.resolution_unit);
+        $('#edit_traceability').val(equipment.traceability);
+        $('#edit_display_type').val(equipment.display_type);
+        $('#edit_manufacturer_id').val(equipment.manufacturer_id);
+        $('#edit_department').val(equipment.department);
+        $('#edit_custodian').val(equipment.custodian);
+        $('#edit_location').val(equipment.location);
+        $('#edit_project_id').val(equipment.project_id);
+        $('#edit_master_equipment').prop('checked', equipment.master_equipment ? true : false);
+        $('#edit_equipment_status').val(equipment.equipment_status || '');
+        $('#edit_uncertainty_unit').val(equipment.uncertainty_unit || '');
+        $('#edit_io').val(equipment.io || '');
+        $('#edit_uncertainty').val(equipment.uncertainty || '');
 
-    // تحديد الـ URL والطريقة
-    const url = projectId ? `/projects/${projectId}` : '/projects';
-    const method = projectId ? 'PUT' : 'POST';
+        // --- تحميل سجلات Uncertainty ---
+        loadUncertainties(equipment.id, 'edit');
 
-    // بناء البيانات للإرسال
+        // --- Calibration ---
+        if(equipment.calibration) {
+            $('#edit_calib_method').val(equipment.calibration.calib_method);
+            $('#edit_calib_procedure_no').val(equipment.calibration.calib_procedure_no);
+            $('#edit_last_calib_date').val(equipment.calibration.last_calib_date);
+            $('#edit_scheduled').val(equipment.calibration.scheduled);
+            $('#edit_next_calib_date').val(equipment.calibration.next_calib_date);
+            $('#edit_reminder').prop('checked', equipment.calibration.reminder);
+            $('#edit_has_next_calibration').prop('checked', equipment.calibration.has_next_calibration);
+            $('#edit_calibrated_externally').prop('checked', equipment.calibration.calibrated_externally);
+            $('#edit_only_one').prop('checked', equipment.calibration.only_one);
+        }
+
+        // --- Maintenance ---
+        if(equipment.maintenance) {
+            $('#edit_last_maint_date').val(equipment.maintenance.last_maint_date);
+            $('#edit_scheduled_date').val(equipment.maintenance.scheduled_date);
+            $('#edit_next_maint_date').val(equipment.maintenance.next_maint_date);
+            $('#edit_scheduled_maint').prop('checked', equipment.maintenance.scheduled_maint);
+            $('#edit_has_next_maint').prop('checked', equipment.maintenance.has_next_maint);
+            $('#edit_reminder_maint').prop('checked', equipment.maintenance.reminder_maint);
+            $('#edit_maint_externally').prop('checked', equipment.maintenance.maint_externally);
+            $('#edit_only_one_maint').prop('checked', equipment.maintenance.only_one);
+            $('#edit_occurrence').val(equipment.maintenance.occurrence);
+            $('#edit_maint_provider').val(equipment.maintenance.maint_provider);
+            $('#edit_maint_internally_by').val(equipment.maintenance.maint_internally_by);
+            $('#edit_maint_status').val(equipment.maintenance.maint_status);
+        }
+
+        openEditEquipmentModal();
+    }).fail(function(err) {
+        console.error(err);
+        showAlert('خطأ أثناء تحميل بيانات الجهاز', 'error');
+    });
+}
+
+
+// --- حفظ التعديلات ---
+function saveEditEquipment(closeAfter = false) {
+    const equipmentId = $('#editEquipmentId').val();
+    if (!equipmentId) return showAlert('لا يوجد جهاز محدد للحفظ!', 'error');
+
+    // جمع بيانات الفورم
     const formData = {
-        name: projectName,
-        arabic_name: $('#projectArabicName').val() || null,
-        registration_date: $('#registrationDate').val() || null,
-        customer_id: customerId,
-        owner_id: ownerId,
-        consultant_id: consultantId,
-        contractor_id: contractorId,
-        projectArabicLocation: $('#projectArabicLocation').val() || null,
-        _token: $('meta[name="csrf-token"]').attr('content')
+        _token: $('input[name="_token"]').val(),
+        _method: 'PUT', // لأننا نستخدم RESTful update
+        equipment_reference: $('#edit_equipment_reference').val(),
+        alternative_id: $('#edit_alternative_id').val(),
+        legacy_id: $('#edit_legacy_id').val(),
+        description: $('#edit_description').val(),
+        serial_number: $('#edit_serial_number').val(),
+        asset_tag: $('#edit_asset_tag').val(),
+        size: $('#edit_size').val(),
+        type: $('#edit_type').val(),
+        make: $('#edit_make').val(),
+        model: $('#edit_model').val(),
+        tolerance_basis: $('#edit_tolerance_basis').val(),
+        tolerance: $('#edit_tolerance').val(),
+        range_capacity: $('#edit_range_capacity').val(),
+        range_unit: $('#edit_range_unit').val(),
+        resolution: $('#edit_resolution').val(),
+        resolution_unit: $('#edit_resolution_unit').val(),
+        traceability: $('#edit_traceability').val(),
+        display_type: $('#edit_display_type').val(),
+        manufacturer_id: $('#edit_manufacturer_id').val(),
+        department: $('#edit_department').val(),
+        custodian: $('#edit_custodian').val(),
+        location: $('#edit_location').val(),
+        project_id: $('#edit_project_id').val(),
+        master_equipment: $('#edit_master_equipment').prop('checked') ? 1 : 0,
+        equipment_status: $('#edit_equipment_status').val(),
+        uncertainty: $('#edit_uncertainty').val(),
+        uncertainty_unit: $('#edit_uncertainty_unit').val(),
+        io: $('#edit_io').val(),
+
+        // Calibration
+
     };
 
     $.ajax({
-        url: url,
-        type: method,
+        url: `/equipments/${equipmentId}`,
+        method: 'POST',
         data: formData,
-        success: function(response) {
-            Swal.fire({
-                icon: 'success',
-                title: 'تم الحفظ بنجاح ✅',
-                text: 'تم حفظ المشروع بنجاح.',
-                timer: 2000,
-                showConfirmButton: false
-            });
+     success: function(response) {
+    Swal.fire('تم الحفظ ✅', response.message || 'تم حفظ المعدة بنجاح', 'success');
 
-            $('#projectId').val(response.id);
-            loadProjects();
-            if (closeAfterSave) closeProjectModal();
+    // تحديث جدول الـ DataTable
+    if ($.fn.DataTable && $.fn.DataTable.isDataTable('#equipmentsTable')) {
+        $('#equipmentsTable').DataTable().ajax.reload(null, false); // false = لا يُعيد الصفحة للصف الأول
+    }
+
+    if (closeAfter) closeEditEquipmentModal();
+},
+        error: function(err) {
+            console.error(err);
+            showAlert('حدث خطأ أثناء حفظ البيانات', 'error');
+        }
+    });
+}
+
+
+// ==========================
+// تحويل التاريخ لتنسيق input[type="date"]
+// ==========================
+function toDateInput(value) {
+    if (!value) return '';
+    return value.split('T')[0].split(' ')[0];
+}
+
+// ==========================
+// تحميل سجلات Uncertainty
+// ==========================
+function loadUncertainties(equipmentId, mode = 'edit') {
+    if (!equipmentId) return;
+
+    const tableId = mode === 'edit' ? 'editUncertaintyHistory' : 'uncertaintyHistory';
+    const valueField = mode === 'edit' ? 'editUncertainty' : 'uncertainty';
+    const dateField = mode === 'edit' ? 'editUncertaintyDate' : 'uncertaintyDate';
+
+    fetch(`/equipments/${equipmentId}`)
+        .then(res => res.json())
+        .then(data => {
+            const records = data.equipment_uncertainties || [];
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+
+            if (records.length > 0) {
+                records.forEach(u => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `<td>${u.date}</td><td>${u.uncertainty}</td>`;
+                    row.addEventListener('click', () => {
+                        document.getElementById(valueField).value = u.uncertainty;
+                        document.getElementById(dateField).value = u.date;
+                    });
+                });
+
+                // تعبئة الحقول بأحدث سجل (أول عنصر)
+                document.getElementById(valueField).value = records[0].uncertainty;
+                document.getElementById(dateField).value = records[0].date;
+            } else {
+                // لو لا توجد سجلات
+                document.getElementById(valueField).value = '';
+                document.getElementById(dateField).value = new Date().toISOString().split('T')[0];
+                tbody.innerHTML = `<tr><td colspan="2">لا يوجد سجلات</td></tr>`;
+            }
+        })
+        .catch(err => console.error('Error loading uncertainties:', err));
+}
+
+// ==========================
+// إضافة سجل جديد
+// ==========================
+function addUncertainty(equipmentId, mode = 'edit') {
+    if (!equipmentId) return;
+
+    const valueField = mode === 'edit' ? 'editUncertainty' : 'uncertainty';
+    const dateField = mode === 'edit' ? 'editUncertaintyDate' : 'uncertaintyDate';
+
+    const value = document.getElementById(valueField).value;
+    const date = document.getElementById(dateField).value;
+
+    if (!value || !date) return alert('يرجى إدخال القيمة والتاريخ');
+
+fetch(`/equipments/${equipmentId}/uncertainty-history`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: JSON.stringify({ uncertainty: value, date })
+})
+.then(res => res.json())
+.then(() => loadUncertainties(equipmentId, mode))
+.catch(err => console.error(err));
+
+}
+
+// --- تبديل التابات ---
+function switchEditTab(tabId) {
+    $('.form-tab-content').hide();
+    $('#' + tabId).show();
+    $('.tab-buttons button').removeClass('active');
+    $(`.tab-buttons button[onclick*="${tabId}"]`).addClass('active');
+}
+
+
+
+
+
+/****************************
+ * اختيار جهاز للتعديل من القائمة
+ ****************************/
+function editSelectedEquipment() {
+    let selected = $('.equipment-checkbox:checked');
+
+      if (selected.length === 0) {
+        Swal.fire('تنبيه ⚠️', 'يرجى اختيار اختبار واحد للتعديل', 'warning');
+        return;
+    }
+
+    if (selected.length > 1) {
+        Swal.fire('تنبيه ⚠️', 'يمكنك تعديل جهاز واحد فقط في كل مرة', 'warning');
+        return;
+    }
+    // لو جهاز واحد فقط مختار
+    editEquipmentModal(selected.val());
+}
+
+
+function saveEquipment(closeAfterSave = true) {
+    // الخانات الخاصة بالـ uncertainty
+    const valueInput = document.getElementById('value');
+    const dateInput = document.getElementById('date_recorded');
+
+    const uncertainties = [];
+    if (valueInput && valueInput.value && dateInput && dateInput.value) {
+        uncertainties.push({
+            value: valueInput.value,
+            date_recorded: dateInput.value
+        });
+    }
+
+    // بيانات الفورم
+    const data = {
+        alternative_id: document.querySelector('[name="alternative_id"]').value,
+        legacy_id: document.querySelector('[name="legacy_id"]').value,
+        description: document.querySelector('[name="description"]').value,
+        serial_number: document.querySelector('[name="serial_number"]').value,
+        asset_tag: document.querySelector('[name="asset_tag"]').value,
+        size: document.querySelector('[name="size"]').value,
+        type: document.querySelector('[name="type"]').value,
+        make: document.querySelector('[name="make"]').value,
+        model: document.querySelector('[name="model"]').value,
+        tolerance_basis: document.querySelector('[name="tolerance_basis"]').value,
+        tolerance: document.querySelector('[name="tolerance"]').value,
+        range_capacity: document.querySelector('[name="range_capacity"]').value,
+        range_unit: document.querySelector('[name="range_unit"]').value,
+        resolution: document.querySelector('[name="resolution"]').value,
+        resolution_unit: document.querySelector('[name="resolution_unit"]').value,
+        traceability: document.querySelector('[name="traceability"]').value,
+        display_type: document.querySelector('[name="display_type"]').value,
+        manufacturer_id: document.querySelector('[name="manufacturer_id"]').value,
+        department: document.querySelector('[name="department"]').value,
+        custodian: document.querySelector('[name="custodian"]').value,
+        location: document.querySelector('[name="location"]').value,
+        uncertainty: document.querySelector('[name="uncertainty"]').value,
+        uncertainty_unit: document.querySelector('[name="uncertainty_unit"]').value,
+        io: document.querySelector('[name="io"]').value,
+        master_equipment: document.querySelector('[name="master_equipment"]').checked ? 1 : 0,
+        equipment_status: document.querySelector('[name="equipment_status"]').value,
+        project_id: document.querySelector('[name="project_id"]').value,
+
+        // التاريخ + القيم
+        uncertainty_history: uncertainties,
+
+        // CSRF token
+        _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    };
+
+    // AJAX
+    $.ajax({
+        url: '/equipments',
+        type: 'POST',
+        data: data,
+        success: function(response) {
+            Swal.fire('تم الحفظ ✅', response.message || 'تم حفظ المعدة بنجاح', 'success');
+            if (closeAfterSave) closeAddEquipmentModal();
         },
         error: function(xhr) {
+            Swal.fire('خطأ ❌', 'حدث خطأ أثناء حفظ بيانات المعدة', 'error');
             console.error(xhr.responseText);
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ ❌',
-                text: 'حدث خطأ أثناء حفظ المشروع',
-                confirmButtonText: 'حسناً'
-            });
         }
     });
 }
 
-
-    //----------------------------------------------------------------------------------------
-    function editProjectModal(id) {
-        // إرسال طلب للحصول على بيانات المشروع
-        $.get(`/projects/${id}`, function(project) {
-            if (!project || !project.id) {
-                alert("❌ لم يتم العثور على بيانات المشروع!");
-                return;
-            }
-
-            // تعبئة حقول النموذج ببيانات المشروع
-            $('#editProjectId').val(project.id);
-            $('#editProjectName').val(project.name);
-            $('#editProjectArabicName').val(project.arabic_name || '');
-            $('#editRegistrationDate').val(project.registration_date || '');
-             populateEditProjectParties(project);
-            $('#editProjectArabicLocation').val(project.projectArabicLocation || '');
-
-            // استدعاء الدالة الصحيحة لتعبئة جدول جهات الاتصال
-            // هنا يتم تمرير مصفوفة جهات الاتصال الخاصة بالمشروع
-            // ✅ إعادة تعبئة الجدول بالبيانات الجديدة القادمة من الخادم
-            if (project.contacts) {
-                window.populateContactsTableEdit(project.contacts);
-            } else {
-                window.contactsTableEdit.clear().draw();
-            }
-
-            // عرض المودال (النافذة المنبثقة)
-            $('#editProjectModal').show();
-
-        }).fail(function(err) {
-            console.error("Error fetching project:", err);
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: '❌ حدث خطأ أثناء تحميل بيانات المشروع.'
-            });
-        });
-    }
-    //----------------------------------------------------------------------------------------
-    function saveEditProject(closeAfterSave) {
-        let projectId = $('#editProjectId').val();
-        if (!projectId) {
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ ❌',
-                text: 'لا يوجد معرف مشروع للتعديل.',
-                confirmButtonText: 'حسناً'
-            });
-            return;
-        }
-
-        let formData = {
-            name: $('#editProjectName').val(),
-            arabic_name: $('#editProjectArabicName').val(),
-            registration_date: $('#editRegistrationDate').val(),
-            customer_id: $('#editCustomer').val(),
-            owner: $('#editOwner').val(),
-            consultant: $('#editConsultant').val(),
-            contractor: $('#editContractor').val(),
-            projectArabicLocation: $('#editProjectArabicLocation').val(),
-            _token: $('meta[name="csrf-token"]').attr('content')
-        };
-
-        $.ajax({
-            url: `/projects/${projectId}`,
-            type: 'PUT',
-            data: formData,
-            success: function(response) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'تم التعديل بنجاح ✅',
-                    text: 'تم تعديل المشروع بنجاح.',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
-                loadProjects();
-                if (closeAfterSave) closeEditProjectModal();
-            },
-            error: function(xhr) {
-                console.error(xhr.responseText);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ ❌',
-                    text: 'حدث خطأ أثناء تعديل المشروع',
-                    confirmButtonText: 'حسناً'
-                });
-            }
-        });
-    }
-    //----------------------------------------------------------------------------------------
-    function deleteSelectedProjects() {
-        let selectedIds = getSelectedProjectIds();
-
-        if (selectedIds.length === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'تنبيه ⚠️',
-                text: 'يرجى اختيار مشروع واحد على الأقل!',
-                confirmButtonText: 'حسناً'
-            });
-            return;
-        }
-
-        Swal.fire({
-            title: 'هل أنت متأكد؟',
-            text: `سيتم حذف ${selectedIds.length} مشروع/مشاريع ولا يمكنك التراجع عن هذا الإجراء!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'نعم، احذف!',
-            cancelButtonText: 'إلغاء'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '/projects/delete-multiple',
-                    type: 'POST',
-                    data: {
-                        ids: selectedIds,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'تم الحذف ✅',
-                            text: 'تم حذف المشاريع المحددة بنجاح!',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                        loadProjects();
-                    },
-                    error: function(xhr) {
-                        console.error("Error deleting projects:", xhr.responseText);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'خطأ ❌',
-                            text: 'حدث خطأ أثناء محاولة حذف المشاريع.',
-                            confirmButtonText: 'حسناً'
-                        });
-                    }
-                });
-            }
-        });
-    }
-    //----------------------------------------------------------------------------------------
-    function editSelectedProject() {
-        let selected = $('.project-checkbox:checked'); // افترض أن كل checkbox لديه class projectCheckbox
-
-        if (selected.length === 0) {
-            Swal.fire('⚠️', 'الرجاء اختيار مشروع واحد للتعديل', 'warning');
-            return;
-        }
-        if (selected.length > 1) {
-            Swal.fire('⚠️', 'الرجاء اختيار مشروع واحد فقط', 'warning');
-            return;
-        }
-
-        let projectId = selected.val(); // جلب id المشروع
-        editProjectModal(projectId);         // استدعاء دالة التعديل الموجودة
-    }
-    //----------------------------------------------------------------------------------------
-    window.goToProjectFiles = function() {
-        let selectedIds = getSelectedProjectIds();
-
-        if (selectedIds.length === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'تنبيه ⚠️',
-                text: 'يرجى اختيار مشروع واحد!',
-                confirmButtonText: 'حسناً'
-            });
-            return;
-        }
-
-        if (selectedIds.length > 1) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'تنبيه ⚠️',
-                text: 'يرجى اختيار مشروع واحد فقط!',
-                confirmButtonText: 'حسناً'
-            });
-            return;
-        }
-
-        // التوجيه لصفحة الملفات
-        let projectId = selectedIds[0];
-        window.location.href = `/projects/${projectId}/files`;
-    }
-    //----------------------------------------------------------------------------------------
-    //----------------------------------Contacts----------------------------------------------
-    //----------------------------------------------------------------------------------------
-    window.toggleAllContacts = function(source, tableId) {
-        // ✅ تم تغيير اسم المعلمة من projectTable إلى tableId
-        // ✅ تم إضافة مسافة بين const و projectTable
-        const projectTable = $(`#${tableId}`).DataTable();
-        const rows = projectTable.rows({ 'search': 'applied' }).nodes();
-        $('input.contact-select', rows).prop('checked', source.checked);
-    };
-    //----------------------------------------------------------------------------------------
-    // لجدول جهات اتصال خاص بالعميل
-    $(document).ready(function() {
-
-        // --------------------------------------------------------
-        // ✅ تعريف جداول البيانات (DataTables)
-        // --------------------------------------------------------
-        // جدول جهات الاتصال الخاصة بإنشاء عميل جديد
-        window.contactsTable = $('#contactsTable').DataTable({
-            columns: [
-                {
-                    data: null,
-                    render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`,
-                    orderable: false
-                },
-                { data: 'name' },
-                { data: 'email' },
-                { data: 'phone' },
-                { data: 'mobile' },
-                { data: 'position' },
-                {
-                    data: 'is_primary',
-                    render: d => (d === 1 || d === "1") ? 'Yes' : 'No'
-                }
-            ],
-            createdRow: function(row, data) {
-                $(row).attr('data-contact-id', data.id);
-            }
-        });
-        // فلترة جهات الاتصال في جدول جهات الاتصال
-        $('#contactsTable thead .column-filter').on('keyup change', function(){
-            let index = $(this).parent().index();
-            window.contactsTable.column(index).search(this.value).draw();
-        });
-        // جدول جهات الاتصال الخاصة بتعديل عميل
-        window.contactsTableEdit = $('#contactsTableEdit').DataTable({
-            responsive: true,
-            columns: [
-                {
-                    data: null,
-                    render: data => `<input type="checkbox" class="contact-select" value="${data.id}">`,
-                    orderable: false
-                },
-                { data: 'name' },
-                { data: 'email' },
-                { data: 'phone' },
-                { data: 'mobile' },
-                { data: 'position' },
-                {
-                    data: 'is_primary',
-                    render: d => (d == 1 || d === true || d === '1') ? 'Yes' : 'No'
-                }
-            ],
-            createdRow: function(row, data) {
-                $(row).attr('data-contact-id', data.id);
-            }
-        });
-
-        // فلترة جهات الاتصال في جدول جهات الاتصال
-        $('#contactsTableEdit thead .column-filter').on('keyup change', function(){
-            let index = $(this).parent().index();
-            window.contactsTableEdit.column(index).search(this.value).draw();
-        });
-
-        // --------------------------------------------------------
-        // ✅ دوال مساعدة
-        // --------------------------------------------------------
-        // دالة لتعبئة جدول جهات الاتصال في وضع التعديل
-        window.populateContactsTableEdit = function(contacts) {
-            if (!window.contactsTableEdit) {
-                console.error("contactsTableEdit is not initialized!");
-                return;
-            }
-            window.contactsTableEdit.clear();
-            window.contactsTableEdit.rows.add(contacts).draw();
-        };
-
-        // دالة لمسح حقول فورم جهة الاتصال (سواء للإضافة أو التعديل)
-        window.clearContactForm = function(modalType = 'add') {
-            if (modalType === 'edit') {
-                $('#editContactId').val('');
-                $('#contactNameedit, #contactEmailedit, #contactPhoneedit, #contactMobileedit, #contactPositionedit').val('');
-                $('#isPrimaryContact').prop('checked', false);
-            } else {
-                $('#editContactIdAdd').val('');
-                $('#contactNameAdd, #contactEmailAdd, #contactPhoneAdd, #contactMobileAdd, #contactPositionAdd').val('');
-                $('#isPrimaryContactAdd').prop('checked', false);
-            }
-        };
-
-        // دالة لحفظ أو تحديث جهة الاتصال
-        window.saveContactForProject = function(modalType = 'add') {
-            let projectId = (modalType === 'edit') ? $('#editProjectId').val() : $('#projectId').val();
-            if (!projectId) {
-                Swal.fire("خطأ", "❌ الرجاء حفظ العميل أولًا قبل تعديل جهة الاتصال", "error");
-                return;
-            }
-
-            let contactId = (modalType === 'edit') ? $('#editContactId').val().trim() : $('#editContactIdAdd').val().trim();
-            let url = contactId ? `/projects/${projectId}/contacts/${contactId}` : `/projects/${projectId}/contacts`;
-            let method = contactId ? 'PUT' : 'POST';
-
-            let formData = {
-                name: (modalType === 'edit') ? $('#contactNameedit').val() : $('#contactNameAdd').val(),
-                email: (modalType === 'edit') ? $('#contactEmailedit').val() : $('#contactEmailAdd').val(),
-                phone: (modalType === 'edit') ? $('#contactPhoneedit').val() : $('#contactPhoneAdd').val(),
-                mobile: (modalType === 'edit') ? $('#contactMobileedit').val() : $('#contactMobileAdd').val(),
-                position: (modalType === 'edit') ? $('#contactPositionedit').val() : $('#contactPositionAdd').val(),
-                is_primary: (modalType === 'edit') ? ($('#isPrimaryContact').is(':checked') ? 1 : 0) : ($('#isPrimaryContactAdd').is(':checked') ? 1 : 0),
-                _token: $('meta[name="csrf-token"]').attr('content')
-            };
-
-            if (!formData.name) {
-                Swal.fire("خطأ", "❌ الرجاء إدخال اسم جهة الاتصال", "warning");
-                return;
-            }
-
+// ================== حذف جهاز واحد ==================
+function deleteEquipment(id) {
+    Swal.fire({
+        title: 'هل أنت متأكد؟',
+        text: "سيتم حذف الجهاز ولا يمكنك التراجع عن هذا الإجراء!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'نعم، احذف!',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (result.isConfirmed) {
             $.ajax({
-                url: url,
-                type: method,
-                data: formData,
-                success: function(res) {
-                    Swal.fire("نجاح", "✔️ تم الحفظ بنجاح", "success");
-
-                    // ⭐ NEW: Fetch all contacts again and re-populate the table
-                    $.get(`/projects/${projectId}/contacts`, function(contacts) {
-                        if (modalType === 'edit') {
-                            window.contactsTableEdit.clear().rows.add(contacts).draw();
-                        } else {
-                            window.contactsTable.clear().rows.add(contacts).draw();
-                        }
+                url: `/equipments/${id}`,
+                type: 'DELETE',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم الحذف ✅',
+                        text: 'تم حذف الجهاز بنجاح.',
+                        timer: 2000,
+                        showConfirmButton: false
                     });
-
-                    window.clearContactForm(modalType);
+                    loadEquipments(); // إعادة تحميل الجدول بعد الحذف
                 },
                 error: function(xhr) {
-                    let errors = xhr.responseJSON?.errors || {};
-                    let msg = '';
-                    for (let f in errors) msg += errors[f] + '\n';
-                    Swal.fire("خطأ", msg || '❌ حدث خطأ أثناء الحفظ', "error");
+                    console.error("Error deleting equipment:", xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ ❌',
+                        text: 'حدث خطأ أثناء محاولة حذف الجهاز.',
+                        confirmButtonText: 'حسناً'
+                    });
                 }
             });
-        };
+        }
+    });
+}
 
-        // دالة لحذف جهات الاتصال المحددة
-        window.deleteSelectedContacts = function(tableSelector) {
-            if (!tableSelector) {
-                Swal.fire("خطأ", "⚠️ لم يتم تحديد الجدول", "error");
-                return;
-            }
+// ================== جلب الأجهزة المحددة ==================
+function getSelectedEquipmentIds() {
+    let ids = [];
+    $('.equipment-checkbox:checked').each(function() {
+        ids.push($(this).val());
+    });
+    return ids;
+}
 
-            let ids = [];
-            $(`${tableSelector} tbody input.contact-select:checked`).each(function() {
-                let row = $(this).closest('tr');
-                let id = row.attr('data-contact-id');
-                if (id) ids.push(id);
+// ================== حذف الأجهزة المحددة ==================
+function deleteSelectedEquipments() {
+    let ids = getSelectedEquipmentIds();
+    if (ids.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'لم يتم تحديد أي جهاز',
+            text: 'الرجاء اختيار جهاز واحد على الأقل للحذف.',
+            confirmButtonText: 'حسناً'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'هل أنت متأكد؟',
+        text: `سيتم حذف ${ids.length} جهاز/أجهزة ولا يمكنك التراجع عن هذا الإجراء!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'نعم، احذف!',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/equipments/bulk-delete`,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    ids: ids
+                },
+                success: function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم الحذف ✅',
+                        text: 'تم حذف الأجهزة المحددة بنجاح.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    loadEquipments();
+                },
+                error: function(xhr) {
+                    console.error("Error deleting equipments:", xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ ❌',
+                        text: 'حدث خطأ أثناء محاولة حذف الأجهزة.',
+                        confirmButtonText: 'حسناً'
+                    });
+                }
             });
+        }
+    });
+}
 
-            if (ids.length === 0) {
-                Swal.fire("تحذير", "⚠️ الرجاء اختيار جهة اتصال واحدة على الأقل للحذف", "warning");
-                return;
-            }
+// ===================== فتح صفحة ملفات المعدات =====================
+window.goToEquipmentFiles = function() {
+    let selectedIds = getSelectedEquipmentIds();
 
-            Swal.fire({
-                title: "تأكيد الحذف",
-                text: `هل أنت متأكد من حذف ${ids.length} جهة اتصال؟`,
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "نعم، احذف",
-                cancelButtonText: "إلغاء"
-            }).then((result) => {
-                if (!result.isConfirmed) return;
+    if (selectedIds.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه ⚠️',
+            text: 'يرجى اختيار جهاز واحد!',
+            confirmButtonText: 'حسناً'
+        });
+        return;
+    }
 
-                $.ajax({
-                    url: `/contacts/delete-multiple`,
-                    type: 'DELETE',
-                    data: {
-                        ids: ids,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(res) {
-                        if (res.success) {
-                            Swal.fire("تم", res.message, "success");
+    if (selectedIds.length > 1) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه ⚠️',
+            text: 'يرجى اختيار جهاز واحد فقط!',
+            confirmButtonText: 'حسناً'
+        });
+        return;
+    }
 
-                            // ✅ تصحيح الوصول إلى كائن DataTable
-                            let projectTable = window[tableSelector.replace('#', '')];
+    // التوجيه لصفحة ملفات الجهاز
+    let equipmentId = selectedIds[0];
+    window.location.href = `/equipments/${equipmentId}/files`;
+};
 
-                            if (projectTable) {
-                                projectTable.rows(function(idx, data, node) {
-                                    return ids.includes($(node).attr('data-contact-id'));
-                                }).remove().draw(false);
-                            }
-                        } else {
-                            Swal.fire("خطأ", res.message || "❌ لم يتم الحذف", "error");
-                        }
-                    },
-                    error: function(xhr) {
-                        let msg = '❌ خطأ في الاتصال بالسيرفر';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            msg = xhr.responseJSON.message;
-                        }
-                        Swal.fire("خطأ", msg, "error");
-                    }
-                });
-            });
-        };
+// ===================== دالة مساعدة للحصول على IDs المحددة من جدول المعدات =====================
+window.getSelectedEquipmentIds = function() {
+    const equipmentsTable = $('#equipmentsTable').DataTable();
+    const selectedCheckboxes = equipmentsTable.$('input[type="checkbox"]:checked');
+    const ids = [];
 
-        window.populateContactFormForEdit = function(modalType = 'add') {
-            // تحديد كائن DataTable والجدول المستهدف بناءً على نوع المودال
-            let projectTable;
-            let $tableSelector;
-            if (modalType === 'edit') {
-                projectTable = window.contactsTableEdit;
-                $tableSelector = '#contactsTableEdit';
-            } else {
-                projectTable = window.contactsTable;
-                $tableSelector = '#contactsTable';
-            }
-
-            // البحث عن مربع الاختيار المحدد في جسم الجدول
-            let selectedCheckbox = $(`${$tableSelector} tbody input[type="checkbox"]:checked`);
-
-            // التحقق من أن هناك عنصر واحد فقط محدد
-            if (selectedCheckbox.length === 0) {
-                Swal.fire("تنبيه", "⚠️ الرجاء اختيار جهة اتصال واحدة للتعديل", "warning");
-                return;
-            }
-            if (selectedCheckbox.length > 1) {
-                Swal.fire("تنبيه", "⚠️ الرجاء اختيار جهة اتصال واحدة فقط للتعديل", "warning");
-                return;
-            }
-
-            // الحصول على بيانات السطر المحدد من كائن DataTable
-            let rowData = projectTable.row(selectedCheckbox.closest('tr')).data();
-
-            // التحقق من أن البيانات موجودة
-            if (!rowData) {
-                Swal.fire("خطأ", "❌ لم يتم العثور على بيانات جهة الاتصال", "error");
-                return;
-            }
-
-            // تعبئة الحقول بالبيانات بناءً على نوع المودال
-            if (modalType === 'edit') {
-                $('#editContactId').val(rowData.id);
-                $('#contactNameedit').val(rowData.name);
-                $('#contactEmailedit').val(rowData.email);
-                $('#contactPhoneedit').val(rowData.phone);
-                $('#contactMobileedit').val(rowData.mobile);
-                $('#contactPositionedit').val(rowData.position);
-                $('#isPrimaryContact').prop('checked', rowData.is_primary == 1 || rowData.is_primary === true);
-            } else {
-                $('#editContactIdAdd').val(rowData.id);
-                $('#contactNameAdd').val(rowData.name);
-                $('#contactEmailAdd').val(rowData.email);
-                $('#contactPhoneAdd').val(rowData.phone);
-                $('#contactMobileAdd').val(rowData.mobile);
-                $('#contactPositionAdd').val(rowData.position);
-                $('#isPrimaryContactAdd').prop('checked', rowData.is_primary == 1 || rowData.is_primary === true);
-            }
-        };
-
+    selectedCheckboxes.each(function() {
+        ids.push($(this).val()); // تأكد أن value للـ checkbox يحتوي على equipment id
     });
 
+    return ids;
+};
 
+// ===================== طباعة جدول المعدات =====================
+window.printEquipmentsTable = function() {
+    const equipmentsTableElement = document.getElementById('equipmentsTable');
+    if (!equipmentsTableElement) {
+        showAlert('⚠️ لم يتم العثور على جدول المعدات.', 'warning');
+        return;
+    }
 
+    const equipmentsTable = $(equipmentsTableElement).DataTable();
+    const selectedCheckboxes = equipmentsTable.$('input[type="checkbox"]:checked');
+    let rowsToProcess;
 
-    // ----------------------------------------------------------------------
-    //----------------------------------------------------------------------------------------
-    //----------------------------------Print & Excel-----------------------------------------
-    //----------------------------------------------------------------------------------------
-    window.printProjectsTable = function() {
-        // تحديد الجدول المطلوب (في هذه الحالة جدول المشاريع)
-        const projectsTableElement = document.getElementById('projectsTable');
-        if (!projectsTableElement) {
-            // رسالة تنبيه في حالة عدم العثور على الجدول
-            showAlert('⚠️ لم يتم العثور على جدول المشاريع.', 'warning');
-            return;
-        }
+    if (selectedCheckboxes.length > 0) {
+        rowsToProcess = selectedCheckboxes.parents('tr');
+    } else {
+        rowsToProcess = equipmentsTable.rows({ 'search': 'applied' }).nodes();
+    }
 
-        // تهيئة كائن DataTable
-        const projectsTable = $(projectsTableElement).DataTable();
+    let printContents = `
+        <style>
+            .equipmentsTable { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            body { font-family: 'Arial', sans-serif; }
+            h2 { text-align: center; margin-bottom: 20px; }
+        </style>
+        <h2>قائمة المعدات</h2>
+        <table>
+            <thead><tr>`;
 
-        // العثور على مربعات التحديد المحددة
-        const selectedCheckboxes = projectsTable.$('input[type="checkbox"]:checked');
-        let rowsToProcess;
-
-        if (selectedCheckboxes.length > 0) {
-            // إذا كان هناك صفوف محددة، قم بمعالجة تلك الصفوف فقط
-            rowsToProcess = selectedCheckboxes.parents('tr');
-        } else {
-            // إذا لم يتم تحديد أي شيء، قم بمعالجة جميع الصفوف المرئية
-            rowsToProcess = projectsTable.rows({
-                'search': 'applied'
-            }).nodes();
-        }
-
-        let printContents = `
-            <style>
-                .projectsTable { width: 100%; border-collapse: collapse; }
-                th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-                body { font-family: 'Arial', sans-serif; }
-                h2 { text-align: center; margin-bottom: 20px; }
-            </style>
-            <h2>قائمة المشاريع</h2>
-            <table>
-                <thead><tr>`;
-
-        // نسخ رؤوس الأعمدة
-        $(projectsTableElement).find('thead tr:first th').each(function() {
-            if ($(this).find('input[type="checkbox"]').length > 0 || $(this).text().trim() === '') {
-                return;
-            }
-            const headerClone = $(this).clone();
-            headerClone.find('input, select, .btn, i').remove();
-            const columnTitle = headerClone.text().trim();
-            printContents += '<th>' + columnTitle + '</th>';
-        });
-
-        printContents += `</tr></thead><tbody>`;
-
-        // إضافة الصفوف المحددة (أو جميعها) إلى محتوى الطباعة
-        $(rowsToProcess).each(function() {
-            printContents += '<tr>';
-            $(this).find('td').each(function() {
-                if ($(this).find('input[type="checkbox"]').length > 0 || $(this).find('.icon-toolbar').length > 0) {
-                    return;
-                }
-                printContents += '<td>' + $(this).text().trim() + '</td>';
-            });
-            printContents += '</tr>';
-        });
-
-        printContents += `</tbody></table>`;
-
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(printContents);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-
-        showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
-    };
-    //----------------------------------------------------------------------------------------
-    window.exportProjectsExcel = function() {
-        // تحديد الجدول المطلوب (في هذه الحالة جدول المشاريع)
-        const projectsTableElement = document.getElementById('projectsTable');
-        if (!projectsTableElement) {
-            // رسالة تنبيه في حالة عدم العثور على الجدول
-            showAlert('⚠️ لم يتم العثور على جدول المشاريع.', 'warning');
-            return;
-        }
-
-        const projectsTable = $(projectsTableElement).DataTable();
-
-        const selectedCheckboxes = projectsTable.$('input[type="checkbox"]:checked');
-        let rowsToProcess;
-
-        if (selectedCheckboxes.length > 0) {
-            rowsToProcess = selectedCheckboxes.parents('tr');
-        } else {
-            rowsToProcess = projectsTable.rows({ 'search': 'applied' }).nodes();
-        }
-
-        // 1. بناء البيانات لـ SheetJS
-        const data = [];
-        const header = [];
-        $(projectsTableElement).find('thead th').each(function() {
-            if ($(this).find('input[type="checkbox"]').length === 0 && $(this).text().trim() !== '') {
-                header.push($(this).text().trim());
-            }
-        });
-        data.push(header);
-
-        $(rowsToProcess).each(function() {
-            const rowData = [];
-            $(this).find('td').each(function() {
-                if ($(this).find('input[type="checkbox"]').length === 0 && $(this).find('.icon-toolbar').length === 0) {
-                    rowData.push($(this).text().trim());
-                }
-            });
-            data.push(rowData);
-        });
-
-        // 2. إنشاء ورقة العمل والمصنف
-        const ws = XLSX.utils.aoa_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "المشاريع");
-
-        // 3. كتابة وتنزيل الملف بصيغة XLSX
-        XLSX.writeFile(wb, "projects-data.xlsx");
-
-        showAlert('تم تصدير البيانات بنجاح إلى ملف Excel.', 'success');
-    };
-    //----------------------------------------------------------------------------------------
-    window.printContactsTable = function(tableId) {
-        const tableElement = document.getElementById(tableId);
-        if (!tableElement) {
-            showAlert('⚠️ لم يتم العثور على جدول جهات الاتصال.', 'warning');
-            return;
-        }
-
-        const contactsTable = $(tableElement).DataTable();
-        const selectedCheckboxes = contactsTable.$('input[type="checkbox"]:checked');
-        let rowsToProcess;
-
-        if (selectedCheckboxes.length > 0) {
-            rowsToProcess = selectedCheckboxes.parents('tr');
-        } else {
-            rowsToProcess = contactsTable.rows({ 'search': 'applied' }).nodes();
-        }
-
-        let printContents = `
-            <html>
-            <head>
-                <title>طباعة قائمة جهات الاتصال</title>
-                <style>
-                    .contactsTable { width: 100%; border-collapse: collapse; }
-                    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-                    body { font-family: 'Arial', sans-serif; }
-                    h2 { text-align: center; margin-bottom: 20px; }
-                </style>
-            </head>
-            <body>
-                <h2>قائمة جهات الاتصال</h2>
-                <table>
-                    <thead><tr>`;
-
-        $(tableElement).find('thead tr:first th').each(function() {
-            if ($(this).find('input[type="checkbox"]').length > 0 || $(this).text().trim() === '') {
-                return;
-            }
-            const headerClone = $(this).clone();
-            headerClone.find('input, select, .btn, i').remove();
-            const columnTitle = headerClone.text().trim();
-            printContents += '<th>' + columnTitle + '</th>';
-        });
-
-        printContents += `</tr></thead><tbody>`;
-
-        $(rowsToProcess).each(function() {
-            printContents += '<tr>';
-            $(this).find('td').each(function() {
-                if ($(this).find('input[type="checkbox"]').length > 0 || $(this).find('.icon-toolbar').length > 0) {
-                    return;
-                }
-                printContents += '<td>' + $(this).text().trim() + '</td>';
-            });
-            printContents += '</tr>';
-        });
-
-        printContents += `</tbody></table></body></html>`;
-
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(printContents);
-        printWindow.document.close();
-        printWindow.focus();
-
-        // تأكد من أن أمر الطباعة يتم استدعاؤه بعد تحميل المحتوى بالكامل.
-        printWindow.onload = function() {
-            printWindow.print();
-            printWindow.close();
-        };
-
-        // قم بتغيير مكان استدعاء showAlert
-        // أضف رسالة النجاح في نهاية الدالة.
-        showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
-    };
-    //----------------------------------------------------------------------------------------
-    window.exportContactsExcelBtn = function(tableId) {
-        // تحديد الجدول المطلوب بناءً على الـ ID
-        const contactsTableElement = document.getElementById(tableId);
-        if (!contactsTableElement) {
-            showAlert('⚠️ لم يتم العثور على جدول جهات الاتصال.', 'warning');
-            return;
-        }
-
-        const contactsTable = $(contactsTableElement).DataTable();
-
-        const selectedCheckboxes = contactsTable.$('input[type="checkbox"]:checked');
-        let rowsToProcess;
-
-        if (selectedCheckboxes.length > 0) {
-            rowsToProcess = selectedCheckboxes.parents('tr');
-        } else {
-            rowsToProcess = contactsTable.rows({ 'search': 'applied' }).nodes();
-        }
-
-        // 1. بناء البيانات لـ SheetJS
-        const data = [];
-        const header = [];
-        $(contactsTableElement).find('thead th').each(function() {
-            if ($(this).find('input[type="checkbox"]').length === 0 && $(this).text().trim() !== '') {
-                header.push($(this).text().trim());
-            }
-        });
-        data.push(header);
-
-        $(rowsToProcess).each(function() {
-            const rowData = [];
-            $(this).find('td').each(function() {
-                if ($(this).find('input[type="checkbox"]').length === 0 && $(this).find('.icon-toolbar').length === 0) {
-                    rowData.push($(this).text().trim());
-                }
-            });
-            data.push(rowData);
-        });
-
-        // 2. إنشاء ورقة العمل والمصنف
-        const ws = XLSX.utils.aoa_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "جهات_الاتصال");
-
-        // 3. كتابة وتنزيل الملف بصيغة XLSX
-        XLSX.writeFile(wb, "contacts-data.xlsx");
-
-        // إظهار رسالة النجاح
-        showAlert('تم تصدير البيانات بنجاح إلى ملف Excel.', 'success');
-    };
-
-
-    function populateEditProjectParties(project) {
-    $('#editCustomer').val(project.customer_id);
-    $('#editOwner').val(project.owner_id);
-    $('#editConsultant').val(project.consultant_id);
-    $('#editContractor').val(project.contractor_id);
-}
-
-
-
-/****************************
- * Modals Open / Close
- ****************************/
-
-// فتح مودال إضافة المعدات
-function openEquipmentModal() {
-    const modal = document.getElementById('equipmentModal');
-    if (modal) modal.style.display = 'block';
-}
-
-// إغلاق مودال إضافة المعدات
-function closeEquipmentModal() {
-    const modal = document.getElementById('equipmentModal');
-    if (modal) modal.style.display = 'none';
-}
-
-// فتح مودال تعديل المعدات
-function openEditEquipmentModal() {
-    const modal = document.getElementById('editEquipmentModal');
-    if (modal) modal.style.display = 'block';
-}
-
-// إغلاق مودال تعديل المعدات
-function closeEditEquipmentModal() {
-    const modal = document.getElementById('editEquipmentModal');
-    if (modal) modal.style.display = 'none';
-}
-
-/****************************
- * Tab Switching
- ****************************/
-function switchTab(tabName) {
-    // جميع التابات
-    const allTabs = document.querySelectorAll('.form-tab-content');
-    allTabs.forEach(tab => {
-        tab.style.display = 'none';
-        tab.classList.remove('active');
+    $(equipmentsTableElement).find('thead tr:first th').each(function() {
+        if ($(this).find('input[type="checkbox"]').length > 0 || $(this).text().trim() === '') return;
+        const headerClone = $(this).clone();
+        headerClone.find('input, select, .btn, i').remove();
+        const columnTitle = headerClone.text().trim();
+        printContents += '<th>' + columnTitle + '</th>';
     });
 
-    // جميع الأزرار
-    const allButtons = document.querySelectorAll('.tab-buttons button');
-    allButtons.forEach(btn => btn.classList.remove('active'));
+    printContents += `</tr></thead><tbody>`;
 
-    // إظهار التاب المطلوب
-    const tabId = tabName + 'Tab';
-    const selectedTab = document.getElementById(tabId);
-    if (selectedTab) selectedTab.style.display = 'block';
-    selectedTab.classList.add('active');
+    $(rowsToProcess).each(function() {
+        printContents += '<tr>';
+        $(this).find('td').each(function() {
+            if ($(this).find('input[type="checkbox"]').length > 0 || $(this).find('.icon-toolbar').length > 0) return;
+            printContents += '<td>' + $(this).text().trim() + '</td>';
+        });
+        printContents += '</tr>';
+    });
 
-    // تفعيل الزر المقابل
-    const buttonIds = {
-        'equipment-details': 'equipment-details-btn',
-        'calibration': 'calibration-btn',
-        'maintenance': 'maintenance-btn',
-        'edit-equipment-details': 'edit-equipment-details-btn',
-        'edit-calibration': 'edit-calibration-btn',
-        'edit-maintenance': 'edit-maintenance-btn'
-    };
+    printContents += `</tbody></table>`;
 
-    const btn = document.getElementById(buttonIds[tabName]);
-    if (btn) btn.classList.add('active');
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContents);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
+    showAlert('تم إرسال أمر الطباعة بنجاح.', 'success');
+};
+
+// ===================== تصدير جدول المعدات إلى Excel =====================
+window.exportEquipmentsExcel = function() {
+    const equipmentsTableElement = document.getElementById('equipmentsTable');
+    if (!equipmentsTableElement) {
+        showAlert('⚠️ لم يتم العثور على جدول المعدات.', 'warning');
+        return;
+    }
+
+    const equipmentsTable = $(equipmentsTableElement).DataTable();
+    const selectedCheckboxes = equipmentsTable.$('input[type="checkbox"]:checked');
+    let rowsToProcess;
+
+    if (selectedCheckboxes.length > 0) {
+        rowsToProcess = selectedCheckboxes.parents('tr');
+    } else {
+        rowsToProcess = equipmentsTable.rows({ 'search': 'applied' }).nodes();
+    }
+
+    const data = [];
+    const header = [];
+
+    $(equipmentsTableElement).find('thead th').each(function() {
+        if ($(this).find('input[type="checkbox"]').length === 0 && $(this).text().trim() !== '') {
+            header.push($(this).text().trim());
+        }
+    });
+    data.push(header);
+
+    $(rowsToProcess).each(function() {
+        const rowData = [];
+        $(this).find('td').each(function() {
+            if ($(this).find('input[type="checkbox"]').length === 0 && $(this).find('.icon-toolbar').length === 0) {
+                rowData.push($(this).text().trim());
+            }
+        });
+        data.push(rowData);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "المعدات");
+
+    XLSX.writeFile(wb, "equipments-data.xlsx");
+
+    showAlert('تم تصدير البيانات بنجاح إلى ملف Excel.', 'success');
+};
+
+// ===================== عرض ملف الجهاز =====================
+function viewEquipmentFile(fileId) {
+    window.open(`/equipments/files/${fileId}/view`, '_blank');
 }
 
-/****************************
- * Close modal on outside click
- ****************************/
-window.onclick = function(event) {
-    const addModal = document.getElementById('equipmentModal');
-    const editModal = document.getElementById('editEquipmentModal');
-    if (event.target === addModal) addModal.style.display = 'none';
-    if (event.target === editModal) editModal.style.display = 'none';
-}
+
+
+
 
 </script>
+
 
 @endsection
