@@ -5,7 +5,7 @@
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-{{-- جرس التنبيهات --}}
+<!-- {{-- جرس التنبيهات --}}
 <div style="position: fixed; top: 20px; right: 20px; z-index: 999;">
     <button id="reminderBell" class="btn btn-warning position-relative">
         <i class="fas fa-bell fa-2x"></i>
@@ -18,7 +18,7 @@
             <ul id="reminderList" class="list-unstyled mb-0"></ul>
         </div>
     </div>
-</div>
+</div> -->
 
 
 
@@ -45,7 +45,10 @@
         <span data-key="Quotations">Quotations</span>
       </div>
 
-      <div class="general-card" onclick="window.location.href='{{ route('confirmations.index') }}'">
+
+
+      <div class="general-card" onclick="window.location.href=''">
+
         <i class="fas fa-check-double"></i>
         <span data-key="Confirmations">Confirmations</span>
       </div>
@@ -55,7 +58,7 @@
         <span data-key="Financial Transactions">Financial Transactions</span>
       </div>
 
-      <div class="general-card" onclick="window.location.href=''">
+      <div class="general-card" onclick="window.location.href='{{ route('deliveries.index') }}'">
         <i class="fas fa-truck"></i>
         <span data-key="Deliveries">Deliveries</span>
       </div>

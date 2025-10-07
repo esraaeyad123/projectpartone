@@ -23,9 +23,9 @@ use App\Http\Controllers\Equipment\CalibrationController;
 use App\Http\Controllers\Equipment\MaintenanceController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReportApproval\ReportApprovalController;
-use App\Http\Controllers\Confirmation\ConfirmationController;
 use App\Http\Controllers\Confirmation\ConfirmationLineController;
 
+use App\Http\Controllers\Deliveries\DeliveryController; // تأكد من استدعاء المتحكم
 
 /*
 |--------------------------------------------------------------------------
@@ -281,7 +281,6 @@ Route::prefix('report-approval')->group(function () {
 
 
 
+Route::get('/deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');
+// هذا يُعرف مسار GET باسم deliveries.index
 
-
-Route::resource('confirmations', ConfirmationController::class);
-Route::post('/confirmation-lines', [ConfirmationLineController::class, 'store'])->name('confirmation-lines.store');
