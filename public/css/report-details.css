@@ -1,0 +1,257 @@
+/* General report sheet styling to mimic paper */
+.report-sheet {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 800px; /* A4 size approximation */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    font-family: Arial, sans-serif;
+    line-height: 1.4;
+}
+
+/* Image-based Header and Footer */
+.report-image-header,
+.report-image-footer {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Adjustments for spacing between image and content */
+.report-image-header {
+    margin-bottom: 20px;
+}
+
+.report-image-footer {
+    margin-top: 30px;
+}
+
+/* Report Title */
+.report-title {
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+/* Main Report Details section */
+.report-details-grid {
+    display: grid;
+    grid-template-columns: min-content 1fr min-content 1fr;
+    gap: 15px;
+    font-size: 14px;
+}
+
+.details-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    border-bottom: 1px dotted #ccc;
+}
+
+.details-item .label {
+    font-weight: bold;
+    color: #555;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+.details-item .value {
+    text-align: right;
+    flex-grow: 1;
+}
+
+/* Table for Test Results */
+.test-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+    table-layout: fixed;
+}
+
+.test-results-table th,
+.test-results-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center;
+}
+
+.test-results-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.test-results-table tr td:first-child,
+.test-results-table tr th:first-child {
+    text-align: left;
+    font-weight: bold;
+    width: 25%;
+}
+
+/* Comments and Notes sections */
+.comments-section {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.comments-section h4 {
+    border-bottom: 1px solid #000;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.notes-list li {
+    margin-bottom: 5px;
+}
+
+.pass-fail-status {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #27ae60;
+}
+
+.report-info {
+    font-size: 10px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Decline Comments Section Styling */
+.decline-comments-section {
+    border: 1px solid #e74c3c;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.decline-comments-section textarea {
+    width: 100%;
+    min-height: 100px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    box-sizing: border-box;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+
+/* === تنسيق الأزرار الجانبية === */
+.report-actions {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 30px;
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.action-button {
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.action-button i {
+    margin-right: 12px;
+}
+
+/* Specific Button Colors */
+.button-gray { background-color: #7f8c8d; }
+.button-approve { background-color: #27ae60; }
+.button-decline, .button-remove, .button-fail { background-color: #e74c3c; }
+.button-pass { background-color: #27ae60; }
+
+/* تأثير التحويم (Hover) */
+.action-button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* === PRINT-SPECIFIC STYLING === */
+@media print {
+    /* Set A4 paper size and margins */
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Hide elements not needed for printing */
+    #header-placeholder,
+    #navbar-placeholder,
+    .report-actions,
+    .main-content .section-content:first-child {
+        display: none !important;
+    }
+
+    /* Ensure main report container takes full width of the printable area */
+    .container,
+    .main-content,
+    #report-details-section {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    /* Adjust report sheet for printing */
+    .report-sheet {
+        width: 100%;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+        padding: 25px; /* Slightly reduced padding to save space */
+    }
+    
+    /* Table adjustments for A4 fit */
+    .test-results-table {
+        width: 100%;
+        table-layout: fixed;
+        font-size: 11px;
+        word-wrap: break-word;
+    }
+
+    .test-results-table th,
+    .test-results-table td {
+        padding: 5px;
+    }
+    
+    .report-details-grid {
+        grid-template-columns: repeat(2, 1fr);
+        font-size: 11px;
+    }
+
+    .details-item .label, .details-item .value {
+        font-size: 11px;
+    }
+
+    .comments-section, .notes-list {
+        font-size: 11px;
+    }
+}

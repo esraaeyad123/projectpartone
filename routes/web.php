@@ -19,11 +19,10 @@ use App\Http\Controllers\Test\TestFileController;
 use App\Http\Controllers\Test\UncertaintyController;
 use App\Http\Controllers\Equipment\EquipmentController;
 use App\Http\Controllers\Equipment\EquipmentFileController;
-
-
-
-
-
+use App\Http\Controllers\Equipment\CalibrationController;
+use App\Http\Controllers\Equipment\MaintenanceController;
+use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\ReportApproval\ReportApprovalController;
 
 
 /*
@@ -255,3 +254,28 @@ Route::get('/equipments/{equipment}/files-json', [EquipmentFileController::class
 Route::get('/equipments/files/{file}/view', [EquipmentFileController::class, 'viewEquipmentFile']);
 // تنزيل ملف Equipment
 Route::get('/equipments/files/{file}/download', [EquipmentFileController::class, 'download']);
+
+Route::get('/equipments/{equipment}/calibrations', [CalibrationController::class, 'index']);
+// إضافة معايرة جديدة لجهاز محدد
+Route::post('/equipments/{equipment}/calibrations', [CalibrationController::class, 'store']);
+
+// تعديل معايرة موجودة عبر ID
+Route::put('/calibrations/{id}', [CalibrationController::class, 'update']);
+
+Route::get('/equipments/{equipmentId}/calibration', [CalibrationController::class, 'showByEquipment']);
+
+Route::post('/equipments/{equipment}/maintenances', [MaintenanceController::class, 'store']);
+Route::put('/maintenances/{id}', [MaintenanceController::class, 'update']);
+// routes/web.php
+Route::get('/dashboard/reminders', [ReminderController::class, 'index']);
+
+Route::prefix('report-approval')->group(function () {
+    Route::get('/', [ReportApprovalController::class, 'index'])->name('report-approval.index');
+    Route::post('/approve/{id}', [ReportApprovalController::class, 'approve'])->name('report-approval.approve');
+    Route::post('/reject/{id}', [ReportApprovalController::class, 'reject'])->name('report-approval.reject');
+    Route::get('/{id}', [ReportApprovalController::class, 'show'])->name('report-approval.show');
+
+});
+
+
+

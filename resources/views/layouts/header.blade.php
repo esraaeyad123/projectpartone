@@ -16,4 +16,6 @@
         <i class="fas fa-microscope"></i>
         <span data-key="LIMS Control Panel">LIMS Control Panel</span>
     </h1>
+
+
 </header>

@@ -250,9 +250,7 @@ function closeEditEquipmentModal() { document.getElementById('editEquipmentModal
 // ======================= فتح مودال تعديل الجهاز =======================
 // --- فتح مودال تعديل الجهاز وتعبئة البيانات ---
 function editEquipmentModal(id) {
-    if (!id) return console.warn('No Equipment ID provided');
-
-     if (!id) {
+    if (!id) {
         Swal.fire({
             icon: 'warning',
             title: 'تنبيه ⚠️',
@@ -263,9 +261,14 @@ function editEquipmentModal(id) {
     }
 
     $.get(`/equipments/${id}`, function(equipment) {
-        if (!equipment || !equipment.id) return showAlert('لم يتم العثور على بيانات الجهاز!', 'error');
+        if (!equipment || !equipment.id) {
+            showAlert('لم يتم العثور على بيانات الجهاز!', 'error');
+            return;
+        }
 
-        // --- تعبئة بيانات Equipment ---
+        // ====================
+        // تعبئة بيانات Equipment Details
+        // ====================
         $('#editEquipmentId').val(equipment.id);
         $('#edit_equipment_reference').val(equipment.equipment_reference);
         $('#edit_description').val(equipment.description);
@@ -296,39 +299,78 @@ function editEquipmentModal(id) {
         $('#edit_io').val(equipment.io || '');
         $('#edit_uncertainty').val(equipment.uncertainty || '');
 
-        // --- تحميل سجلات Uncertainty ---
-        loadUncertainties(equipment.id, 'edit');
+        // ====================
+        // تحميل سجلات Uncertainty
+        // ====================
+        loadUncertainties(equipment.id, 'edit'); // افترض أن هذه الدالة موجودة
 
-        // --- Calibration ---
-        if(equipment.calibration) {
-            $('#edit_calib_method').val(equipment.calibration.calib_method);
-            $('#edit_calib_procedure_no').val(equipment.calibration.calib_procedure_no);
-            $('#edit_last_calib_date').val(equipment.calibration.last_calib_date);
-            $('#edit_scheduled').val(equipment.calibration.scheduled);
-            $('#edit_next_calib_date').val(equipment.calibration.next_calib_date);
-            $('#edit_reminder').prop('checked', equipment.calibration.reminder);
-            $('#edit_has_next_calibration').prop('checked', equipment.calibration.has_next_calibration);
-            $('#edit_calibrated_externally').prop('checked', equipment.calibration.calibrated_externally);
-            $('#edit_only_one').prop('checked', equipment.calibration.only_one);
-        }
+        // ====================
+        // Calibration
+        // ====================
+       if (equipment.calibration) {
+    // تعبئة الحقول الأساسية
+    $('#edit_calibration_id').val(equipment.calibration.id);
+    $('#edit_equipment_id').val(equipment.id);
+    $('#edit_calib_method').val(equipment.calibration.calib_method || '');
+    $('#edit_calib_procedure_no').val(equipment.calibration.calib_procedure_no || '');
+    $('#edit_last_calib_date').val(equipment.calibration.last_calib_date || '');
+    $('#edit_scheduled').val(equipment.calibration.scheduled || '');
+    $('#edit_next_calib_date').val(equipment.calibration.next_calib_date || '');
 
-        // --- Maintenance ---
-        if(equipment.maintenance) {
-            $('#edit_last_maint_date').val(equipment.maintenance.last_maint_date);
-            $('#edit_scheduled_date').val(equipment.maintenance.scheduled_date);
-            $('#edit_next_maint_date').val(equipment.maintenance.next_maint_date);
-            $('#edit_scheduled_maint').prop('checked', equipment.maintenance.scheduled_maint);
-            $('#edit_has_next_maint').prop('checked', equipment.maintenance.has_next_maint);
-            $('#edit_reminder_maint').prop('checked', equipment.maintenance.reminder_maint);
-            $('#edit_maint_externally').prop('checked', equipment.maintenance.maint_externally);
-            $('#edit_only_one_maint').prop('checked', equipment.maintenance.only_one);
-            $('#edit_occurrence').val(equipment.maintenance.occurrence);
-            $('#edit_maint_provider').val(equipment.maintenance.maint_provider);
-            $('#edit_maint_internally_by').val(equipment.maintenance.maint_internally_by);
-            $('#edit_maint_status').val(equipment.maintenance.maint_status);
-        }
+    // تعبئة checkboxes
+    $('#edit_reminder').prop('checked', equipment.calibration.reminder == 1);
+    $('#edit_has_next_calibration').prop('checked', equipment.calibration.has_next_calibration == 1);
+    $('#edit_only_one').prop('checked', equipment.calibration.only_one == 1);
+    $('#edit_calibrated_externally').prop('checked', equipment.calibration.calibrated_externally == 1);
 
-        openEditEquipmentModal();
+    // تعبئة الحقول الإضافية
+    $('#edit_provider').val(equipment.calibration.provider || '');
+    $('#edit_internally_by').val(equipment.calibration.internally_by || '');
+    $('#edit_last_certificate').val(equipment.calibration.last_certificate || '');
+    $('#edit_calibration_status').val(equipment.calibration.calibration_status || 'scheduled');
+} else {
+    // إذا لا توجد بيانات معايرة — تفريغ جميع الحقول
+    $('#edit_calibration_id, #edit_equipment_id').val('');
+    $('#edit_calib_method, #edit_calib_procedure_no, #edit_last_calib_date, #edit_scheduled, #edit_next_calib_date').val('');
+    $('#edit_provider, #edit_internally_by, #edit_last_certificate').val('');
+    $('#edit_calibration_status').val('scheduled');
+    $('#edit_reminder, #edit_has_next_calibration, #edit_calibrated_externally, #edit_only_one').prop('checked', false);
+}
+
+
+        // ====================
+        // Maintenance
+        // ====================
+          if (equipment.maintenance) {
+    $('#edit_maintenance_id').val(equipment.maintenance.id);
+    $('#edit_last_maint_date').val(equipment.maintenance.last_maint_date);
+    $('#edit_scheduled_date').val(equipment.maintenance.scheduled_date);
+    $('#edit_next_maint_date').val(equipment.maintenance.next_maint_date);
+    $('#edit_scheduled_maint').prop('checked', equipment.maintenance.scheduled_maint ? true : false);
+    $('#edit_has_next_maint').prop('checked', equipment.maintenance.has_next_maint ? true : false);
+    $('#edit_reminder_maint').prop('checked', equipment.maintenance.reminder_maint ? true : false);
+    $('#edit_maint_externally').prop('checked', equipment.maintenance.maint_externally ? true : false);
+    $('#edit_only_one_maint').prop('checked', equipment.maintenance.only_one ? true : false);
+    $('#edit_occurrence').val(equipment.maintenance.occurrence);
+    $('#edit_maint_provider').val(equipment.maintenance.maint_provider);
+    $('#edit_maint_internally_by').val(equipment.maintenance.maint_internally_by);
+    $('#edit_maint_status').val(equipment.maintenance.maint_status);
+} else {
+    // إعادة تعيين القيم إذا لم توجد صيانة
+    $('#edit_maintenance_id').val('');
+    $('#edit_last_maint_date,#edit_scheduled_date,#edit_next_maint_date,#edit_occurrence,#edit_maint_provider,#edit_maint_internally_by').val('');
+    $('#edit_scheduled_maint,#edit_has_next_maint,#edit_reminder_maint,#edit_maint_externally,#edit_only_one_maint').prop('checked', false);
+    $('#edit_maint_status').val('scheduled');
+}
+
+
+
+
+        // ====================
+        // فتح المودال والتاب الافتراضي
+        // ====================
+        openEditEquipmentModal(); // ستقوم بإظهار المودال وفتح تاب الـ Equipment Details
+        switchTabEdit('edit-equipment-details');
     }).fail(function(err) {
         console.error(err);
         showAlert('خطأ أثناء تحميل بيانات الجهاز', 'error');
@@ -476,14 +518,6 @@ fetch(`/equipments/${equipmentId}/uncertainty-history`, {
 
 }
 
-// --- تبديل التابات ---
-function switchEditTab(tabId) {
-    $('.form-tab-content').hide();
-    $('#' + tabId).show();
-    $('.tab-buttons button').removeClass('active');
-    $(`.tab-buttons button[onclick*="${tabId}"]`).addClass('active');
-}
-
 
 
 
@@ -565,6 +599,8 @@ function saveEquipment(closeAfterSave = true) {
         data: data,
         success: function(response) {
             Swal.fire('تم الحفظ ✅', response.message || 'تم حفظ المعدة بنجاح', 'success');
+             if (response.equipment && response.equipment.id) {
+                 $('#equipmentID').val(response.equipment.id); }
             if (closeAfterSave) closeAddEquipmentModal();
         },
         error: function(xhr) {
@@ -836,6 +872,296 @@ function viewEquipmentFile(fileId) {
 }
 
 
+// دالة لتبديل التبويبات داخل المودال
+// -------------------- Add Equipment Modal Tabs --------------------
+function switchTab(tabName) {
+    // إخفاء جميع التابات داخل مودال الإضافة
+    const allTabs = document.querySelectorAll('#equipmentModal .form-tab-content');
+    allTabs.forEach(tab => tab.style.display = 'none');
+
+    // إزالة active من كل أزرار التاب داخل المودال
+    const allButtons = document.querySelectorAll('#equipmentModal .tab-buttons button');
+    allButtons.forEach(btn => btn.classList.remove('active'));
+
+    // إظهار التاب المطلوب
+    const selectedTab = document.getElementById(tabName + 'Tab');
+    if (selectedTab) selectedTab.style.display = 'block';
+
+    // تفعيل الزر المناسب
+    const activeButton = document.getElementById(tabName + '-btn');
+    if (activeButton) activeButton.classList.add('active');
+}
+
+
+
+
+// دالة لفتح المودال
+function openEquipmentModal() {
+    document.getElementById('equipmentModal').style.display = 'block';
+    switchTab('equipment-details'); // افتراضي: افتح أول تاب
+}
+
+// دالة لإغلاق المودال
+function closeEquipmentModal() {
+    document.getElementById('equipmentModal').style.display = 'none';
+}
+
+// عند الضغط خارج المودال يتم الإغلاق
+window.onclick = function(event) {
+    const modal = document.getElementById('equipmentModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+};
+
+// ================================
+// Switch Tabs in Edit Equipment Modal
+// ================================
+function switchTabEdit(tabName) {
+    // إخفاء جميع التابات داخل مودال التعديل
+    const allTabs = document.querySelectorAll('#editEquipmentModal .form-tab-content');
+    allTabs.forEach(tab => tab.style.display = 'none');
+
+    // إزالة active من كل أزرار التاب
+    const allButtons = document.querySelectorAll('#editEquipmentModal .tab-buttons button');
+    allButtons.forEach(btn => btn.classList.remove('active'));
+
+    // إظهار التاب المطلوب
+    const selectedTab = document.getElementById(tabName + 'Tab');
+    if (selectedTab) selectedTab.style.display = 'block';
+
+    // تفعيل الزر المناسب
+    const activeButton = document.getElementById(tabName + '-btn');
+    if (activeButton) activeButton.classList.add('active');
+}
+
+// ✅ هذه الوظيفة تُستدعى عند فتح المودال
+function openEditEquipmentModal() {
+    document.getElementById("editEquipmentModal").style.display = "block";
+    // تأكد أن التاب الأساسي ظاهر أولًا
+    switchTabEdit('edit-equipment-details');
+}
+
+// ✅ لإغلاق المودال
+function closeEditEquipmentModal() {
+    document.getElementById("editEquipmentModal").style.display = "none";
+}
+
+
+// ================================
+// Optional: Open modal and default to first tab
+// ================================
+function openEditEquipmentModal(equipmentData) {
+    // افتح المودال
+    document.getElementById('editEquipmentModal').style.display = 'block';
+
+    // املى البيانات في الفورم
+    if (equipmentData) {
+        document.getElementById('editEquipmentId').value = equipmentData.id;
+        document.getElementById('edit_description').value = equipmentData.description;
+        // املى باقي الحقول حسب data
+    }
+
+    // افتح التاب الأول (Equipment Details)
+    switchTabEdit('edit-equipment-details');
+}
+
+// ================================
+// Close modal
+// ================================
+function closeEditEquipmentModal() {
+    document.getElementById('editEquipmentModal').style.display = 'none';
+}
+
+
+
+
+
+
+// 🧹 تفريغ الحقول بعد الحفظ
+window.clearCalibrationForm = function(modalType = 'add') {
+    $('input[name="calib_method"]').val('');
+    $('input[name="calib_procedure_no"]').val('');
+    $('input[name="last_calib_date"]').val('');
+    $('input[name="scheduled"]').val('');
+    $('input[name="next_calib_date"]').val('');
+    $('select[name="provider"]').val('');
+    $('input[name="internally_by"]').val('');
+    $('input[name="last_certificate"]').val('');
+    $('select[name="calibration_status"]').val('scheduled');
+    $('input[type="checkbox"]').prop('checked', false);
+};
+
+
+
+// دالة لغلق المودال
+function closeEditCalibrationModal() {
+    $('#edit-calibrationTab').hide();
+}
+
+// حفظ أو تعديل المعايرة
+window.saveCalibration = function(modalType = 'add') {
+    let equipmentId = (modalType === 'edit') ? $('#editEquipmentId').val() : $('#equipmentID').val();
+    if (!equipmentId) {
+        Swal.fire("خطأ ❌", "❌ الرجاء حفظ الجهاز أولًا قبل إضافة بيانات المعايرة", "error");
+        return;
+    }
+
+    // اختيار ID الصحيح من الفورم
+    let calibrationId = (modalType === 'edit')
+        ? ($('#edit_calibration_id').val() || '').trim()
+        : ($('#calibrationId').val() || '').trim();
+
+    let url = calibrationId
+        ? `/calibrations/${calibrationId}`              // تعديل
+        : `/equipments/${equipmentId}/calibrations`;   // إضافة جديدة
+
+    let method = calibrationId ? 'PUT' : 'POST';
+
+    // جمع بيانات الفورم
+    let formData = {
+        calib_method: (modalType === 'edit') ? $('#edit_calib_method').val() || '' : $('#calib_method').val() || '',
+        calib_procedure_no: (modalType === 'edit') ? $('#edit_calib_procedure_no').val() || '' : $('#calib_procedure_no').val() || '',
+        last_calib_date: (modalType === 'edit') ? $('#edit_last_calib_date').val() || '' : $('#last_calib_date').val() || '',
+        scheduled: (modalType === 'edit') ? $('#edit_scheduled').val() || '' : $('#scheduled').val() || '',
+        next_calib_date: (modalType === 'edit') ? $('#edit_next_calib_date').val() || '' : $('#next_calib_date').val() || '',
+        reminder: (modalType === 'edit') ? ($('#edit_reminder').is(':checked') ? 1 : 0) : ($('#reminder').is(':checked') ? 1 : 0),
+        has_next_calibration: (modalType === 'edit') ? ($('#edit_has_next_calibration').is(':checked') ? 1 : 0) : ($('#has_next_calibration').is(':checked') ? 1 : 0),
+        only_one: (modalType === 'edit') ? ($('#edit_only_one').is(':checked') ? 1 : 0) : ($('#only_one').is(':checked') ? 1 : 0),
+        calibrated_externally: (modalType === 'edit') ? ($('#edit_calibrated_externally').is(':checked') ? 1 : 0) : ($('#calibrated_externally').is(':checked') ? 1 : 0),
+        provider: (modalType === 'edit') ? $('#edit_provider').val() || '' : $('#provider').val() || '',
+        internally_by: (modalType === 'edit') ? $('#edit_internally_by').val() || '' : $('#internally_by').val() || '',
+        last_certificate: (modalType === 'edit') ? $('#edit_last_certificate').val() || '' : $('#last_certificate').val() || '',
+        calibration_status: (modalType === 'edit') ? $('#edit_calibration_status').val() || 'scheduled' : $('#calibration_status').val() || 'scheduled',
+        _token: $('meta[name="csrf-token"]').attr('content')
+    };
+
+    if (!formData.calib_method) {
+        Swal.fire("تنبيه ⚠️", "❌ الرجاء إدخال طريقة المعايرة", "warning");
+        return;
+    }
+
+    $.ajax({
+        url: url,
+        type: method,
+        data: formData,
+        success: function(res) {
+            Swal.fire("نجاح ✅", res.message || "تم حفظ المعايرة بنجاح", "success");
+
+            // إعادة تحميل بيانات المعايرة بعد الحفظ
+            $.get(`/equipments/${equipmentId}/calibration`, function(calibration){
+                if (calibration) {
+                    // املأ الفورم إذا كان تعديل
+                    $('#edit_calibration_id').val(calibration.id);
+                    $('#edit_calib_method').val(calibration.calib_method);
+                    $('#edit_calib_procedure_no').val(calibration.calib_procedure_no);
+                    $('#edit_last_calib_date').val(calibration.last_calib_date);
+                    $('#edit_scheduled').val(calibration.scheduled);
+                    $('#edit_next_calib_date').val(calibration.next_calib_date);
+                    $('#edit_reminder').prop('checked', calibration.reminder ? true : false);
+                    $('#edit_has_next_calibration').prop('checked', calibration.has_next_calibration ? true : false);
+                    $('#edit_only_one').prop('checked', calibration.only_one ? true : false);
+                    $('#edit_calibrated_externally').prop('checked', calibration.calibrated_externally ? true : false);
+                }
+            });
+
+            // تنظيف الفورم إذا كان إضافة جديدة
+            if (modalType === 'add') {
+                window.clearCalibrationForm(modalType);
+            }
+        },
+        error: function(xhr) {
+            let errors = xhr.responseJSON?.errors || {};
+            let msg = '';
+            for (let f in errors) msg += errors[f] + '\n';
+            Swal.fire("خطأ ❌", msg || "حدث خطأ أثناء حفظ المعايرة", "error");
+            console.error(xhr.responseText);
+        }
+    });
+};
+
+
+window.saveMaintenance = function(modalType = 'add') {
+    let equipmentId = (modalType === 'edit') ? $('#editEquipmentId').val() : $('#equipmentID').val();
+    if (!equipmentId) {
+        Swal.fire("خطأ ❌", "❌ الرجاء حفظ الجهاز أولًا قبل إضافة بيانات الصيانة", "error");
+        return;
+    }
+
+    // اختيار ID الصحيح من الفورم
+    let maintenanceId = (modalType === 'edit') ? $('#edit_maintenance_id').val() : $('#maintenanceId').val();
+
+    let url = maintenanceId
+        ? `/maintenances/${maintenanceId}`               // تعديل
+        : `/equipments/${equipmentId}/maintenances`;    // إضافة جديدة
+
+    let method = maintenanceId ? 'PUT' : 'POST';
+
+    // جمع بيانات الفورم
+    let formData = {
+        last_maint_date: (modalType === 'edit') ? $('#edit_last_maint_date').val() : $('#last_maint_date').val(),
+        scheduled_date: (modalType === 'edit') ? $('#edit_scheduled_date').val() : $('#scheduled_date').val(),
+        next_maint_date: (modalType === 'edit') ? $('#edit_next_maint_date').val() : $('#next_maint_date').val(),
+        scheduled_maint: (modalType === 'edit') ? ($('#edit_scheduled_maint').is(':checked') ? 1 : 0) : ($('#scheduled_maint').is(':checked') ? 1 : 0),
+        has_next_maint: (modalType === 'edit') ? ($('#edit_has_next_maint').is(':checked') ? 1 : 0) : ($('#has_next_maint').is(':checked') ? 1 : 0),
+        reminder_maint: (modalType === 'edit') ? ($('#edit_reminder_maint').is(':checked') ? 1 : 0) : ($('#reminder_maint').is(':checked') ? 1 : 0),
+        maint_externally: (modalType === 'edit') ? ($('#edit_maint_externally').is(':checked') ? 1 : 0) : ($('#maint_externally').is(':checked') ? 1 : 0),
+        only_one: (modalType === 'edit') ? ($('#edit_only_one_maint').is(':checked') ? 1 : 0) : ($('#only_one').is(':checked') ? 1 : 0),
+        occurrence: (modalType === 'edit') ? $('#edit_occurrence').val() : $('#occurrence').val(),
+        maint_provider: (modalType === 'edit') ? $('#edit_maint_provider').val() : $('#maint_provider').val(),
+        maint_internally_by: (modalType === 'edit') ? $('#edit_maint_internally_by').val() : $('#maint_internally_by').val(),
+        maint_status: (modalType === 'edit') ? $('#edit_maint_status').val() : $('#maint_status').val(),
+        _token: $('meta[name="csrf-token"]').attr('content')
+    };
+
+    // تحقق من الحقول الأساسية (مثلاً تاريخ آخر صيانة)
+    if (!formData.last_maint_date) {
+        Swal.fire("تنبيه ⚠️", "❌ الرجاء إدخال تاريخ آخر صيانة", "warning");
+        return;
+    }
+
+    $.ajax({
+        url: url,
+        type: method,
+        data: formData,
+        success: function(res) {
+            Swal.fire("نجاح ✅", res.message || "تم حفظ الصيانة بنجاح", "success");
+
+            // إعادة تحميل بيانات الصيانة في الفورم
+            $.get(`/equipments/${equipmentId}/maintenance`, function(maintenance){
+                if (maintenance) {
+                    $('#edit_maintenance_id').val(maintenance.id);
+                    $('#edit_last_maint_date').val(maintenance.last_maint_date);
+                    $('#edit_scheduled_date').val(maintenance.scheduled_date);
+                    $('#edit_next_maint_date').val(maintenance.next_maint_date);
+                    $('#edit_scheduled_maint').prop('checked', maintenance.scheduled_maint ? true : false);
+                    $('#edit_has_next_maint').prop('checked', maintenance.has_next_maint ? true : false);
+                    $('#edit_reminder_maint').prop('checked', maintenance.reminder_maint ? true : false);
+                    $('#edit_maint_externally').prop('checked', maintenance.maint_externally ? true : false);
+                    $('#edit_only_one_maint').prop('checked', maintenance.only_one ? true : false);
+                    $('#edit_occurrence').val(maintenance.occurrence);
+                    $('#edit_maint_provider').val(maintenance.maint_provider);
+                    $('#edit_maint_internally_by').val(maintenance.maint_internally_by);
+                    $('#edit_maint_status').val(maintenance.maint_status);
+                }
+            });
+
+            // تنظيف الفورم إذا كان إضافة جديدة
+            if (modalType === 'add') {
+                $('#last_maint_date,#scheduled_date,#next_maint_date,#occurrence,#maint_provider,#maint_internally_by').val('');
+                $('#scheduled_maint,#has_next_maint,#reminder_maint,#maint_externally,#only_one').prop('checked', false);
+                $('#maint_status').val('scheduled');
+            }
+        },
+        error: function(xhr) {
+            let errors = xhr.responseJSON?.errors || {};
+            let msg = '';
+            for (let f in errors) msg += errors[f] + '\n';
+            Swal.fire("خطأ ❌", msg || "حدث خطأ أثناء حفظ الصيانة", "error");
+            console.error(xhr.responseText);
+        }
+    });
+};
 
 
 

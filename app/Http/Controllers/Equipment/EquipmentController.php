@@ -6,6 +6,8 @@ use App\Models\Project;
 use App\Models\UncertaintyRecord;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 class EquipmentController extends Controller
 {
@@ -91,11 +93,17 @@ if (!empty($validated['uncertainty_history'])) {
     /**
      * Display the specified resource.
      */
-   public function show(string $id)
+public function show(string $id)
 {
-    $equipment = Equipment::with('equipmentUncertainties')->findOrFail($id);
+    $equipment = Equipment::with([
+        'equipmentUncertainties',   // سجلات الـ Uncertainty
+        'calibration',
+        'maintenance'             // العلاقة مع جدول Calibrations
+    ])->findOrFail($id);
+
     return response()->json($equipment);
 }
+
 
 
 
@@ -179,5 +187,6 @@ public function deleteMultiple(Request $request)
     }
     return response()->json(['message' => 'لم يتم تحديد أي جهاز'], 400);
 }
+
 
 }

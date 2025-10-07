@@ -74,4 +74,20 @@ public function files()
     return $this->hasMany(EquipmentFile::class);
 }
 
+ public function calibration()
+    {
+        return $this->hasOne(Calibration::class);
+    }
+
+    // Maintenance
+
+ // Equipment.php
+
+// الصيانة لكل جهاز
+public function maintenance()
+{
+    return $this->hasOne(Maintenance::class, 'equipment_id');
+}
+
+
 }
