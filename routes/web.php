@@ -27,6 +27,10 @@ use App\Http\Controllers\ReportApproval\ReportApprovalController;
 
 use App\Http\Controllers\ConfirmationController; 
 
+use App\Http\Controllers\DeliveryController; // تأكد من استدعاء المتحكم
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -285,4 +289,11 @@ Route::prefix('report-approval')->group(function () {
 Route::get('/confirmations', [ConfirmationController::class, 'index'])->name('confirmation.index');
 // ... (قد تحتاجين هذا المسار لـ DataTables لاحقًا)
 Route::get('/confirmations/data', [ConfirmationController::class, 'data'])->name('confirmations.data');
+
+
+
+
+
+Route::get('/deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');
+// هذا يُعرف مسار GET باسم deliveries.index
 
