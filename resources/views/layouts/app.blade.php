@@ -50,9 +50,8 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
 
    {{-- ملفات JS للمشروع --}}
-   <script src="{{ asset('js/jquery-3.6.0.min.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('js/report-details.js') }}" type="text/javascript"></script>
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script src="{{ asset('js/report-details.js') }}" type="text/javascript"></script>
      <script src="{{ asset('js/customer_types.js') }}"></script>
      <script src="{{ asset('js/main.js') }}"></script>
 

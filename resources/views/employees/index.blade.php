@@ -39,7 +39,7 @@
                                 <tr>
                                     <th><input type="checkbox" id="selectAllEmployees"></th>
                                     <th>Employee Reference<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                                    
+
                                     <th>Initials<br>
                                         <select class="column-filter">
                                             <option value="">All</option>
@@ -51,7 +51,7 @@
                                             <option value="Prof.">Prof.</option>
                                         </select>
                                     </th>
-                                    
+
                                     <th>First Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Mid. Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
                                     <th>Last Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
@@ -133,9 +133,9 @@ function updateFullName(prefix) {
     const firstName = ($('#' + prefix + 'FirstName').val() || '').trim();
     const midName = ($('#' + prefix + 'MidName').val() || '').trim();
     const lastName = ($('#' + prefix + 'LastName').val() || '').trim();
-    
+
     let fullNameParts = [];
-    
+
     // إضافة الأجزاء غير الفارغة
     if (firstName) fullNameParts.push(firstName);
     if (midName) fullNameParts.push(midName);
@@ -191,7 +191,7 @@ $(document).ready(function() {
             var val = $(this).val(); // جلب القيمة الأصلية
             var searchVal = '';
             var isSelect = $(this).is('select');
-            
+
             // 1. إذا كان حقلاً منسدلاً (Select) وتم اختيار قيمة (ليست "All")
             if (isSelect && val) {
                 // نستخدم التعابير النمطية (^ و $) لفرض تطابق تام للقيمة المختارة
@@ -204,7 +204,7 @@ $(document).ready(function() {
             // 2. تطبيق البحث، مع تفعيل خاصية Regex إذا كانت مطبقة
             if (column.search() !== searchVal) {
                 // نمرر true كباراميتر ثانٍ لتفعيل Regex، و false لتعطيل Smart Search
-                column.search(searchVal, true, false).draw(); 
+                column.search(searchVal, true, false).draw();
             }
         });
     });
@@ -375,37 +375,37 @@ function getSelectedEmployeeIds() {
 // ==================== Save Employee ====================
 function saveEmployee(closeAfterSave) {
     const employeeId = $('#employeeId').val();
-    
+
     // 1. جلب وتنظيف حقول الاسم الأساسية
     const firstName = ($('#firstName').val() || '').trim();
     const midName = ($('#midName').val() || '').trim();
     const lastName = ($('#lastName').val() || '').trim();
-    
+
     // 2. إعادة بناء Full Name بشكل موثوق
     let fullNameParts = [];
     if (firstName) fullNameParts.push(firstName);
     if (midName) fullNameParts.push(midName);
     if (lastName) fullNameParts.push(lastName);
-    const generatedFullName = fullNameParts.join(' ').trim(); 
+    const generatedFullName = fullNameParts.join(' ').trim();
 
     // 3. التحقق من الحقول الإلزامية (الاسم الأول والأخير)
     if (!firstName || !lastName) {
         Swal.fire("تحذير", "⚠️ الرجاء إدخال الاسم الأول والأخير.", "warning");
-        return; 
+        return;
     }
-    
+
     // تحديد URL والطريقة
     const url = '/employees';
     const method = 'POST';
 
     // 4. بناء بيانات النموذج للإرسال
     const formData = {
-        initials: $('#initials').val() || null, 
+        initials: $('#initials').val() || null,
         first_name: firstName,
         mid_name: midName || null,
         last_name: lastName,
         full_name: generatedFullName, // إرسال الاسم الكامل المُعاد بناؤه
-        
+
         // ... باقي الحقول مع تنظيف القيم ...
         email: ($('#email').val() || '').trim() || null,
         title: ($('#title').val() || '').trim() || null,
@@ -413,10 +413,10 @@ function saveEmployee(closeAfterSave) {
         ctta: $('#ctta').val() || null,
         business_unit: $('#businessUnit').val() || null,
         department: $('#department').val() || null,
-        job_roles: getSelectedJobRoles(), 
+        job_roles: getSelectedJobRoles(),
         _token: $('meta[name="csrf-token"]').attr('content')
     };
-    
+
     $.ajax({
         url: url,
         type: method,
@@ -431,21 +431,21 @@ function saveEmployee(closeAfterSave) {
             });
 
             // الخطوة الحاسمة: تحديث حقل Full Name في المودال (لجعله مرئياً)
-            $('#fullName').val(generatedFullName); 
+            $('#fullName').val(generatedFullName);
 
-            $('#employeeId').val(response.id); 
-            loadEmployees(); 
+            $('#employeeId').val(response.id);
+            loadEmployees();
             if (closeAfterSave) closeEmployeeModal();
         },
         error: function(xhr) {
            console.error(xhr.responseText);
            const errorResponse = xhr.responseJSON;
-           
+
            // تحسين عرض رسالة الخطأ من الخادم
-           const validationErrors = errorResponse && errorResponse.errors 
+           const validationErrors = errorResponse && errorResponse.errors
                ? Object.values(errorResponse.errors).map(e => e.join(', ')).join('<br>')
                : errorResponse && errorResponse.message ? errorResponse.message : 'حدث خطأ غير معروف أثناء الحفظ.';
-           
+
            Swal.fire({
                 icon: 'error',
                 title: 'خطأ في الخادم ❌',
@@ -471,7 +471,7 @@ function openEditEmployeeModal(id) {
 
         // تعبئة الحقول في المودال
         $('#editEmployeeId').val(employee.id);
-        $('#editInitials').val(employee.initials); 
+        $('#editInitials').val(employee.initials);
         $('#editEmployeeReference').val(employee.employee_reference || '');
         $('#editFullName').val(employee.full_name || '');
         $('#editEmail').val(employee.email || '');
@@ -545,22 +545,22 @@ function updateEmployee(closeAfterSave = true) {
     if (firstName) fullNameParts.push(firstName);
     if (midName) fullNameParts.push(midName);
     if (lastName) fullNameParts.push(lastName);
-    const generatedFullName = fullNameParts.join(' ').trim(); 
-    
+    const generatedFullName = fullNameParts.join(' ').trim();
+
     // 3. التحقق من الحقول الإلزامية (الاسم الأول والأخير)
     if (!firstName || !lastName) {
         Swal.fire("تحذير", "⚠️ الرجاء إدخال الاسم الأول والأخير.", "warning");
-        return; 
+        return;
     }
 
     // 4. بناء بيانات النموذج للإرسال
     const formData = {
-        initials: $('#editInitials').val() || null, 
+        initials: $('#editInitials').val() || null,
         first_name: firstName,
         mid_name: midName || null,
         last_name: lastName,
         full_name: generatedFullName, // إرسال الاسم الكامل المُعاد بناؤه
-        
+
         // ... باقي الحقول مع تنظيف القيم ...
         email: ($('#editEmail').val() || '').trim() || null,
         title: ($('#editTitle').val() || '').trim() || null,
@@ -585,7 +585,7 @@ function updateEmployee(closeAfterSave = true) {
             });
 
             // الخطوة الحاسمة: تحديث حقل Full Name في المودال (لجعله مرئياً)
-            $('#editFullName').val(generatedFullName); 
+            $('#editFullName').val(generatedFullName);
 
             loadEmployees();
             if (closeAfterSave) closeEditEmployeeModal();
@@ -595,10 +595,10 @@ function updateEmployee(closeAfterSave = true) {
             const errorResponse = xhr.responseJSON;
 
             // تحسين عرض رسالة الخطأ من الخادم
-            const validationErrors = errorResponse && errorResponse.errors 
+            const validationErrors = errorResponse && errorResponse.errors
                 ? Object.values(errorResponse.errors).map(e => e.join(', ')).join('<br>')
                 : errorResponse && errorResponse.message ? errorResponse.message : 'حدث خطأ غير معروف أثناء التعديل.';
-            
+
             Swal.fire({
                 icon: 'error',
                 title: 'خطأ في الخادم ❌',
@@ -672,8 +672,8 @@ function deleteSelectedEmployees() {
     employeesTable.$('.employee-checkbox:checked').each(function() {
         const row = $(this).closest('tr');
         // هنا نفترض أن قيمة checkbox هي Employee ID (كما هو في كود loadEmployees المُعدَّل)
-        const id = $(this).val(); 
-        
+        const id = $(this).val();
+
         selectedIds.push(id);
         rowsToDelete.push(row);
     });
@@ -694,25 +694,25 @@ function deleteSelectedEmployees() {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            
+
             // 3. إرسال طلب AJAX للحذف
             $.ajax({
                 // المسار الصحيح والمُعرَّف في web.php هو /employees/delete-multiple
-                url: `/employees/delete-multiple`, 
-                type: 'POST', 
+                url: `/employees/delete-multiple`,
+                type: 'POST',
                 data: {
                     ids: selectedIds,
                     _token: $('meta[name="csrf-token"]').attr('content'),
                     _method: 'DELETE' // لإجبار Laravel على التعامل معه كـ DELETE
                 },
                 success: function(response) {
-                    
+
                     // 🌟 الخطوة الحاسمة: إزالة الصفوف من DataTables مباشرة
-                    employeesTable.rows(rowsToDelete).remove().draw(false); 
-                    
+                    employeesTable.rows(rowsToDelete).remove().draw(false);
+
                     // إزالة تحديد كل المربعات بعد الحذف
-                    $('#selectAllEmployees').prop('checked', false); 
-                    
+                    $('#selectAllEmployees').prop('checked', false);
+
                     Swal.fire("تم الحذف! ✅", "تم حذف الموظف/الموظفين بنجاح.", "success");
                 },
                 error: function(xhr) {
