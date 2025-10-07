@@ -25,6 +25,8 @@ use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReportApproval\ReportApprovalController;
 
 
+use App\Http\Controllers\ConfirmationController; 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -278,4 +280,9 @@ Route::prefix('report-approval')->group(function () {
 });
 
 
+
+
+Route::get('/confirmations', [ConfirmationController::class, 'index'])->name('confirmation.index');
+// ... (قد تحتاجين هذا المسار لـ DataTables لاحقًا)
+Route::get('/confirmations/data', [ConfirmationController::class, 'data'])->name('confirmations.data');
 
