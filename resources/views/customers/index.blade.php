@@ -767,6 +767,7 @@
             window.contactsTableEdit.rows.add(contacts).draw();
         };
 
+        
         // دالة لملء فورم جهة الاتصال لغرض التعديل
         window.populateContactFormForEdit = function(modalType = 'add') {
             let customerTable = (modalType === 'edit') ? window.contactsTableEdit : window.contactsTable;

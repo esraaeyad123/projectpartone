@@ -45,7 +45,7 @@
         <span data-key="Quotations">Quotations</span>
       </div>
 
-      <div class="general-card" onclick="window.location.href=''">
+      <div class="general-card" onclick="window.location.href='{{ route('confirmation.index') }}'">
         <i class="fas fa-check-double"></i>
         <span data-key="Confirmations">Confirmations</span>
       </div>
@@ -84,10 +84,10 @@
         <span data-key="Employees">Employees</span>
       </div>
 
-      <div class="general-card" onclick="window.location.href=''">
+      <!-- <div class="general-card" onclick="window.location.href=''">
         <i class="fas fa-building"></i>
         <span data-key="Department">Department</span>
-      </div>
+      </div> -->
 
      <div class="general-card" onclick="window.location.href='{{ route('tests.index') }}'">
   <i class="fas fa-flask"></i>
