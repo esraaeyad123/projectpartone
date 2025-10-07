@@ -1,532 +1,473 @@
-<div id="employeeModal" class="modal">
-  <div class="modal-content new-employee-modal-design">
-    <span class="close-btn" onclick="closeEmployeeModal()"><i class="fas fa-times"></i></span>
-    <h2 class="modal-title">Add New Employee 👨‍💼</h2>
+<div id="confModal" class="modal">
+    <div class="modal-content new-conf-modal-design" style="width: 900px; max-width: 95%;">
+        <span class="close-btn" onclick="closeModal('confModal')"><i class="fas fa-times"></i></span>
+        <h2 class="modal-title">Add New Delivery 🚚</h2>
 
-    <div class="tab-buttons">
-      <button id="employee-btn" onclick="switchEmployeeTab('employee')" class="active">
-        <i class="fas fa-user"></i> Employee
-      </button>
-      <button id="contact-btn" onclick="switchEmployeeTab('contact')">
-        <i class="fas fa-address-book"></i> Contacts
-      </button>
+        <div class="tab-buttons">
+            <button id="conf-btn" onclick="switchTab('conf')" class="active"><i class="fas fa-truck"></i> Delivery</button>
+            <button id="contact-btn" onclick="switchTab('contact')"><i class="fas fa-list-ul"></i> Delivery Lines</button>
+        </div>
+
+        <form id="confForm">
+            {{-- // ---------------------------------------------------------------------------------------- --}}
+            {{-- // DELIVERY TAB (ADD NEW) --}}
+            {{-- // ---------------------------------------------------------------------------------------- --}}
+            <div id="confTab" class="form-tab-content active">
+
+                {{-- 1. Main Info (المعلومات الرئيسية) --}}
+                <fieldset class="form-section-fieldset">
+                    <legend>Main Info</legend>
+                    <input type="hidden" id="confId">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="deliveryNo">Delivery No:</label>
+                            <input type="text" id="deliveryNo" name="delivery_no" value="AAM-DN-24-000081" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label for="deliveryDate">Delivery Date:</label>
+                            <input type="date" id="deliveryDate" name="delivery_date" value="{{ date('Y-m-d') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="departmentSelect">Department:</label>
+                            <select id="departmentSelect" name="department">
+                                <option value="Materials Testing" selected>Materials Testing</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="projectCodeSelect">Project Code:</label>
+                            <select id="projectCodeSelect" name="project_code">
+                                <option value="AAMP-4" selected>AAMP-4</option>
+                            
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="projectNo">Project No:</label>
+                            <input type="text" id="projectNo" name="project_no" placeholder="(فارغ)">
+                        </div>
+                        <div class="form-group">
+                            <label for="projectNameSelect">Project:</label>
+                            <select id="projectNameSelect" name="project_name">
+                                <option value="samer villa" selected>samer villa</option>
+                            
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="projectDetails">Details:</label>
+                            <input type="text" id="projectDetails" name="project_details" value="samer villa">
+                        </div>
+                    </div>
+                </fieldset>
+
+                {{-- 2. Customer Info (معلومات العميل) --}}
+                <fieldset class="form-section-fieldset">
+                    <legend>Customer Info</legend>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerID">Customer ID:</label>
+                            <input type="text" id="customerID" name="customer_id_ref" value="AAMC-5" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerSelect">Customer:</label>
+                            <select id="customerSelect" name="customer_id">
+                                <option value="samer demo" selected>samer demo</option>
+                            
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="accountNo">Account No:</label>
+                            <input type="text" id="accountNo" name="account_no" placeholder="(فارغ)">
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location:</label>
+                            <input type="text" id="location" name="location" value="alhasa (الأحساء)">
+                        </div>
+                    </div>
+                </fieldset>
+
+                {{-- 3. Contact Info (معلومات الاتصال) --}}
+                <fieldset class="form-section-fieldset">
+                    <legend>Contact Info</legend>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="deliveryContact">Contact:</label>
+                            <input type="text" id="deliveryContact" name="contact_person" value="sam">
+                        </div>
+                        <div class="form-group">
+                            <label for="attnTo">Attn. To:</label>
+                            <input type="text" id="attnTo" name="attn_to" value="sam">
+                        </div>
+                        <div class="form-group">
+                            <label for="attnPos">Attn. Pos:</label>
+                            <input type="text" id="attnPos" name="attn_pos" value="site engineer (مهندس الموقع)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="addressEmail">Address/Email:</label>
+                            <input type="text" id="addressEmail" name="address_email" value="Ehsa/Saudi Arabia E-mail: a2@ebc.com">
+                        </div>
+                    </div>
+                </fieldset>
+
+                {{-- 4. Delivery Info (معلومات إتمام التسليم) --}}
+                <fieldset class="form-section-fieldset">
+                    <legend>Delivery Info</legend>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="preparedBy">Prepared By:</label>
+                            <input type="text" id="preparedBy" name="prepared_by" value="Super ZontaSoft">
+                        </div>
+                        <div class="form-group">
+                            <label for="deliveredBy">Delivered By:</label>
+                            <input type="text" id="deliveredBy" name="delivered_by" value="samer">
+                        </div>
+                        <div class="form-group">
+                            <label for="receivedBy">Received By:</label>
+                            <input type="text" id="receivedBy" name="received_by" value="sam">
+                        </div>
+                        <div class="form-group">
+                            <label for="dateReceived">Date Received:</label>
+                            <input type="date" id="dateReceived" name="date_received" value="2024-07-28">
+                        </div>
+                    </div>
+                </fieldset>
+
+
+            </div>
+
+            {{-- // ---------------------------------------------------------------------------------------- --}}
+            {{-- // CONFIRMATION LINE TAB (ADD NEW) --}}
+            {{-- // ---------------------------------------------------------------------------------------- --}}
+            <div id="contactTab" class="form-tab-content" style="display: none;">
+
+                {{-- 1. Services/Test Section (الخدمات/الاختبارات) --}}
+                <fieldset class="form-section-fieldset">
+                    <legend>Services/Test</legend>
+
+                    {{-- Buttons (أزرار أيقونات فقط) --}}
+                    <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
+                        <button type="button" class="btn btn-primary" onclick="addServiceLine()" title="إضافة (Add)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="editSelectedServiceLine('#servicesTable')" title="تعديل (Edit)">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button type="button" class="btn-danger" onclick="deleteSelectedServiceLine('#servicesTable')" title="حذف (Delete)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button title="تصدير لاكسل (Export to Excel)" onclick="exportServiceLineExcel('servicesTable')" class="btn-icon">
+                            <i class="fa-solid fa-table"></i>
+                        </button>
+                        <button title="طباعة (Print)" onclick="printServiceLineTable('servicesTable')" class="btn-icon">
+                            <i class="fas fa-print"></i>
+                        </button>
+                    </div>
+
+                    {{-- Table (هيكل الجدول الصحيح) --}}
+                    <div class="table-responsive-container">
+                        <table id="servicesTable" class="services-table display responsive nowrap" data-ignore-lang>
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Name</th>
+                                    <th>Method</th>
+                                    <th>Unit</th>
+                                    <th>Price</th>
+                                    <th>Price only</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{-- Table rows will be populated here via JS --}}
+                            </tbody>
+                        </table>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="form-buttons modal-bottom-buttons">
+                <button type="button" class="btn-primary" onclick="closeModal('confModal')"><i class="fas fa-times"></i> Close</button>
+                <button type="button" class="btn-success" onclick="saveConf(true)"><i class="fas fa-save"></i> Save & Close</button>
+                <button type="button" class="btn-primary" onclick="saveConf(false)"><i class="fas fa-save"></i> Save</button>
+            </div>
+        </form>
     </div>
-
-    <form id="employeeForm"> <input type="hidden" name="_token" value="{{ csrf_token() }}">
-      <input type="hidden" id="employeeId">
-
-      <div id="employeeTab" class="form-tab-content active">
-
-        <fieldset class="form-section-fieldset">
-          <legend>Employee Personal Information</legend>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="initials">Initials:</label>
-              <select id="initials">
-                <option value="" selected disabled>Select Initials</option>
-                <option value="Mr.">Mr.</option>
-                <option value="Ms.">Ms.</option>
-                <option value="Mrs.">Mrs.</option>
-                <option value="Dr.">Dr.</option>
-                <option value="Eng.">Eng.</option>
-                <option value="Prof.">Prof.</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="title">Title:</label>
-              <input type="text" id="title">
-            </div>
-            <div class="form-group">
-              <label for="email">Email:</label>
-              <input type="email" id="email">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="firstName">First Name:</label>
-              <input type="text" id="firstName">
-            </div>
-            <div class="form-group">
-              <label for="midName">Mid. Name:</label>
-              <input type="text" id="midName">
-            </div>
-            <div class="form-group">
-              <label for="lastName">Last Name:</label>
-              <input type="text" id="lastName">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group full-width-group">
-              <label for="fullName">Full Name:</label>
-              <input type="text" id="fullName" readonly style="background-color: #f0f0f0;">
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="form-section-fieldset">
-          <legend>Employment Information</legend>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="employeeReference">Employee Reference:</label>
-              <input type="text" id="employeeReference" readonly
-                     style="background-color: #e9ecef; cursor: not-allowed;"
-                     placeholder="Automatically Generated">
-            </div>
-            <div class="form-group">
-              <label for="supervisor">Supervisor:</label>
-              <select id="supervisor">
-                <option value="" selected disabled>Select Supervisor</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="businessUnit">Business Unit:</label>
-              <select id="businessUnit">
-                  <option value="" disabled selected>Select Unit</option> <option value="AAM-JED">AAM-JED</option>
-                  <option value="AAM-EHSA">AAM-EHSA</option>
-              </select>
-          </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="department">Department:</label>
-              <select id="department">
-                <option value="" selected disabled>Select Department</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="CTTA">CTTA:</label>
-              <input type="text" id="CTTA">
-            </div>
-            <div class="form-group-placeholder">
-              </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group-checkbox full-width-group job-roles-container-wrapper" style="padding-top: 10px;">
-              <label for="" style="display: block; font-weight: bold; margin-bottom: 10px;">Job Roles:</label> 
-              <div class="job-roles-creative-grid">
-                
-                <div class="role-box">
-                    <input type="checkbox" id="officeStaff" class="hidden-checkbox">
-                    <label for="officeStaff" class="checkbox-label">
-                        <i class="fas fa-briefcase"></i>
-                        <span>Office Staff</span>
-                    </label>
-                </div>
-
-                <div class="role-box">
-                    <input type="checkbox" id="laboratoryStaff" class="hidden-checkbox">
-                    <label for="laboratoryStaff" class="checkbox-label">
-                        <i class="fas fa-flask"></i>
-                        <span>Laboratory Staff</span>
-                    </label>
-                </div>
-
-                <div class="role-box">
-                    <input type="checkbox" id="siteStaff" class="hidden-checkbox">
-                    <label for="siteStaff" class="checkbox-label">
-                        <i class="fas fa-hard-hat"></i>
-                        <span>Site Staff</span>
-                    </label>
-                </div>
-
-                <div class="role-box">
-                    <input type="checkbox" id="drillerStaff" class="hidden-checkbox">
-                    <label for="drillerStaff" class="checkbox-label">
-                        <i class="fas fa-hammer"></i> <span>Driller Staff</span>
-                    </label>
-                </div>
-
-                <div class="role-box">
-                    <input type="checkbox" id="driversStaff" class="hidden-checkbox">
-                    <label for="driversStaff" class="checkbox-label">
-                        <i class="fas fa-truck"></i>
-                        <span>Drivers Staff</span>
-                    </label>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </fieldset>
-
-      </div>
-
-      <div id="contactTab" class="form-tab-content" style="display: none;">
-        <fieldset class="form-section-fieldset">
-          <legend>Contact List</legend>
-          <div class="contact-toolbar">
-            <button type="button" class="btn-secondary" onclick="populateEmployeeContactForm('add')">
-              <i class="fas fa-pen"></i> Edit Selected
-            </button>
-            <button type="button" class="btn-danger" onclick="deleteSelectedEmployeeContacts('#employeeContactsTable')">
-              <i class="fas fa-trash"></i> Delete Selected
-            </button>
-            <button type="button" class="btn-icon" onclick="exportContactsExcelBtn('employeeContactsTable')">
-              <i class="fa-solid fa-table"></i>
-            </button>
-            <button type="button" class="btn-icon" onclick="printContactsTable('employeeContactsTable')">
-              <i class="fas fa-print"></i>
-            </button>
-          </div>
-          <div class="table-responsive-container">
-            <table id="employeeContactsTable" class="contacts-table display responsive nowrap">
-              <thead>
-                <tr>
-                  <th><input type="checkbox" onclick="toggleAllContacts(this,'employeeContactsTable')"></th>
-                  <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Mobile<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Position<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Is Primary<br>
-                    <select class="column-filter">
-                      <option value="">All</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </select>
-                  </th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </fieldset>
-
-        <fieldset class="form-section-fieldset">
-          <legend>Add / Edit Contact Person</legend>
-          <input type="hidden" id="contactIdEmployee">
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="contactNameEmployee">Contact Name:</label>
-              <input type="text" id="contactNameEmployee">
-            </div>
-            <div class="form-group">
-              <label for="contactEmailEmployee">Contact Email:</label>
-              <input type="email" id="contactEmailEmployee">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="contactPhoneEmployee">Contact Phone:</label>
-              <input type="tel" id="contactPhoneEmployee">
-            </div>
-            <div class="form-group">
-              <label for="contactMobileEmployee">Contact Mobile:</label>
-              <input type="tel" id="contactMobileEmployee">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="contactPositionEmployee">Position:</label>
-              <input type="text" id="contactPositionEmployee">
-            </div>
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="isPrimaryContactEmployee">
-              <label for="isPrimaryContactEmployee">Primary Contact</label>
-            </div>
-          </div>
-
-          <div class="contact-toolbar">
-            <button type="button" class="btn btn-primary" onclick="saveEmployeeContact('add')">
-              💾 Save / Update
-            </button>
-            <button type="button" class="btn btn-secondary" onclick="clearEmployeeContactForm('add')">
-              <i class="fas fa-eraser"></i> Clear Form
-            </button>
-          </div>
-        </fieldset>
-      </div>
-
-      <div class="form-buttons modal-bottom-buttons">
-        <button type="button" class="btn-primary" onclick="closeEmployeeModal()">
-          <i class="fas fa-times"></i> Close
-        </button>
-        <button type="button" class="btn-success" onclick="saveEmployee(true)">
-          <i class="fas fa-save"></i> Save & Close
-        </button>
-        <button type="button" class="btn-success" onclick="saveEmployee(false)">
-          <i class="fas fa-save"></i> Save
-        </button>
-      </div>
-    </form>
-  </div>
 </div>
-
-<div id="editEmployeeModal" class="modal">
-  <div class="modal-content new-employee-modal-design">
-    <span class="close-btn" onclick="closeEditEmployeeModal()">
-      <i class="fas fa-times"></i>
-    </span>
-    <h2 class="modal-title">Edit Employee 📝</h2>
-
-    <div class="tab-buttons">
-      <button type="button" id="edit-employee-btn"
-              onclick="switchEmployeeTab('employee', 'edit')"
-              class="active">
-        <i class="fas fa-user"></i> Employee
-      </button>
-      <button type="button" id="edit-contact-btn"
-              onclick="switchEmployeeTab('contact', 'edit')">
-        <i class="fas fa-address-book"></i> Contacts
-      </button>
+<div id="modal-container"></div>
+<div id="dynamicContent"></div>
+<div id="customDialogModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeCustomDialog()">&times;</span>
+        <h3 id="customDialogTitle"></h3>
+        <p id="customDialogMessage"></p>
+        <div class="form-buttons" id="customDialogButtons"></div>
     </div>
-
-    <form id="editEmployeeForm">
-      <input type="hidden" id="editEmployeeId">
-
-      <div id="editEmployeeTab" class="form-tab-content active">
-
-        <fieldset class="form-section-fieldset">
-          <legend>Employee Personal Information</legend>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editInitials">Initials:</label>
-              <select id="editInitials">
-                <option value="" selected disabled>Select Initials</option>
-                <option value="Mr.">Mr.</option>
-                <option value="Ms.">Ms.</option>
-                <option value="Mrs.">Mrs.</option>
-                <option value="Dr.">Dr.</option>
-                <option value="Eng.">Eng.</option>
-                <option value="Prof.">Prof.</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="editTitle">Title:</label>
-              <input type="text" id="editTitle">
-            </div>
-            <div class="form-group">
-              <label for="editEmail">Email:</label>
-              <input type="email" id="editEmail">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editFirstName">First Name:</label>
-              <input type="text" id="editFirstName">
-            </div>
-            <div class="form-group">
-              <label for="editMidName">Mid. Name:</label>
-              <input type="text" id="editMidName">
-            </div>
-            <div class="form-group">
-              <label for="editLastName">Last Name:</label>
-              <input type="text" id="editLastName">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group full-width-group">
-              <label for="editFullName">Full Name:</label>
-              <input type="text" id="editFullName" readonly style="background-color: #f0f0f0;">
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="form-section-fieldset">
-          <legend>Employment Information</legend>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editEmployeeReference">Employee Reference:</label>
-              <input type="text" id="editEmployeeReference" readonly
-                     style="background-color: #e9ecef; cursor: not-allowed;"
-                     placeholder="Automatically Generated">
-            </div>
-            <div class="form-group">
-              <label for="editSupervisor">Supervisor:</label>
-              <select id="editSupervisor">
-                <option value="" selected disabled>Select Supervisor</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="editBusinessUnit">Business Unit:</label>
-              <select id="editBusinessUnit">
-                  <option value="" disabled selected>Select Unit
-                  </option> <option value="AAM-JED">AAM-JED</option>
-                  <option value="AAM-EHSA">AAM-EHSA</option>
-              </select>
-          </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editDepartment">Department:</label>
-              <select id="editDepartment">
-                <option value="" selected disabled>Select Department</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="editCTTA">CTTA:</label>
-              <input type="text" id="editCTTA">
-            </div>
-            <div class="form-group-placeholder">
-              </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group-checkbox full-width-group job-roles-container-wrapper" style="padding-top: 10px;">
-              <label for="" style="display: block; font-weight: bold; margin-bottom: 10px;">Job Roles:</label> 
-              <div class="job-roles-creative-grid">
-                
-                <div class="role-box">
-                    <input type="checkbox" id="editOfficeStaff" class="hidden-checkbox">
-                    <label for="editOfficeStaff" class="checkbox-label">
-                        <i class="fas fa-briefcase"></i>
-                        <span>Office Staff</span>
-                    </label>
-                </div>
-
-                <div class="role-box">
-                    <input type="checkbox" id="editLaboratoryStaff" class="hidden-checkbox">
-                    <label for="editLaboratoryStaff" class="checkbox-label">
-                        <i class="fas fa-flask"></i>
-                        <span>Laboratory Staff</span>
-                    </label>
-                </div>
-
-                <div class="role-box">
-                    <input type="checkbox" id="editSiteStaff" class="hidden-checkbox">
-                    <label for="editSiteStaff" class="checkbox-label">
-                        <i class="fas fa-hard-hat"></i>
-                        <span>Site Staff</span>
-                    </label>
-                </div>
-
-                <div class="role-box">
-                    <input type="checkbox" id="editDrillerStaff" class="hidden-checkbox">
-                    <label for="editDrillerStaff" class="checkbox-label">
-                        <i class="fas fa-hammer"></i> <span>Driller Staff</span>
-                    </label>
-                </div>
-
-                <div class="role-box">
-                    <input type="checkbox" id="editDriversStaff" class="hidden-checkbox">
-                    <label for="editDriversStaff" class="checkbox-label">
-                        <i class="fas fa-truck"></i>
-                        <span>Drivers Staff</span>
-                    </label>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </fieldset>
-      </div>
-
-      <div id="editContactTab" class="form-tab-content" style="display: none;">
-        <fieldset class="form-section-fieldset">
-          <legend>Contact List</legend>
-          <div class="contact-toolbar">
-            <button type="button" class="btn-secondary" onclick="populateEmployeeContactFormForEdit('edit')">
-              <i class="fas fa-pen"></i> Edit Selected
-            </button>
-            <button type="button" class="btn-danger" onclick="deleteSelectedEmployeeContacts('#editEmployeeContactsTable')">
-              <i class="fas fa-trash"></i> Delete Selected
-            </button>
-            <button type="button" class="btn-icon" onclick="exportContactsExcelBtn('editEmployeeContactsTable')">
-              <i class="fa-solid fa-table"></i>
-            </button>
-            <button type="button" class="btn-icon" onclick="printContactsTable('editEmployeeContactsTable')">
-              <i class="fas fa-print"></i>
-            </button>
-          </div>
-          <div class="table-responsive-container">
-            <table id="editEmployeeContactsTable" class="contacts-table display responsive nowrap">
-              <thead>
-                <tr>
-                  <th><input type="checkbox" onclick="toggleAllContacts(this,'editEmployeeContactsTable')"></th>
-                  <th>Name<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Email<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Phone<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Mobile<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Position<br><input type="text" placeholder="Search..." class="column-filter"></th>
-                  <th>Is Primary<br>
-                    <select class="column-filter">
-                      <option value="">All</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </select>
-                  </th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </fieldset>
-
-        <fieldset class="form-section-fieldset">
-          <legend>Add / Edit Contact Person</legend>
-          <input type="hidden" id="editContactIdEmployee">
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editContactNameEmployee">Contact Name:</label>
-              <input type="text" id="editContactNameEmployee">
-            </div>
-            <div class="form-group">
-              <label for="editContactEmailEmployee">Contact Email:</label>
-              <input type="email" id="editContactEmailEmployee">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editContactPhoneEmployee">Contact Phone:</label>
-              <input type="tel" id="editContactPhoneEmployee">
-            </div>
-            <div class="form-group">
-              <label for="editContactMobileEmployee">Contact Mobile:</label>
-              <input type="tel" id="editContactMobileEmployee">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="editContactPositionEmployee">Position:</label>
-              <input type="text" id="editContactPositionEmployee">
-            </div>
-            <div class="form-group-checkbox">
-              <input type="checkbox" id="editIsPrimaryContactEmployee">
-              <label for="editIsPrimaryContactEmployee">Primary Contact</label>
-            </div>
-          </div>
-
-          <div class="contact-toolbar">
-            <button type="button" class="btn btn-primary" onclick="saveEmployeeContact('edit')">
-              💾 Save / Update
-            </button>
-            <button type="button" class="btn btn-secondary" onclick="clearEmployeeContactForm('edit')">
-              <i class="fas fa-eraser"></i> Clear Form
-            </button>
-          </div>
-        </fieldset>
-      </div>
-
-      <div class="form-buttons modal-bottom-buttons">
-
-      <button type="button" class="btn-primary" onclick="closeEditEmployeeModal()">
-          <i class="fas fa-times"></i> Close
-        </button>
-        <button type="button" class="btn-success" onclick="updateEmployee(true)">
-          <i class="fas fa-save"></i> Update & Close
-        </button>
-        <button type="button" class="btn-success" onclick="updateEmployee(false)">
-          <i class="fas fa-save"></i> Update
-        </button>
-        
-      </div>
-    </form>
-  </div>
 </div>
+<div id="editConfModal" class="modal">
+    <div class="modal-content new-conf-modal-design" style="width: 900px; max-width: 95%;">
+        <span class="close-btn" onclick="closeModal('editConfModal')"><i class="fas fa-times"></i></span>
+        <h2 class="modal-title">Edit Delivery 📝</h2>
+
+        <div class="tab-buttons">
+            <button id="edit-conf-btn" onclick="switchTab('edit-conf')" class="active"><i class="fas fa-truck"></i> Delivery</button>
+            <button id="edit-contact-btn" onclick="switchTab('edit-contact')"><i class="fas fa-list-ul"></i> Delivery Lines</button>
+        </div>
+        <form id="editConfForm">
+            {{-- // ---------------------------------------------------------------------------------------- --}}
+            {{-- // DELIVERY TAB (EDIT) --}}
+            {{-- // ---------------------------------------------------------------------------------------- --}}
+            <div id="editConfTab" class="form-tab-content active">
+
+                {{-- 1. Main Info (المعلومات الرئيسية) --}}
+                <fieldset class="form-section-fieldset">
+                    <legend>Main Info</legend>
+                    <input type="hidden" id="editConfId">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editDeliveryNo">Delivery No:</label>
+                            <input type="text" id="editDeliveryNo" name="delivery_no" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDeliveryDate">Delivery Date:</label>
+                            <input type="date" id="editDeliveryDate" name="delivery_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDepartmentSelect">Department:</label>
+                            <select id="editDepartmentSelect" name="department">
+                                <option value="Materials Testing">Materials Testing</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editProjectCodeSelect">Project Code:</label>
+                            <select id="editProjectCodeSelect" name="project_code">
+                           
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editProjectNo">Project No:</label>
+                            <input type="text" id="editProjectNo" name="project_no">
+                        </div>
+                        <div class="form-group">
+                            <label for="editProjectNameSelect">Project:</label>
+                            <select id="editProjectNameSelect" name="project_name">
+                               
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="editProjectDetails">Details:</label>
+                            <input type="text" id="editProjectDetails" name="project_details">
+                        </div>
+                    </div>
+                </fieldset>
+
+                {{-- 2. Customer Info (معلومات العميل) --}}
+                <fieldset class="form-section-fieldset">
+                    <legend>Customer Info</legend>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editCustomerID">Customer ID:</label>
+                            <input type="text" id="editCustomerID" name="customer_id_ref" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label for="editCustomerSelect">Customer:</label>
+                            <select id="editCustomerSelect" name="customer_id">
+                               
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editAccountNo">Account No:</label>
+                            <input type="text" id="editAccountNo" name="account_no">
+                        </div>
+                        <div class="form-group">
+                            <label for="editLocation">Location:</label>
+                            <input type="text" id="editLocation" name="location">
+                        </div>
+                    </div>
+                </fieldset>
+
+                {{-- 3. Contact Info (معلومات الاتصال) --}}
+                <fieldset class="form-section-fieldset">
+                    <legend>Contact Info</legend>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editDeliveryContact">Contact:</label>
+                            <input type="text" id="editDeliveryContact" name="contact_person">
+                        </div>
+                        <div class="form-group">
+                            <label for="editAttnTo">Attn. To:</label>
+                            <input type="text" id="editAttnTo" name="attn_to">
+                        </div>
+                        <div class="form-group">
+                            <label for="editAttnPos">Attn. Pos:</label>
+                            <input type="text" id="editAttnPos" name="attn_pos">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="editAddressEmail">Address/Email:</label>
+                            <input type="text" id="editAddressEmail" name="address_email">
+                        </div>
+                    </div>
+                </fieldset>
+
+                {{-- 4. Delivery Info (معلومات إتمام التسليم) --}}
+                <fieldset class="form-section-fieldset">
+                    <legend>Delivery Info</legend>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editPreparedBy">Prepared By:</label>
+                            <input type="text" id="editPreparedBy" name="prepared_by">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDeliveredBy">Delivered By:</label>
+                            <input type="text" id="editDeliveredBy" name="delivered_by">
+                        </div>
+                        <div class="form-group">
+                            <label for="editReceivedBy">Received By:</label>
+                            <input type="text" id="editReceivedBy" name="received_by">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDateReceived">Date Received:</label>
+                            <input type="date" id="editDateReceived" name="date_received">
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            {{-- // ---------------------------------------------------------------------------------------- --}}
+            {{-- // CONFIRMATION LINE TAB (EDIT) --}}
+            {{-- // ---------------------------------------------------------------------------------------- --}}
+            <div id="editContactTab" class="form-tab-content" style="display: none;">
+                <fieldset class="form-section-fieldset">
+                    <legend>Services/Test</legend>
+
+                    {{-- Buttons (أزرار أيقونات فقط) --}}
+                    <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
+                        <button type="button" class="btn btn-primary" onclick="addServiceLine('edit')" title="إضافة (Add)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="editSelectedServiceLine('#servicesTableEdit')" title="تعديل (Edit)">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                         <button type="button" class="btn-danger" onclick="deleteSelectedServiceLine('#servicesTableEdit')" title="حذف (Delete)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button title="تصدير لاكسل (Export to Excel)" onclick="exportServiceLineExcel('servicesTableEdit')" class="btn-icon">
+                            <i class="fa-solid fa-table"></i>
+                        </button>
+                        <button title="طباعة (Print)" onclick="printServiceLineTable('servicesTableEdit')" class="btn-icon">
+                            <i class="fas fa-print"></i>
+                        </button>
+                    </div>
+
+                    {{-- Table (هيكل الجدول الصحيح) --}}
+                    <div class="table-responsive-container">
+                        <table id="servicesTableEdit" class="services-table display responsive nowrap" data-ignore-lang>
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Name</th>
+                                    <th>Method</th>
+                                    <th>Unit</th>
+                                    <th>Price</th>
+                                    <th>Price only</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{-- Table rows will be populated here via JS --}}
+                            </tbody>
+                        </table>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="form-buttons modal-bottom-buttons">
+                <button type="button" class="btn-primary" onclick="closeModal('editConfModal')"><i class="fas fa-times"></i> Close</button>
+                <button type="button" class="btn-success" onclick="saveEditConf(true)"><i class="fas fa-save"></i> Update & Close</button>
+                <button type="button" class="btn-primary" onclick="saveEditConf(false)"><i class="fas fa-save"></i> Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="serviceSelectionModal" class="modal" style="display: none;">
+    <div class="modal-content new-conf-modal-design" style="width: 800px; max-width: 90%;">
+        <span class="close-btn" onclick="closeModal('serviceSelectionModal')"><i class="fas fa-times"></i></span>
+        <h3 class="modal-title">Select Services/Items</h3>
+
+        <div class="table-responsive-container" style="margin-top: 20px;">
+            <table id="availableServicesTable" class="services-table display responsive nowrap" data-ignore-lang>
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Method</th>
+                        <th>Unit</th>
+                        <th>Price</th>
+                        <th>Price only</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {{-- مثال على صف يحتوي على حقول إدخال قابلة للتعديل --}}
+                    <tr data-service-id="101">
+                        {{-- ✅ تعديل: إضافة دالة toggleRowSelection عند تغيير حالة الـ checkbox --}}
+                        <td><input type="checkbox" name="selectService[]" value="101" class="service-selector" onchange="toggleRowSelection(this)"> 101</td>
+                        <td>Calibration Service A</td>
+                        <td>ASTM E4</td>
+                        <td>Service</td>
+                        <td><input type="number" class="form-control input-sm editable-price" value="500.00" min="0" step="0.01" style="width: 80px;"></td>
+                        <td><input type="checkbox" class="is-price-only"></td>
+                        {{-- ✅ حقل الكمية قابل للتعديل --}}
+                        <td><input type="number" class="form-control input-sm editable-quantity" value="1" min="1" style="width: 50px;"></td>
+                    </tr>
+
+                    <tr data-service-id="102">
+                        <td><input type="checkbox" name="selectService[]" value="102" class="service-selector" onchange="toggleRowSelection(this)"> 102</td>
+                        <td>Pressure Test B</td>
+                        <td>ISO 9001</td>
+                        <td>Item</td>
+                        {{-- ✅ حقل السعر قابل للتعديل --}}
+                        <td><input type="number" class="form-control input-sm editable-price" value="1200.00" min="0" step="0.01" style="width: 80px;"></td>
+                        {{-- ✅ مربع اختيار Price only قابل للتعديل --}}
+                        <td><input type="checkbox" class="is-price-only"></td>
+                        {{-- ✅ حقل الكمية قابل للتعديل --}}
+                        <td><input type="number" class="form-control input-sm editable-quantity" value="1" min="1" style="width: 50px;"></td>
+                    </tr>
+                    {{-- ... (بقية الخدمات) ... --}}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-buttons modal-bottom-buttons" style="margin-top: 20px; justify-content: flex-end;">
+            <button type="button" class="btn-primary" onclick="closeModal('serviceSelectionModal')"><i class="fas fa-times"></i> Close </button>
+            <button type="button" class="btn-warning" onclick="handleServiceInsert('price_only')"><i class="fas fa-money-bill-alt"></i> Set Selected as Price Only</button>
+            <button type="button" class="btn-success" onclick="handleServiceInsert('test')"><i class="fas fa-plus"></i> Insert</button>
+        </div>
+    </div>
+</div>
+<style>
+    /* تنسيق CSS لتمييز الصف المحدد */
+    .row-selected {
+        background-color: #ffe0b2 !important; /* لون برتقالي فاتح */
+        border-left: 5px solid #ff9800; /* شريط برتقالي على اليسار */
+        font-weight: 500;
+    }
+    /* يمكنك إضافة أي تنسيقات أخرى للجدول هنا */
+</style>

@@ -10,7 +10,9 @@
 }
 
 /* ===================== أزرار اللغة (English/العربية) ===================== */
+
 .main-header > div > div {
+  
   display: flex;
   gap: 0.5rem;
   background-color: var(--white);
