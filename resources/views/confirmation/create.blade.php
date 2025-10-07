@@ -13,7 +13,7 @@
             {{-- // CONFIRMATION TAB (ADD NEW) --}}
             {{-- // ---------------------------------------------------------------------------------------- --}}
             <div id="confTab" class="form-tab-content active">
-                
+
                 {{-- 1. Main Information (المعلومات الرئيسية) --}}
                 <fieldset class="form-section-fieldset">
                     <legend>Main Information</legend>
@@ -38,24 +38,50 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="projectCode">Project Code:</label>
-                            <input type="text" id="projectCode" name="project_code">
-                        </div>
-                        <div class="form-group">
-                            <label for="projectName">Project Name:</label>
-                            <input type="text" id="projectName" name="project_name">
-                        </div>
-                        <div class="form-group">
-                            <label for="customerName">Customer Name:</label>
-                            {{-- Customer Select retained but renamed for clarity --}}
-                            <select id="customer" name="customer_id">
-                                <option value="" disabled selected>[Select Customer]</option>
-                                {{-- @foreach(customers as $customer) ... @endforeach --}}
-                            </select>
-                        </div>
-                    </div>
+       <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
+    <div class="form-group" style="flex: 1;">
+        <label for="customerSelect">Customer Name:</label>
+        <select id="customerSelect" name="customer_id">
+            <option value="" disabled selected>[Select Customer]</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}"
+                    {{ isset($confirmation) && $confirmation->customer_id == $customer->id ? 'selected' : '' }}>
+                    {{ $customer->customer_name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="form-group" style="flex: 1;">
+        <label for="projectCodeSelect">Project Code:</label>
+        <select id="projectCodeSelect" name="project_code">
+            <option value="" disabled selected>[Select Project Code]</option>
+            @foreach($projects as $project)
+                <option value="{{ $project->reference }}"
+                    data-customer="{{ $project->customer_id }}"
+                    {{ isset($confirmation) && $confirmation->project_code == $project->reference ? 'selected' : '' }}>
+                    {{ $project->reference }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="form-group" style="flex: 1;">
+        <label for="projectNameSelect">Project Name:</label>
+        <select id="projectNameSelect" name="project_name">
+            <option value="" disabled selected>[Select Project Name]</option>
+            @foreach($projects as $project)
+                <option value="{{ $project->name }}"
+                    data-customer="{{ $project->customer_id }}"
+                    {{ isset($confirmation) && $confirmation->project_name == $project->name ? 'selected' : '' }}>
+                    {{ $project->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+</div>
+
+
 
                     <div class="form-row">
                         <div class="form-group full-width">
@@ -63,7 +89,7 @@
                             <input type="text" id="projectDetails" name="project_details">
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="subject">Subject:</label>
@@ -89,19 +115,26 @@
                 </fieldset>
 
                 {{-- 2. Contact Information (معلومات الاتصال) --}}
-                <fieldset class="form-section-fieldset">
-                    <legend>Contact Information</legend>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="contactPerson">Contact:</label>
-                            <input type="text" id="contactPerson" name="contact_person" placeholder="e.g., Contact Person Name">
-                        </div>
-                        <div class="form-group">
-                            <label for="confTo">To:</label>
-                            <input type="text" id="confTo" name="conf_to" placeholder="e.g., Destination/Recipient">
-                        </div>
-                    </div>
-                </fieldset>
+               <fieldset class="form-section-fieldset">
+    <legend>Contact Information</legend>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="contactPersonSelect">Contact:</label>
+            <select id="contactPersonSelect" name="contact_person">
+                <option value="" disabled selected>[Select Contact]</option>
+                {{-- سيتم ملؤها ديناميكياً حسب المشروع --}}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="confToSelect">To:</label>
+            <select id="confToSelect" name="conf_to">
+                <option value="" disabled selected>[Select Destination]</option>
+                {{-- سيتم ملؤها ديناميكياً حسب المشروع --}}
+            </select>
+        </div>
+    </div>
+</fieldset>
+
 
                 {{-- 3. Terms and other Controls (الشروط والضوابط الأخرى) --}}
                 <fieldset class="form-section-fieldset">
@@ -140,32 +173,32 @@
 
 
             </div>
-            
+
             {{-- // ---------------------------------------------------------------------------------------- --}}
             {{-- // CONFIRMATION LINE TAB (ADD NEW) - FINAL MODIFIED --}}
             {{-- // ---------------------------------------------------------------------------------------- --}}
             <div id="contactTab" class="form-tab-content" style="display: none;">
-                
+
                 {{-- 1. Services/Test Section (الخدمات/الاختبارات) --}}
                 <fieldset class="form-section-fieldset">
                     <legend>Services/Test</legend>
-                    
+
                     {{-- Buttons (أزرار أيقونات فقط) --}}
                     <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
                         <button type="button" class="btn btn-primary" onclick="addServiceLine()" title="إضافة (Add)">
-                            <i class="fas fa-plus"></i> 
+                            <i class="fas fa-plus"></i>
                         </button>
                         <button type="button" class="btn-secondary" onclick="editSelectedServiceLine('#servicesTable')" title="تعديل (Edit)">
-                            <i class="fas fa-pen"></i> 
+                            <i class="fas fa-pen"></i>
                         </button>
                         <button type="button" class="btn-danger" onclick="deleteSelectedServiceLine('#servicesTable')" title="حذف (Delete)">
-                            <i class="fas fa-trash"></i> 
+                            <i class="fas fa-trash"></i>
                         </button>
                         <button title="تصدير لاكسل (Export to Excel)" onclick="exportServiceLineExcel('servicesTable')" class="btn-icon">
-                            <i class="fa-solid fa-table"></i> 
+                            <i class="fa-solid fa-table"></i>
                         </button>
                         <button title="طباعة (Print)" onclick="printServiceLineTable('servicesTable')" class="btn-icon">
-                            <i class="fas fa-print"></i> 
+                            <i class="fas fa-print"></i>
                         </button>
                     </div>
 
@@ -235,7 +268,7 @@
             {{-- // CONFIRMATION TAB (EDIT) --}}
             {{-- // ---------------------------------------------------------------------------------------- --}}
             <div id="editConfTab" class="form-tab-content active">
-                
+
                 {{-- 1. Main Information (المعلومات الرئيسية) --}}
                 <fieldset class="form-section-fieldset">
                     <legend>Main Information</legend>
@@ -285,7 +318,7 @@
                             <input type="text" id="editProjectDetails" name="project_details">
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editSubject">Subject:</label>
@@ -360,30 +393,30 @@
                     </div>
                 </fieldset>
             </div>
-            
+
             {{-- // ---------------------------------------------------------------------------------------- --}}
             {{-- // CONFIRMATION LINE TAB (EDIT) - FINAL MODIFIED --}}
             {{-- // ---------------------------------------------------------------------------------------- --}}
             <div id="editContactTab" class="form-tab-content" style="display: none;">
                 <fieldset class="form-section-fieldset">
                     <legend>Services/Test</legend>
-                    
+
                     {{-- Buttons (أزرار أيقونات فقط) --}}
                     <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
                         <button type="button" class="btn btn-primary" onclick="addServiceLine('edit')" title="إضافة (Add)">
-                            <i class="fas fa-plus"></i> 
+                            <i class="fas fa-plus"></i>
                         </button>
                         <button type="button" class="btn-secondary" onclick="editSelectedServiceLine('#servicesTableEdit')" title="تعديل (Edit)">
-                            <i class="fas fa-pen"></i> 
+                            <i class="fas fa-pen"></i>
                         </button>
                          <button type="button" class="btn-danger" onclick="deleteSelectedServiceLine('#servicesTableEdit')" title="حذف (Delete)">
-                            <i class="fas fa-trash"></i> 
+                            <i class="fas fa-trash"></i>
                         </button>
                         <button title="تصدير لاكسل (Export to Excel)" onclick="exportServiceLineExcel('servicesTableEdit')" class="btn-icon">
-                            <i class="fa-solid fa-table"></i> 
+                            <i class="fa-solid fa-table"></i>
                         </button>
                         <button title="طباعة (Print)" onclick="printServiceLineTable('servicesTableEdit')" class="btn-icon">
-                            <i class="fas fa-print"></i> 
+                            <i class="fas fa-print"></i>
                         </button>
                     </div>
 
@@ -441,12 +474,12 @@
                         <th>Method</th>
                         <th>Unit</th>
                         <th>Price</th>
-                        <th>Price only</th> 
+                        <th>Price only</th>
                         <th>Quantity</th>
                     </tr>
                 </thead>
                 <tbody>
-                    
+
                     {{-- مثال على صف يحتوي على حقول إدخال قابلة للتعديل --}}
                     <tr data-service-id="101">
                         {{-- ✅ تعديل: إضافة دالة toggleRowSelection عند تغيير حالة الـ checkbox --}}
@@ -458,7 +491,7 @@
                         <td><input type="checkbox" class="is-price-only"></td>
                         <td><input type="number" class="form-control input-sm editable-quantity" value="1" min="1" style="width: 50px;"></td>
                     </tr>
-                    
+
                     <tr data-service-id="102">
                         <td><input type="checkbox" name="selectService[]" value="102" class="service-selector" onchange="toggleRowSelection(this)"> 102</td>
                         <td>Pressure Test B</td>

@@ -22,6 +22,8 @@ return new class extends Migration
 
         $table->date('registration_date')->nullable();
         $table->string('region')->nullable();
+        $table->string('project_details')->nullable();
+
 
         // علاقات
         $table->foreignId('customer_id')->nullable()->constrained('customers')->onDelete('cascade');

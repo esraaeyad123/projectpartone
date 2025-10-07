@@ -1,8 +1,8 @@
-@extends('layouts.app') 
-@section('title', __('Confirmation')) 
+@extends('layouts.app')
+@section('title', __('Confirmation'))
 @section('content')
 @include('confirmation.create') <!-- المودال -->
-    
+
 <main class="main-content">
     <section id="confirmation-section" class="section-content active">
 
@@ -112,8 +112,9 @@
         });
     }
 //-------------------------------------------------------------------------------------------
+
     $(document).ready(function() {
-        
+
         // 💡 تأكدي أن اسم الجدول هنا هو confirmationsTable
         window.confirmationTable = $('#confirmationsTable').DataTable({
             responsive: true,
@@ -138,18 +139,18 @@
             ]
             // ... إضافة وظيفة البحث الديناميكي هنا كما كانت في جدول العملاء
         });
-        
+
         // ... باقي أكواد الجافاسكريبت والـ Column Filters ...
-        
+
     });
 //-------------------------------------------------------------------------------------------
     function openConfModal() {
         // 💡 التعديل: تصفير النموذج الخاص بالتعميد
         $('#confForm')[0].reset();
-        
+
         // 💡 التعديل: مسح قيمة مُعرِّف التعميد (إذا كان يستخدم للتعديل)
         $('#confId').val('');
-        
+
         // 💡 التعديل: إظهار النافذة المنبثقة الخاصة بالتعميد
         $('#confModal').show();
     }
@@ -170,7 +171,7 @@
         if (tabName === 'conf') {
             $('#confTab').show();
             $('#conf-btn').addClass('active');
-            
+
         // ✅ التعديل الرئيسي: تهيئة جدول الإضافة عند التبديل إلى "Confirmation Line"
         } else if (tabName === 'contact') {
             $('#contactTab').show();
@@ -196,12 +197,12 @@
                 });
                 servicesTableInitialized = true; // لمنع إعادة التهيئة
             }
-            
+
         // 💡 التعديل: تبديل إلى علامة تبويب "Edit Conf" للتعديل
         } else if (tabName === 'edit-conf') {
             $('#editConfTab').show();
             $('#edit-conf-btn').addClass('active');
-            
+
         // ✅ التعديل الرئيسي: تهيئة جدول التعديل عند التبديل إلى "Confirmation Line" للتعديل
         } else if (tabName === 'edit-contact') {
             $('#editContactTab').show();
@@ -233,7 +234,7 @@
     function addServiceLine(mode = 'add') {
         // فتح النافذة المنبثقة الجديدة لاختيار الخدمات
         document.getElementById('serviceSelectionModal').style.display = 'block';
-        
+
         // (اختياري) تهيئة DataTables للجدول الجديد إذا لم يتم تهيئته مسبقًا
         if (!$.fn.DataTable.isDataTable('#availableServicesTable')) {
             $('#availableServicesTable').DataTable({
@@ -271,6 +272,219 @@
         }
     }
 //-------------------------------------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', function() {
+    const customerSelect = document.getElementById('customerSelect');
+    const projectCodeSelect = document.getElementById('projectCodeSelect');
+    const projectNameSelect = document.getElementById('projectNameSelect');
+    const projectDetailsInput = document.getElementById('projectDetails');
+    const contactPersonSelect = document.getElementById('contactPersonSelect');
+    const confToSelect = document.getElementById('confToSelect');
+
+    // خريطة المشاريع مع التفاصيل وجهات الاتصال
+    const projectsMap = {
+        @foreach($projects as $project)
+            "{{ $project->reference }}": {
+                code: @json($project->reference),
+                name: @json($project->name),
+                details: @json($project->project_details ?? ''),
+                customer: @json($project->customer_id),
+                contacts: [
+                    @foreach($project->contacts as $contact)
+                        { contact: @json($contact->name), to: @json($contact->phone) },
+                    @endforeach
+                ]
+            },
+        @endforeach
+    };
+
+    // تحديث خيارات المشاريع حسب العميل المحدد
+    function filterProjectsByCustomer() {
+        const customerId = customerSelect.value;
+
+        // مسح المشاريع القديمة
+        projectCodeSelect.innerHTML = '<option value="" disabled selected>[Select Project Code]</option>';
+        projectNameSelect.innerHTML = '<option value="" disabled selected>[Select Project Name]</option>';
+
+        for (const ref in projectsMap) {
+            const project = projectsMap[ref];
+            if (project.customer == customerId) {
+                const codeOption = document.createElement('option');
+                codeOption.value = project.code;
+                codeOption.textContent = project.code;
+                projectCodeSelect.appendChild(codeOption);
+
+                const nameOption = document.createElement('option');
+                nameOption.value = project.name;
+                nameOption.textContent = project.name;
+                projectNameSelect.appendChild(nameOption);
+            }
+        }
+
+        // مسح الحقول عند تغيير العميل
+        projectDetailsInput.value = '';
+        contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+        confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
+    }
+
+    // تعبئة تفاصيل المشروع وجهات الاتصال عند اختيار مشروع
+    function fillProjectData() {
+        const selectedCode = projectCodeSelect.value;
+        if (!selectedCode || !projectsMap[selectedCode]) {
+            projectDetailsInput.value = '';
+            contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+            confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
+            projectNameSelect.value = '';
+            return;
+        }
+
+        const project = projectsMap[selectedCode];
+        projectNameSelect.value = project.name;
+        projectDetailsInput.value = project.details;
+
+        // ملء جهات الاتصال
+        contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+        confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
+        project.contacts.forEach(item => {
+            const contactOption = document.createElement('option');
+            contactOption.value = item.contact;
+            contactOption.textContent = item.contact;
+            contactPersonSelect.appendChild(contactOption);
+
+            const toOption = document.createElement('option');
+            toOption.value = item.to;
+            toOption.textContent = item.to;
+            confToSelect.appendChild(toOption);
+        });
+    }
+
+    // عند تغيير Project Name لتحديث الكود تلقائيًا
+    function syncCodeFromName() {
+        const selectedName = projectNameSelect.value;
+        for (const ref in projectsMap) {
+            if (projectsMap[ref].name === selectedName) {
+                projectCodeSelect.value = ref;
+                fillProjectData();
+                break;
+            }
+        }
+    }
+
+    // Event listeners
+    customerSelect.addEventListener('change', filterProjectsByCustomer);
+    projectCodeSelect.addEventListener('change', fillProjectData);
+    projectNameSelect.addEventListener('change', syncCodeFromName);
+
+    // استدعاء أولي إذا كان هناك مشروع محدد مسبقًا
+    filterProjectsByCustomer();
+    fillProjectData();
+});
+
+function saveConf(closeAfter = false) {
+    const confData = {
+        customer_id: document.getElementById('customerSelect').value,
+        project_code: document.getElementById('projectCodeSelect').value,
+        project_name: document.getElementById('projectNameSelect').value,
+        project_details: document.getElementById('projectDetails').value,
+        contact_person: document.getElementById('contactPerson')?.value || '',
+        conf_to: document.getElementById('confTo')?.value || ''
+    };
+
+    if (!confData.customer_id || !confData.project_code) {
+        alert('⚠️ يرجى اختيار العميل والمشروع أولاً.');
+        return;
+    }
+
+    fetch('/confirmations', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(confData)
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('✅ Confirmation saved successfully.');
+
+            // تخزين ID التعميد الجديد في متغير عام
+            window.currentConfirmationId = result.id;
+
+            if (closeAfter) {
+                window.location.href = '/confirmations';
+            }
+        } else {
+            alert('❌ Error saving confirmation');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('⚠️ Error saving confirmation.');
+    });
+}
+
+function handleServiceInsert(mode = 'add') {
+    // تحقق أولاً أنه يوجد Confirmation محفوظ
+    if (!window.currentConfirmationId) {
+        alert('⚠️ يرجى أولاً حفظ الـ Confirmation قبل إضافة الخدمات.');
+        return;
+    }
+
+    // اجمع بيانات السطر الجديد من الجدول أو النافذة
+    const newLine = {
+        confirmation_id: window.currentConfirmationId,
+        service_name: document.getElementById('serviceName')?.value || '',
+        method: document.getElementById('serviceMethod')?.value || '',
+        unit: document.getElementById('serviceUnit')?.value || '',
+        quantity: parseFloat(document.getElementById('serviceQty')?.value || 1),
+        price: parseFloat(document.getElementById('servicePrice')?.value || 0),
+        total: 0
+    };
+    newLine.total = newLine.quantity * newLine.price;
+
+    // إرسال البيانات إلى السيرفر
+    fetch('/confirmation-lines', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(newLine)
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('✅ Service added successfully.');
+
+            // إضافة السطر الجديد للجدول بدون تحديث الصفحة
+            const tbody = document.querySelector('#serviceLinesTable tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${newLine.service_name}</td>
+                <td>${newLine.method}</td>
+                <td>${newLine.unit}</td>
+                <td>${newLine.quantity}</td>
+                <td>${newLine.price.toFixed(2)}</td>
+                <td>${newLine.total.toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+
+            // تفريغ الحقول بعد الإضافة
+            document.getElementById('serviceName').value = '';
+            document.getElementById('serviceMethod').value = '';
+            document.getElementById('serviceUnit').value = '';
+            document.getElementById('serviceQty').value = '';
+            document.getElementById('servicePrice').value = '';
+        } else {
+            alert('❌ Failed to add service line.');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('⚠️ Error adding service line.');
+    });
+}
 
 
 

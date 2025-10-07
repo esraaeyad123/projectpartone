@@ -18,11 +18,18 @@ class Project extends Model
     'owner_id',
     'consultant_id',
     'contractor_id',
+    'project_details'
     ];
 
   public function customer() {
     return $this->belongsTo(Customer::class, 'customer_id');
 }
+
+   public function confirmations()
+    {
+        return $this->hasMany(Confirmation::class);
+    }
+
 
 public function owner() {
     return $this->belongsTo(Customer::class, 'owner_id');

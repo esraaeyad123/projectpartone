@@ -45,7 +45,7 @@
         <span data-key="Quotations">Quotations</span>
       </div>
 
-      <div class="general-card" onclick="window.location.href=''">
+      <div class="general-card" onclick="window.location.href='{{ route('confirmations.index') }}'">
         <i class="fas fa-check-double"></i>
         <span data-key="Confirmations">Confirmations</span>
       </div>

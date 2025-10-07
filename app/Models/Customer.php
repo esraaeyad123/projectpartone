@@ -55,6 +55,10 @@ public function contacts() {
         return $this->hasMany(Project::class);
     }
 
+     public function confirmations()
+    {
+        return $this->hasMany(Confirmation::class);
+    }
   protected static function boot()
     {
         parent::boot();
