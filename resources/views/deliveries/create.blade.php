@@ -4,7 +4,7 @@
         <h2 class="modal-title">Add New Delivery 🚚</h2>
 
         <div class="tab-buttons">
-            <button id="conf-btn" onclick="switchTab('conf')" class="active"><i class="fas fa-truck"></i> Delivery</button>
+            <button id="conf-btn" onclick="switchTab('conf')" class="active"><i class="fas fa-truck"></i> Delivery Header</button>
             <button id="contact-btn" onclick="switchTab('contact')"><i class="fas fa-list-ul"></i> Delivery Lines</button>
         </div>
 
@@ -150,11 +150,11 @@
 
                 {{-- 1. Services/Test Section (الخدمات/الاختبارات) --}}
                 <fieldset class="form-section-fieldset">
-                    <legend>Services/Test</legend>
+                    <legend>Customer Report</legend>
 
                     {{-- Buttons (أزرار أيقونات فقط) --}}
                     <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
-                        <button type="button" class="btn btn-primary" onclick="addServiceLine()" title="إضافة (Add)">
+                        <button type="button" class="btn btn-primary" onclick="sendToCustomer()" title="إضافة (Add)">
                             <i class="fas fa-plus"></i>
                         </button>
                         <button type="button" class="btn-secondary" onclick="editSelectedServiceLine('#servicesTable')" title="تعديل (Edit)">
@@ -217,7 +217,7 @@
         <h2 class="modal-title">Edit Delivery 📝</h2>
 
         <div class="tab-buttons">
-            <button id="edit-conf-btn" onclick="switchTab('edit-conf')" class="active"><i class="fas fa-truck"></i> Delivery</button>
+            <button id="edit-conf-btn" onclick="switchTab('edit-conf')" class="active"><i class="fas fa-truck"></i> Delivery Delivery Header</button>
             <button id="edit-contact-btn" onclick="switchTab('edit-contact')"><i class="fas fa-list-ul"></i> Delivery Lines</button>
         </div>
         <form id="editConfForm">
@@ -355,11 +355,11 @@
             {{-- // ---------------------------------------------------------------------------------------- --}}
             <div id="editContactTab" class="form-tab-content" style="display: none;">
                 <fieldset class="form-section-fieldset">
-                    <legend>Services/Test</legend>
+                    <legend>Customer Report</legend>
 
                     {{-- Buttons (أزرار أيقونات فقط) --}}
                     <div class="contact-toolbar" style="border-bottom: none; padding-bottom: 5px;">
-                        <button type="button" class="btn btn-primary" onclick="addServiceLine('edit')" title="إضافة (Add)">
+                        <button type="button" class="btn btn-primary" onclick="sendToCustomer()" title="إضافة (Add)">
                             <i class="fas fa-plus"></i>
                         </button>
                         <button type="button" class="btn-secondary" onclick="editSelectedServiceLine('#servicesTableEdit')" title="تعديل (Edit)">
@@ -405,7 +405,10 @@
         </form>
     </div>
 </div>
-<div id="serviceSelectionModal" class="modal" style="display: none;">
+
+
+
+<!-- <div id="serviceSelectionModal" class="modal" style="display: none;">
     <div class="modal-content new-conf-modal-design" style="width: 800px; max-width: 90%;">
         <span class="close-btn" onclick="closeModal('serviceSelectionModal')"><i class="fas fa-times"></i></span>
         <h3 class="modal-title">Select Services/Items</h3>
@@ -470,4 +473,4 @@
         font-weight: 500;
     }
     /* يمكنك إضافة أي تنسيقات أخرى للجدول هنا */
-</style>
+</style> -->
