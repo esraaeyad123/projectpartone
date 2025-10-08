@@ -1,7 +1,8 @@
-@extends('layouts.app')
-@section('title', __('Deliveries'))
+@extends('layouts.app') 
+@section('title', __('Financial Transactions')) 
 @section('content')
-@include('deliveries.create') <!-- المودال -->
+@include('financial.create') <!-- المودال -->
+
 
 <main class="main-content">
     <section id="deliveries-section" class="section-content active">
@@ -13,7 +14,7 @@
                 <button title="Edit Invoice" onclick="openEditDeliveriesModal()" class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedConfirmation()" class="btn-icon"><i class="fas fa-trash"></i></button>
                 
-                <button title="Approve Delivery" onclick="approveDelivery()" class="btn-icon btn-approve" style="color: #28a745;">
+                <button title="Approve Invoice" onclick="approveInvoice()" class="btn-icon btn-approve" style="color: #28a745;">
                     <i class="fas fa-check-circle"></i> 
                 </button>
                 
@@ -32,30 +33,36 @@
         <!-------------------------------------------End Buttons----------------------------------------------->
         <!-------------------------------------------Start confirmationTable----------------------------------------------->
         <div class="table-responsive-container">
-            <table id="deliveriesTable" class="table table-bordered table-striped display responsive nowrap" style="width:100%">
+            <table id="invoicesTable" class="table table-bordered table-striped display responsive nowrap" style="width:100%">
                 <thead>
                     <tr>
-                        <th><input type="checkbox" id="selectAllDeliveries"></th>
+                        <th><input type="checkbox" id="selectAllInvoices"></th>
 
-                        <th>Delivery No.<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Delivery Date<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-from"></th>
+                        <th>Invoice #<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Invoice Date<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-from"></th>
+                        
                         <th>Status<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Department<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Prepared By<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Delivered By<br><input type="text" class="column-filter" placeholder="Search..."></th>
+
+                        <th>Net Amount<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>VAT Amount<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Total Due<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        
+                        <th>Due Date<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-to"></th>
+                        
+                        <th>Customer Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>TRN<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Project Code<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Project Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Customer Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>P. Number<br><input type="text" class="column-filter" placeholder="Search..."></th> <th>Recovered By<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Date Received<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-from"></th>
-                        <th>Contract Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Contact Title<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Items<br><input type="text" class="column-filter" placeholder="Search..."></th>
+
+                        <th>Account Manager<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Department<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        
+                        <th>Items Count<br><input type="text" class="column-filter" placeholder="Search..."></th>
 
                     </tr>
                 </thead>
                 <tbody>
-                    </tbody>
+                </tbody>
             </table>
         </div>
         <!-------------------------------------------End confirmationTable------------------------------------------------->
@@ -117,68 +124,108 @@
     }
 //-------------------------------------------------------------------------------------------
 
-    $(document).ready(function() {
+$(document).ready(function() {
 
-        // 💡 تأكدي أن اسم الجدول هنا هو confirmationsTable
-        window.deliveriesTable = $('#deliveriesTable').DataTable({
-            responsive: true,
-            scrollX: true,
-            // ... إعدادات أخرى ...
-            columns: [
-                // 1. عمود الاختيار (Checkbox)
-                { data: null, orderable: false, searchable: false }, 
-                
-                // 2. Delivery No.
-                { data: 'delivery_no' }, 
-                
-                // 3. Delivery Date
-                { data: 'delivery_date' }, 
-                
-                // 4. Status
-                { data: 'status' }, 
-                
-                // 5. Department
-                { data: 'department' }, 
-                
-                // 6. Prepared By
-                { data: 'prepared_by' }, 
-                
-                // 7. Delivered By
-                { data: 'delivered_by' }, 
-                
-                // 8. Project Code (V. Code)
-                { data: 'project_code' }, 
-                
-                // 9. Project Name
-                { data: 'project_name' }, 
-                
-                // 10. Customer Name
-                { data: 'customer_name' }, 
-                
-                // 11. P. Number
-                { data: 'p_number' }, 
-                
-                // 12. Recovered By
-                { data: 'recovered_by' }, 
-                
-                // 13. Date Received (Date Rece...)
-                { data: 'date_received' }, 
-                
-                // 14. Contract Name
-                { data: 'contract_name' }, 
-                
-                // 15. Contact Title
-                { data: 'contact_title' }, 
-                
-                // 16. Items
-                { data: 'items' } 
-            ]
-            // ... إضافة وظيفة البحث الديناميكي هنا كما كانت في جدول العملاء
-        });
+    // 1. تحديث اسم الجدول إلى #invoicesTable
+    window.invoicesTable = $('#invoicesTable').DataTable({
+        responsive: true,
+        scrollX: true,
+        
+        // ❌ تم حذف خاصية 'ajax'
+        // ❌ تم حذف خاصية 'serverSide: true' - (هذا هو المفتاح للعمل بالـ Frontend فقط)
+        processing: true, // يمكن الاحتفاظ بها لكنها لن تفعل شيئًا بدون جلب بيانات
+        
+        // ترتيب افتراضي (حسب تاريخ الفاتورة تنازليًا - العمود الثالث)
+        order: [[2, 'desc']], 
 
-        // ... باقي أكواد الجافاسكريبت والـ Column Filters ...
+        // 💡 ملاحظة: عند العمل بالـ Frontend فقط، يجب إما حذف مصفوفة 'columns'
+        // أو استخدام 'data: null' للأعمدة التي تريد التعامل مع محتواها يدوياً.
+        // بما أن البيانات ستُقرأ مباشرة من <tbody>، سنقوم بإزالتها لتبسيط الكود، 
+        // لكن سأتركها مع 'data: null' للوضوح.
 
+        columns: [
+            // 1. عمود الاختيار (Checkbox)
+            { 
+                data: null, 
+                orderable: false, 
+                searchable: false, 
+                render: function (data, type, row) {
+                    // هذا الـ render لن يعمل بشكل صحيح إلا إذا كانت هناك بيانات في وضع الـ Ajax
+                    // لذا يفضل وضع الـ checkbox داخل الـ HTML مباشرة في وضع الـ Frontend
+                    return '<input type="checkbox" class="select-row-checkbox" value="' + (data ? data.id : '') + '">';
+                }
+            }, 
+            
+            // 2. Invoice # (سيُقرأ من محتوى الخلية في <tbody>)
+            { data: null }, 
+            
+            // 3. Invoice Date
+            { data: null }, 
+            
+            // 4. Status (الحالة) - يجب أن يكون كود التلوين في الـ HTML مباشرة
+            { data: null }, 
+
+            // 5. Net Amount 
+            { data: null }, 
+            
+            // 6. VAT Amount
+            { data: null }, 
+            
+            // 7. Total Due 
+            { data: null }, 
+
+            // 8. Due Date 
+            { data: null }, 
+            
+            // 9. Customer Name
+            { data: null }, 
+
+            // 10. TRN
+            { data: null }, 
+            
+            // 11. Project Code
+            { data: null }, 
+            
+            // 12. Project Name
+            { data: null }, 
+            
+            // 13. Account Manager
+            { data: null }, 
+
+            // 14. Department
+            { data: null }, 
+            
+            // 15. Items Count
+            { data: null } 
+        ]
+        
     });
+
+    // 2. وظيفة البحث الديناميكي لكل عمود (Column Filters)
+    // هذا الجزء سيعمل بشكل سليم لأنه يعتمد على محتويات الجدول بعد تهيئة DataTables
+    $('#invoicesTable thead .column-filter').each(function(i) {
+        var that = this;
+        var table = window.invoicesTable;
+        
+        // لا نريد تفعيل الفلترة على أول عمود (Checkbox)
+        var columnIndex = i + 1; 
+
+        $(this).on('keyup change clear', function() {
+            if (table.column(columnIndex).search() !== this.value) {
+                table
+                    .column(columnIndex)
+                    .search(this.value)
+                    .draw();
+            }
+        });
+    });
+
+    // 3. معالج الاختيار الشامل
+    $('#selectAllInvoices').on('click', function(){
+        $('.select-row-checkbox').prop('checked', this.checked);
+    });
+
+});
 //-------------------------------------------------------------------------------------------
     function openConfModal() {
         // 💡 التعديل: تصفير النموذج الخاص بالتعميد

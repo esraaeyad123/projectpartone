@@ -26,6 +26,8 @@ use App\Http\Controllers\ReportApproval\ReportApprovalController;
 use App\Http\Controllers\Confirmation\ConfirmationLineController;
 
 use App\Http\Controllers\Deliveries\DeliveryController; // تأكد من استدعاء المتحكم
+use App\Http\Controllers\Confirmation\ConfirmationController;
+use App\Http\Controllers\FinancialController;
 
 /*
 |--------------------------------------------------------------------------
@@ -284,3 +286,18 @@ Route::prefix('report-approval')->group(function () {
 Route::get('/deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');
 // هذا يُعرف مسار GET باسم deliveries.index
 
+Route::resource('confirmations', ConfirmationController::class);
+
+Route::post('/confirmation-lines', [ConfirmationLineController::class, 'store'])
+    ->name('confirmation-lines.store');
+Route::get('/confirmations/{id}/lines', [ConfirmationController::class, 'getLines']);
+Route::put('/confirmation-lines/{id}', [ConfirmationLineController::class, 'update'])->name('confirmation-lines.update');
+// حذف Service Line
+Route::delete('/confirmation-lines/{id}', [ConfirmationLineController::class, 'destroy'])
+    ->name('confirmation-lines.destroy');
+// routes/web.php
+Route::post('/confirmations/duplicate', [ConfirmationController::class, 'duplicate'])->name('confirmations.duplicate');
+Route::delete('/confirmations/{id}', [ConfirmationController::class, 'destroy'])->name('confirmations.destroy');
+
+// المسار: /financial
+Route::get('/financial', [FinancialController::class, 'index'])->name('financial.index');

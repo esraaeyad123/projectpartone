@@ -53,7 +53,7 @@
         <span data-key="Confirmations">Confirmations</span>
       </div>
 
-      <div class="general-card" onclick="window.location.href=''">
+      <div class="general-card" onclick="window.location.href='{{ route('financial.index') }}'">
         <i class="fas fa-exchange-alt"></i>
         <span data-key="Financial Transactions">Financial Transactions</span>
       </div>
