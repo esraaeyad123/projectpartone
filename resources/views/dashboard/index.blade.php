@@ -47,7 +47,7 @@
 
 
 
-      <div class="general-card" onclick="window.location.href=''">
+      <div class="general-card" onclick="window.location.href='{{ route('confirmations.index') }}'">
 
         <i class="fas fa-check-double"></i>
         <span data-key="Confirmations">Confirmations</span>
@@ -68,7 +68,7 @@
         <span data-key="Report Approval Activities">Report Approval Activities</span>
       </div>
 
-      <div class="general-card" onclick="window.location.href=''">
+      <div class="general-card" onclick="window.location.href='{{ route('confirmations.index') }}'">
         <i class="fas fa-file-invoice-dollar"></i>
         <span data-key="Quotation Approval Activities">Quotation Approval Activities</span>
       </div>

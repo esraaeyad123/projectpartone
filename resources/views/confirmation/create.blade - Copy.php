@@ -296,43 +296,37 @@
                     </div>
 
                    <div class="form-row">
-<div class="form-group">
-    <label for="editProjectCode">Project Code:</label>
-    <select id="editProjectCode" name="project_code">
-        <option value="" disabled selected>[Select Project Code]</option>
-        @foreach($projects as $project)
-            <option value="{{ $project->id }}">{{ $project->reference }}</option>
-        @endforeach
-    </select>
+    <div class="form-group">
+        <label for="editProjectCode">Project Code:</label>
+        <select id="editProjectCode" name="project_code">
+            <option value="" disabled selected>[Select Project Code]</option>
+            {{-- سيتم ملؤها تلقائيًا بواسطة JS --}}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="editProjectName">Project Name:</label>
+        <select id="editProjectName" name="project_name">
+            <option value="" disabled selected>[Select Project Name]</option>
+            {{-- سيتم ملؤها تلقائيًا بواسطة JS --}}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="editCustomerName">Customer Name:</label>
+        <select id="editCustomer" name="customer_id">
+            <option value="" disabled selected>[Select Customer]</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}">{{ $customer->customer_name }}</option>
+            @endforeach
+        </select>
+    </div>
 </div>
 
-<div class="form-group">
-    <label for="editProjectName">Project Name:</label>
-    <select id="editProjectName" name="project_name">
-        <option value="" disabled selected>[Select Project Name]</option>
-        @foreach($projects as $project)
-            <option value="{{ $project->id }}">{{ $project->name }}</option>
-        @endforeach
-    </select>
-</div>
-
-<div class="form-group">
-    <label for="editCustomerName">Customer Name:</label>
-    <select id="editCustomer" name="customer_id">
-        <option value="" disabled selected>[Select Customer]</option>
-        @foreach($customers as $customer)
-            <option value="{{ $customer->id }}">{{ $customer->customer_name }}</option>
-        @endforeach
-    </select>
-</div>
-<div class="form-group">
-    <label for="editProjectDetails">Project Details:</label>
-    <input type="text" id="editProjectDetails" name="project_details">
-</div>
-
-</div>
-
-
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="editProjectDetails">Project Details:</label>
+                            <input type="text" id="editProjectDetails" name="project_details">
+                        </div>
+                    </div>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -531,66 +525,6 @@
         </div>
     </div>
 </div>
-<div id="editServiceSelectionModal" class="modal" style="display: none;">
-    <div class="modal-content new-conf-modal-design" style="width: 800px; max-width: 90%;">
-        <span class="close-btn" onclick="closeModal('editServiceSelectionModal')"><i class="fas fa-times"></i></span>
-        <h3 class="modal-title">✏️ Edit Service Line</h3>
-
-         <div class="table-responsive-container" style="margin-top: 20px;">
-            <table id="editavailableServicesTable" class="services-table display responsive nowrap" data-ignore-lang>
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Name</th>
-                        <th>Method</th>
-                        <th>Unit</th>
-                        <th>Price</th>
-                        <th>Price only</th>
-                        <th>Quantity</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    {{-- مثال على صف يحتوي على حقول إدخال قابلة للتعديل --}}
-                    <tr data-service-id="101">
-                        {{-- ✅ تعديل: إضافة دالة toggleRowSelection عند تغيير حالة الـ checkbox --}}
-                        <td><input type="checkbox" name="selectService[]" value="101" class="service-selector" onchange="toggleRowSelection(this)"> 101</td>
-                        <td>Calibration Service A</td>
-                        <td>ASTM E4</td>
-                        <td>Service</td>
-                        <td><input type="number" class="form-control input-sm editable-price" value="500.00" min="0" step="0.01" style="width: 80px;"></td>
-                        <td><input type="checkbox" class="is-price-only"></td>
-                        <td><input type="number" class="form-control input-sm editable-quantity" value="1" min="1" style="width: 50px;"></td>
-                    </tr>
-
-                    <tr data-service-id="102">
-                        <td><input type="checkbox" name="selectService[]" value="102" class="service-selector" onchange="toggleRowSelection(this)"> 102</td>
-                        <td>Pressure Test B</td>
-                        <td>ISO 9001</td>
-                        <td>Item</td>
-                        {{-- ✅ حقل السعر قابل للتعديل --}}
-                        <td><input type="number" class="form-control input-sm editable-price" value="1200.00" min="0" step="0.01" style="width: 80px;"></td>
-                        {{-- ✅ مربع اختيار Price only قابل للتعديل --}}
-                        <td><input type="checkbox" class="is-price-only"></td>
-                        {{-- ✅ حقل الكمية قابل للتعديل --}}
-                        <td><input type="number" class="form-control input-sm editable-quantity" value="1" min="1" style="width: 50px;"></td>
-                    </tr>
-                    {{-- ... (بقية الخدمات) ... --}}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="form-buttons modal-bottom-buttons" style="margin-top: 20px; justify-content: flex-end;">
-            <button type="button" class="btn-primary" onclick="closeModal('editServiceSelectionModal')">
-                <i class="fas fa-times"></i> Close
-            </button>
-            <button type="button" class="btn-success" id="saveEditedServiceBtn">
-                <i class="fas fa-save"></i> Save Changes
-            </button>
-        </div>
-    </div>
-</div>
-
 <!-- ------------------------------------------------------------------------------------------------------ -->
 <style>
     /* تنسيق CSS لتمييز الصف المحدد */
