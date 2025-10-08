@@ -10,7 +10,7 @@
         <div class="icon-toolbar">
             <div>
                 <button title="Add" onclick="openConfModal()" class="btn-icon"><i class="fas fa-file"></i></button>
-                <button title="Edit" onclick="openEditConfirmationModal()"  class="btn-icon"><i class="fas fa-pen"></i></button>
+                <button title="Edit" onclick="handleEditConfirmation()"  class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedConfirmation()" class="btn-icon"><i class="fas fa-trash"></i></button>
             </div>
 
@@ -49,19 +49,19 @@
                     @foreach($confirmations as $confirmation)
                     <tr>
                         <td><input type="checkbox" class="selectConfirmation" value="{{ $confirmation->id }}"></td>
-                        <td>{{ $confirmation->conf_category }}</td>
-                        <td>{{ $confirmation->confirmation_id }}</td>
-                        <td>{{ $confirmation->date_confirmed }}</td>
+                        <td>{{ $confirmation->category }}</td>
+                        <td>{{ $confirmation->confirm_id }}</td>
+                        <td>{{ $confirmation->confirm_date }}</td>
                         <td>{{ $confirmation->conf_source }}</td>
-                        <td>{{ $confirmation->project_code }}</td>
-                        <td>{{ $confirmation->project_name }}</td>
-                        <td>{{ $confirmation->project_details }}</td>
+                        <td>{{ $confirmation->project->reference  ?? '' }}</td>
+                        <td>{{ $confirmation->project->name ?? '' }}</td>
+                        <td>{{ $confirmation->project->project_details ?? ''}}</td>
                         <td>{{ $confirmation->contract_no }}</td>
-                        <td>{{ $confirmation->customer_name }}</td>
+                        <td>{{ $confirmation->customer->customer_name }}</td>
                         <td>{{ $confirmation->validity }}</td>
                         <td>{{ $confirmation->payment_terms }}</td>
                         <td>{{ $confirmation->discount }}</td>
-                        <td>{{ $confirmation->vat }}</td>
+                        <td>{{ $confirmation->tax }}</td>
                         <td>{{ $confirmation->currency }}</td>
                     </tr>
                     @endforeach
@@ -81,6 +81,7 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
 <!-- ================================== JS Libraries ================================== -->
 
 <script>
@@ -113,36 +114,100 @@
     }
 //-------------------------------------------------------------------------------------------
 
-    $(document).ready(function() {
-
-        // 💡 تأكدي أن اسم الجدول هنا هو confirmationsTable
-        window.confirmationTable = $('#confirmationsTable').DataTable({
-            responsive: true,
-            scrollX: true,
-            // ... إعدادات أخرى ...
-            columns: [
-                { data: null, orderable: false, searchable: false }, // Checkbox
-                { data: 'conf_category' },
-                { data: 'confirmation_id' },
-                { data: 'date_confirmed' },
-                { data: 'conf_source' },
-                { data: 'project_code' },
-                { data: 'project_name' },
-                { data: 'project_details' },
-                { data: 'contract_no' },
-                { data: 'customer_name' },
-                { data: 'validity' },
-                { data: 'payment_terms' },
-                { data: 'discount' },
-                { data: 'vat' },
-                { data: 'currency' }
-            ]
-            // ... إضافة وظيفة البحث الديناميكي هنا كما كانت في جدول العملاء
-        });
-
-        // ... باقي أكواد الجافاسكريبت والـ Column Filters ...
-
+  $(document).ready(function() {
+    // تهيئة DataTable
+    window.confirmationsTable = $('#confirmationsTable').DataTable({
+        responsive: true,
+        scrollX: true,
+        orderCellsTop: true,
+        fixedHeader: true,
+        columnDefs: [
+            { orderable: false, targets: [0] } // عمود الشيكبوكس
+        ]
     });
+
+    // ربط البحث لكل عمود
+    confirmationsTable.columns().every(function() {
+        var column = this;
+        $('input', this.header()).on('keyup change', function() {
+            if (column.search() !== this.value) {
+                column.search(this.value).draw();
+            }
+        });
+    });
+
+    // تحديد/إلغاء تحديد كل الصفوف
+    $('#selectAllConfirmations').on('change', function() {
+        var rows = confirmationsTable.rows({ 'search': 'applied' }).nodes();
+        $('input[type="checkbox"]', rows).prop('checked', this.checked);
+    });
+     $('#confirmationsTable tbody').on('click', '.edit-btn', function() {
+        const data = confirmationTable.row($(this).parents('tr')).data();
+        openEditConfirmationModal(data.id);
+    });
+    $('#confirmationsTable tbody').on('change', 'input[type="checkbox"]', function() {
+        var allChecked = $('tbody input[type="checkbox"]').length === $('tbody input[type="checkbox"]:checked').length;
+        $('#selectAllConfirmations').prop('checked', allChecked);
+    });
+
+    $('#editCustomer').on('change', function() {
+    const customerId = $(this).val();
+
+    if (!customerId) return;
+
+    // تنظيف الحقول القديمة
+    $('#editProjectCode').empty().append('<option value="" disabled selected>[Select Project Code]</option>');
+    $('#editProjectName').empty().append('<option value="" disabled selected>[Select Project Name]</option>');
+    $('#editProjectDetails').val('');
+
+    // جلب المشاريع الخاصة بهذا العميل
+    $.get(`/customers/${customerId}/projects`, function(projects) {
+        projects.forEach(project => {
+            $('#editProjectCode').append(`<option value="${project.id}">${project.reference}</option>`);
+            $('#editProjectName').append(`<option value="${project.id}">${project.name}</option>`);
+        });
+    });
+});
+
+$('#editProjectCode, #editProjectName').on('change', function() {
+    const projectId = $(this).val();
+    if (!projectId) return;
+
+    $.get(`/projects/${projectId}`, function(project) {
+        $('#editProjectDetails').val(project.project_details || '');
+    });
+});
+
+
+
+    // تعبئة الجدول بالبيانات
+    function loadConfirmations(data) {
+        confirmationsTable.clear();
+        data.forEach(conf => {
+            confirmationsTable.row.add([
+                `<input type="checkbox" class="confirmation-checkbox">`,
+                conf.conf_category,
+                conf.confirmation_id,
+                conf.date_confirmed,
+                conf.conf_source,
+                conf.project_code,
+                conf.project_name,
+                conf.project_details,
+                conf.contract_no,
+                conf.customer_name,
+                conf.validity,
+                conf.payment_terms,
+                conf.discount,
+                conf.vat,
+                conf.currency
+            ]).draw(false);
+        });
+    }
+
+    loadConfirmations(sampleData);
+});
+
+
 //-------------------------------------------------------------------------------------------
     function openConfModal() {
         // 💡 التعديل: تصفير النموذج الخاص بالتعميد
@@ -285,6 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const projectsMap = {
         @foreach($projects as $project)
             "{{ $project->reference }}": {
+                id: @json($project->id),          // ✅ أضف هذا
                 code: @json($project->reference),
                 name: @json($project->name),
                 details: @json($project->project_details ?? ''),
@@ -328,19 +394,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // تعبئة تفاصيل المشروع وجهات الاتصال عند اختيار مشروع
-    function fillProjectData() {
-        const selectedCode = projectCodeSelect.value;
-        if (!selectedCode || !projectsMap[selectedCode]) {
-            projectDetailsInput.value = '';
-            contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
-            confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
-            projectNameSelect.value = '';
-            return;
-        }
+   function fillProjectData() {
+    const selectedCode = projectCodeSelect.value;
+    if (!selectedCode || !projectsMap[selectedCode]) {
+        projectDetailsInput.value = '';
+        contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+        confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
+        projectNameSelect.value = '';
+        window.selectedProjectId = null; // ✅ افتراضي عند عدم الاختيار
+        return;
+    }
 
-        const project = projectsMap[selectedCode];
-        projectNameSelect.value = project.name;
-        projectDetailsInput.value = project.details;
+       const project = projectsMap[selectedCode];
+    projectNameSelect.value = project.name;
+    projectDetailsInput.value = project.details;
+    window.selectedProjectId = project.id; // ✅ خزن project_id للاستخدام لاحقاً
 
         // ملء جهات الاتصال
         contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
@@ -380,20 +448,83 @@ document.addEventListener('DOMContentLoaded', function() {
     fillProjectData();
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const editCustomer = $('#editCustomer');
+    const editProjectCode = $('#editProjectCode');
+    const editProjectName = $('#editProjectName');
+    const editProjectDetails = $('#editProjectDetails');
+
+    // خريطة المشاريع جاهزة في الصفحة
+    const projectsMap = {
+    @foreach($projects as $project)
+        "{{ $project->id }}": {
+            code: "{{ $project->reference }}",
+            name: "{{ $project->name }}",
+            details: "{{ $project->project_details ?? '' }}",
+            customer_id: "{{ $project->customer_id }}"
+        },
+    @endforeach
+};
+
+
+    // عند تغيير العميل
+    editCustomer.on('change', function() {
+        const customerId = $(this).val();
+
+        // مسح القوائم
+        editProjectCode.empty().append('<option value="" disabled selected>[Select Project Code]</option>');
+        editProjectName.empty().append('<option value="" disabled selected>[Select Project Name]</option>');
+        editProjectDetails.val('');
+
+        // تعبئة المشاريع الخاصة بالعميل
+        for (const id in projectsMap) {
+            const project = projectsMap[id];
+            if (project.customer_id == customerId) {
+                editProjectCode.append(`<option value="${id}">${project.code}</option>`);
+                editProjectName.append(`<option value="${id}">${project.name}</option>`);
+            }
+        }
+    });
+
+    // عند اختيار المشروع من أي قائمة
+    editProjectCode.add(editProjectName).on('change', function() {
+        const projectId = $(this).val();
+        if (!projectId || !projectsMap[projectId]) return;
+
+        const project = projectsMap[projectId];
+
+        // مزامنة القوائم
+        editProjectCode.val(projectId);
+        editProjectName.val(projectId);
+
+        // تعبئة تفاصيل المشروع
+        editProjectDetails.val(project.details);
+    });
+});
+
+
 function saveConf(closeAfter = false) {
+    const projectDetailsInput = document.getElementById('projectDetails');
+
     const confData = {
         customer_id: document.getElementById('customerSelect').value,
+        project_id: window.selectedProjectId,
         project_code: document.getElementById('projectCodeSelect').value,
         project_name: document.getElementById('projectNameSelect').value,
-        project_details: document.getElementById('projectDetails').value,
-        contact_person: document.getElementById('contactPerson')?.value || '',
-        conf_to: document.getElementById('confTo')?.value || ''
+        project_details: projectDetailsInput.value,
+        contact_person: document.getElementById('contactPersonSelect')?.value || '',
+        conf_to: document.getElementById('confToSelect')?.value || '',
+        category: document.getElementById('confCategory')?.value || '',
+        confirm_date: document.getElementById('confirmDate').value,
+        subject: document.getElementById('subject').value,
+        conf_source: document.getElementById('confSource').value,
+        contract_no: document.getElementById('contractNo').value,
+        currency: document.getElementById('currency').value,
+        discount: document.getElementById('discount').value,
+        tax: document.getElementById('tax').value,
+        validity: document.getElementById('validity').value,
+        payment_terms: document.getElementById('paymentTerms').value || '',
     };
-
-    if (!confData.customer_id || !confData.project_code) {
-        alert('⚠️ يرجى اختيار العميل والمشروع أولاً.');
-        return;
-    }
 
     fetch('/confirmations', {
         method: 'POST',
@@ -406,83 +537,976 @@ function saveConf(closeAfter = false) {
     .then(res => res.json())
     .then(result => {
         if (result.status === 'success') {
-            alert('✅ Confirmation saved successfully.');
-
-            // تخزين ID التعميد الجديد في متغير عام
             window.currentConfirmationId = result.id;
 
+            // 🟢 اشعار باستخدام SweetAlert2
+            Swal.fire({
+                icon: 'success',
+                title: 'تم الحفظ بنجاح ✅',
+                text: 'تم حفظ الـ Confirmation بنجاح.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
             if (closeAfter) {
-                window.location.href = '/confirmations';
+                setTimeout(() => {
+                    window.location.href = '/confirmations';
+                }, 2000); // انتظار انتهاء الـ timer
             }
         } else {
-            alert('❌ Error saving confirmation');
+            Swal.fire({
+                icon: 'error',
+                title: '❌ خطأ',
+                text: result.message || 'حدث خطأ أثناء حفظ الـ Confirmation.',
+            });
         }
     })
     .catch(err => {
         console.error(err);
-        alert('⚠️ Error saving confirmation.');
+        Swal.fire({
+            icon: 'error',
+            title: '⚠️ خطأ',
+            text: 'حدث خطأ أثناء حفظ الـ Confirmation. تحقق من الكونسول.',
+        });
     });
 }
 
+
+
 function handleServiceInsert(mode = 'add') {
-    // تحقق أولاً أنه يوجد Confirmation محفوظ
+    // تحقق من وجود Confirmation
     if (!window.currentConfirmationId) {
-        alert('⚠️ يرجى أولاً حفظ الـ Confirmation قبل إضافة الخدمات.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه ⚠️',
+            text: 'يرجى أولاً حفظ الـ Confirmation قبل إضافة الخدمات.',
+            timer: 2000,
+            showConfirmButton: false
+        });
         return;
     }
 
-    // اجمع بيانات السطر الجديد من الجدول أو النافذة
-    const newLine = {
-        confirmation_id: window.currentConfirmationId,
-        service_name: document.getElementById('serviceName')?.value || '',
-        method: document.getElementById('serviceMethod')?.value || '',
-        unit: document.getElementById('serviceUnit')?.value || '',
-        quantity: parseFloat(document.getElementById('serviceQty')?.value || 1),
-        price: parseFloat(document.getElementById('servicePrice')?.value || 0),
-        total: 0
-    };
-    newLine.total = newLine.quantity * newLine.price;
+    const serviceSelectionModal = (mode === 'edit')
+        ? document.getElementById('editServiceSelectionModal')
+        : document.getElementById('serviceSelectionModal');
 
-    // إرسال البيانات إلى السيرفر
-    fetch('/confirmation-lines', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify(newLine)
-    })
-    .then(res => res.json())
-    .then(result => {
-        if (result.status === 'success') {
-            alert('✅ Service added successfully.');
+    const serviceTable = (mode === 'edit')
+        ? document.querySelector('#servicesTableEdit tbody')
+        : document.querySelector('#servicesTable tbody');
 
-            // إضافة السطر الجديد للجدول بدون تحديث الصفحة
-            const tbody = document.querySelector('#serviceLinesTable tbody');
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${newLine.service_name}</td>
-                <td>${newLine.method}</td>
-                <td>${newLine.unit}</td>
-                <td>${newLine.quantity}</td>
-                <td>${newLine.price.toFixed(2)}</td>
-                <td>${newLine.total.toFixed(2)}</td>
-            `;
-            tbody.appendChild(row);
+    if (!serviceTable) {
+        console.error('❌ لم يتم العثور على جدول الخدمات داخل المودال الحالي');
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'لم يتم العثور على جدول الخدمات داخل المودال الحالي.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        return;
+    }
 
-            // تفريغ الحقول بعد الإضافة
-            document.getElementById('serviceName').value = '';
-            document.getElementById('serviceMethod').value = '';
-            document.getElementById('serviceUnit').value = '';
-            document.getElementById('serviceQty').value = '';
-            document.getElementById('servicePrice').value = '';
-        } else {
-            alert('❌ Failed to add service line.');
+    const selectedRows = serviceSelectionModal.querySelectorAll('tbody input.service-selector:checked');
+    if (selectedRows.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه ⚠️',
+            text: 'يرجى اختيار خدمة واحدة على الأقل.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        return;
+    }
+
+    selectedRows.forEach(row => {
+        const tr = row.closest('tr');
+
+        const serviceName = tr.cells[1].textContent.trim();
+        const method = tr.cells[2].textContent.trim();
+        const unit = tr.cells[3].textContent.trim();
+        const price = parseFloat(tr.querySelector('.editable-price').value || 0);
+        const quantity = parseFloat(tr.querySelector('.editable-quantity').value || 1);
+        const total = price * quantity;
+        const isPriceOnly = tr.querySelector('.is-price-only').checked;
+
+        const newLine = {
+            confirmation_id: window.currentConfirmationId,
+            service_name: serviceName,
+            method: method,
+            unit: unit,
+            quantity: quantity,
+            price: price,
+            total: total,
+            price_only: isPriceOnly ? 1 : 0
+        };
+
+        fetch('/confirmation-lines', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(newLine)
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.status === 'success') {
+                const lineId = result.line?.id || '';
+                const serviceId = result.line?.service_id || '';
+
+                const rowEl = document.createElement('tr');
+                rowEl.dataset.lineId = lineId;
+                rowEl.dataset.serviceId = serviceId;
+                rowEl.innerHTML = `
+                    <td><input type="checkbox" class="service-line-selector"></td>
+                    <td>${newLine.service_name}</td>
+                    <td>${newLine.method}</td>
+                    <td>${newLine.unit}</td>
+                    <td>${newLine.total.toFixed(2)}</td>
+                    <td>${newLine.price_only ? '✔️' : ''}</td>
+                    <td>${newLine.quantity}</td>
+                `;
+                serviceTable.appendChild(rowEl);
+
+                // إزالة تحديد الصف بعد الإضافة
+                row.querySelector('.service-selector').checked = false;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تمت الإضافة ✅',
+                    text: `${newLine.service_name} تمت إضافتها بنجاح.`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ ❌',
+                    text: result.message || 'فشل في إضافة الخدمة.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Error adding line:', err);
+            Swal.fire({
+                icon: 'error',
+                title: '⚠️ خطأ',
+                text: 'حدث خطأ أثناء إضافة الخدمة. تحقق من الكونسول.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
+    });
+
+    closeModal(serviceSelectionModal.id);
+}
+
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    modal.style.display = 'none';
+    modal.classList.remove('show');
+}
+
+
+function openEditConfModal() {
+    const modal = document.getElementById('editConfModal');
+    modal.style.display = 'block';
+    modal.classList.add('show'); // ✅ مهم
+}
+
+
+// الحصول على جميع الـ IDs المحددة من جدول Confirmations
+function getSelectedConfirmationIds() {
+    let ids = [];
+    $('.selectConfirmation:checked').each(function() {
+        ids.push($(this).val());
+    });
+    return ids;
+}
+
+// =====================================
+// جلب الـ Confirmation المحددة للتعديل
+// =====================================
+function handleEditConfirmation() {
+    const selectedIds = getSelectedConfirmationIds();
+    if (selectedIds.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تحذير ⚠️',
+            text: 'الرجاء اختيار Confirmation واحد للتعديل!'
+        });
+        return;
+    }
+    if (selectedIds.length > 1) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تحذير ⚠️',
+            text: 'الرجاء اختيار Confirmation واحد فقط للتعديل!'
+        });
+        return;
+    }
+
+    const confirmationId = selectedIds[0];
+    openEditConfirmationModal(confirmationId);
+}
+
+// =====================================
+// فتح المودال وتعبئة بيانات Confirmation + Lines
+// =====================================
+function openAddConfirmationModal() {
+    // إعادة تعيين currentConfirmationId لأننا لم نحفظ Confirmation بعد
+    window.currentConfirmationId = null;
+
+    // إعادة تعيين الحقول
+    $('#confForm')[0].reset();
+    $('#servicesTable tbody').empty();
+
+    // عرض المودال
+    $('#confModal').show();
+}
+function openEditConfirmationModal(id) {
+    if (!id) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ ❌',
+            text: 'لم يتم تحديد الـ Confirmation!'
+        });
+        return;
+    }
+
+    $.get(`/confirmations/${id}`, function(confirmation) {
+        if (!confirmation || !confirmation.id) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ ❌',
+                text: 'لم يتم العثور على بيانات الـ Confirmation!'
+            });
+            return;
         }
-    })
-    .catch(err => {
+
+        // ==========================
+        // تعبئة الحقول
+        // ==========================
+        $('#editConfId').val(confirmation.id);
+        $('#editConfCategory').val(confirmation.category || '');
+        $('#editConfirmID').val(confirmation.confirmation_id || '');
+        $('#editConfirmDate').val(confirmation.confirm_date || new Date().toISOString().split('T')[0]);
+        $('#editProjectCode').val(confirmation.project?.reference || '');
+        $('#editProjectName').val(confirmation.project?.name || '');
+        $('#editProjectDetails').val(confirmation.project?.project_details || '');
+        $('#editCustomer').val(confirmation.customer?.id || '');
+        $('#editContactPerson').val(confirmation.contact_person || '');
+        $('#editConfTo').val(confirmation.conf_to || '');
+        $('#editSubject').val(confirmation.subject || '');
+        $('#editConfSource').val(confirmation.conf_source || '');
+        $('#editContractNo').val(confirmation.contract_no || '');
+        $('#editCurrency').val(confirmation.currency || 'SAR');
+        $('#editDiscount').val(confirmation.discount || 0);
+        $('#editTax').val(confirmation.tax || 15);
+        $('#editValidity').val(confirmation.validity || '60 Days');
+        $('#editPaymentTerms').val(confirmation.payment_terms || '');
+
+        // ==========================
+        // تعيين currentConfirmationId لتجنب رسالة "يرجى أولاً حفظ الـ Confirmation"
+        // ==========================
+        window.currentConfirmationId = confirmation.id;
+
+        // ==========================
+        // جلب خطوط الـ Confirmation
+        // ==========================
+        $.get(`/confirmations/${id}/lines`, function(lines) {
+            const tbody = $('#servicesTableEdit tbody');
+            tbody.empty();
+
+            if (Array.isArray(lines)) {
+                lines.forEach(line => {
+                    tbody.append(`
+                        <tr data-line-id="${line.id}" data-service-id="${line.service_id}">
+                            <td><input type="checkbox" class="service-line-selector"></td>
+                            <td>${line.service_name}</td>
+                            <td>${line.method}</td>
+                            <td>${line.unit}</td>
+                            <td>${line.total}</td>
+                            <td>${line.price_only ? '✔️' : ''}</td>
+                            <td>${line.quantity}</td>
+                        </tr>
+                    `);
+                });
+            }
+
+            // عرض المودال بعد تعبئة كل شيء
+            $('#editConfModal').show();
+        }).fail(function(err) {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ ❌',
+                text: 'فشل تحميل خطوط الـ Confirmation.'
+            });
+        });
+
+    }).fail(function(err) {
         console.error(err);
-        alert('⚠️ Error adding service line.');
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ ❌',
+            text: 'فشل تحميل بيانات الـ Confirmation.'
+        });
+    });
+}
+
+
+// إغلاق أي مودال
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+
+function fillEditProjectFields(projectCode) {
+    if (!projectCode || !projectsMap[projectCode]) return;
+    const project = projectsMap[projectCode];
+
+    // تحديث Project Code & Name
+    $('#editProjectCode').val(project.code);
+    $('#editProjectName').val(project.name);
+
+    // تحديث Customer
+    $('#editCustomer').val(project.customer_id);
+}
+
+function saveEditConf(closeAfterSave = true) {
+    const confirmationId = $('#editConfId').val();
+    if (!confirmationId) return;
+
+    // 1. جلب وتنظيف الحقول الأساسية
+    const customerId = $('#editCustomer').val() || null;
+    const projectId = $('#editProjectCode').val() || null;
+    const projectCode = $('#editProjectCode option:selected').text() || '';
+    const projectName = $('#editProjectName option:selected').text() || '';
+    const projectDetails = $('#editProjectDetails').val().trim() || '';
+    const contactPerson = $('#editContactPerson').val() || '';
+    const confTo = $('#editConfTo').val() || '';
+    const category = $('#editConfCategory').val() || '';
+    const confirmDate = $('#editConfirmDate').val() || '';
+    const subject = $('#editSubject').val() || '';
+    const confSource = $('#editConfSource').val() || '';
+    const contractNo = $('#editContractNo').val() || '';
+    const currency = $('#editCurrency').val() || 'SAR';
+    const discount = parseFloat($('#editDiscount').val()) || 0;
+    const tax = parseFloat($('#editTax').val()) || 15;
+    const validity = $('#editValidity').val() || '';
+    const paymentTerms = $('#editPaymentTerms').val() || '';
+
+    // 2. التحقق من الحقول الأساسية
+    if (!customerId) {
+        Swal.fire("تحذير", "⚠️ الرجاء اختيار العميل.", "warning");
+        return;
+    }
+    if (!projectId) {
+        Swal.fire("تحذير", "⚠️ الرجاء اختيار المشروع.", "warning");
+        return;
+    }
+
+    // 3. بناء البيانات للإرسال
+    const data = {
+        customer_id: customerId,
+        project_id: projectId,
+        project_code: projectCode,
+        project_name: projectName,
+        project_details: projectDetails,
+        contact_person: contactPerson,
+        conf_to: confTo,
+        category: category,
+        confirm_date: confirmDate,
+        subject: subject,
+        conf_source: confSource,
+        contract_no: contractNo,
+        currency: currency,
+        discount: discount,
+        tax: tax,
+        validity: validity,
+        payment_terms: paymentTerms,
+        _token: $('meta[name="csrf-token"]').attr('content')
+    };
+
+    // 4. إرسال البيانات إلى السيرفر
+    $.ajax({
+        url: `/confirmations/${confirmationId}`,
+        type: 'PUT',
+        data: data,
+        success: function(response) {
+            Swal.fire({
+                icon: 'success',
+                title: 'تم التعديل بنجاح ✅',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            // تحديث الجدول أو الواجهة بعد التعديل
+            loadConfirmations(); // دالة تقوم بإعادة تحميل الجدول
+            if (closeAfterSave) closeEditConfModal();
+        },
+        error: function(xhr) {
+            console.error(xhr.responseText);
+            const errorResponse = xhr.responseJSON;
+
+            const validationErrors = errorResponse && errorResponse.errors
+                ? Object.values(errorResponse.errors).map(e => e.join(', ')).join('<br>')
+                : errorResponse && errorResponse.message ? errorResponse.message : 'حدث خطأ غير معروف أثناء التعديل.';
+
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ في الخادم ❌',
+                html: validationErrors,
+                confirmButtonText: 'حسناً'
+            });
+        }
+    });
+}
+
+
+function editSelectedServiceLine(tableSelector = '#servicesTableEdit') {
+    const selectedRows = document.querySelectorAll(`${tableSelector} tbody input.service-line-selector:checked`);
+
+    if (selectedRows.length === 0) {
+        Swal.fire({ icon: 'warning', title: '⚠️', text: 'الرجاء اختيار صف للتعديل.' });
+        return;
+    }
+    if (selectedRows.length > 1) {
+        Swal.fire({ icon: 'warning', title: '⚠️', text: 'يمكنك تعديل صف واحد فقط في كل مرة.' });
+        return;
+    }
+
+    const row = selectedRows[0].closest('tr');
+    const lineId = row.dataset.lineId || null;
+    const selectedServiceId = row.dataset.serviceId || null;
+
+    // 1️⃣ جلب كل الخدمات من مودال الإضافة
+    const availableServices = $('#availableServicesTable tbody').html();
+    $('#editServiceSelectionModal').fadeIn(200);
+    const tbody = $('#editServiceSelectionModal tbody');
+    tbody.html(availableServices);
+
+    // 2️⃣ تعبئة القيم الحالية (سعر، كمية، Price Only)
+    const currentPrice = parseFloat(row.cells[4].textContent.trim()) || 0;
+    const currentQuantity = parseFloat(row.cells[6].textContent.trim()) || 1;
+    const isPriceOnly = row.cells[5].textContent.trim() === '✔️';
+    const currentName = row.cells[1].textContent.trim();
+
+    const matchedRow = tbody.find(`tr:contains("${currentName}")`);
+    if (matchedRow.length) {
+        matchedRow.find('.service-selector').prop('checked', true);
+        matchedRow.find('.editable-price').val(currentPrice);
+        matchedRow.find('.editable-quantity').val(currentQuantity);
+        matchedRow.find('.is-price-only').prop('checked', isPriceOnly);
+    }
+
+    // 3️⃣ عند الضغط على "Save Changes"
+    $('#saveEditedServiceBtn').off('click').on('click', function() {
+        const checkedRow = $('#editServiceSelectionModal tbody input.service-selector:checked').closest('tr');
+        if (checkedRow.length === 0) {
+            Swal.fire({ icon: 'warning', title: '⚠️', text: 'الرجاء اختيار خدمة واحدة على الأقل.' });
+            return;
+        }
+
+        const updated = {
+            service_id: null, // تركها null لتجنب مشاكل FK
+            service_name: checkedRow.children().eq(1).text().trim(),
+            method: checkedRow.children().eq(2).text().trim(),
+            unit: checkedRow.children().eq(3).text().trim(),
+            price: parseFloat(checkedRow.find('.editable-price').val()) || 0,
+            quantity: parseFloat(checkedRow.find('.editable-quantity').val()) || 1,
+            price_only: checkedRow.find('.is-price-only').is(':checked') ? 1 : 0
+        };
+
+        // تحديث الجدول مؤقتاً
+        row.cells[1].textContent = updated.service_name;
+        row.cells[2].textContent = updated.method;
+        row.cells[3].textContent = updated.unit;
+        row.cells[4].textContent = (updated.price * updated.quantity).toFixed(2);
+        row.cells[5].textContent = updated.price_only ? '✔️' : '';
+        row.cells[6].textContent = updated.quantity;
+
+        $('#editServiceSelectionModal').fadeOut(200);
+
+        // إرسال التحديث للسيرفر
+        if (lineId) {
+            $.ajax({
+                url: `/confirmation-lines/${lineId}`,
+                type: 'PUT',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                data: updated,
+                success: function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم التعديل بنجاح ✅',
+                        text: 'تم تحديث بيانات الخدمة على قاعدة البيانات.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ ❌',
+                        text: 'فشل في تحديث الخدمة على قاعدة البيانات.'
+                    });
+                }
+            });
+        }
+    });
+}
+
+
+
+
+
+
+function deleteSelectedServiceLine(tableSelector) {
+    const selectedRows = document.querySelectorAll(`${tableSelector} tbody input.service-line-selector:checked`);
+
+    if (selectedRows.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: '⚠️ تنبيه',
+            text: 'الرجاء اختيار صف واحد على الأقل للحذف.'
+        });
+        return;
+    }
+
+    Swal.fire({
+        icon: 'warning',
+        title: 'تأكيد الحذف',
+        text: 'هل أنت متأكد من حذف الصفوف المحددة؟',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        selectedRows.forEach((checkbox) => {
+            const row = checkbox.closest('tr');
+            const lineId = row.dataset.lineId; // يجب أن يكون موجود في tr: data-line-id="..."
+
+            if (!lineId) {
+                // إذا الصف جديد ولم يُحفظ بعد، نحذفه مباشرة دون AJAX
+                row.remove();
+                return;
+            }
+
+            // طلب AJAX لحذف الصف من السيرفر
+            $.ajax({
+                url: `/confirmation-lines/${lineId}`,
+                type: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function(response) {
+                    // حذف الصف من الجدول مباشرة
+                    row.remove();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم الحذف ✅',
+                        text: 'تم حذف الصف بنجاح.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ ❌',
+                        text: 'فشل الحذف.'
+                    });
+                }
+            });
+        });
+    });
+}
+
+function loadConfirmations() {
+    $.ajax({
+        url: '/confirmations/list',
+        type: 'GET',
+        success: function(data) {
+            $('#confirmationsTable tbody').html(data);
+        },
+        error: function(xhr) {
+            console.error('Failed to reload confirmations:', xhr.responseText);
+        }
+    });
+}
+
+// ---------------------- طباعة جدول الخدمات ----------------------
+// ---------------------- طباعة جدول الخدمات ----------------------
+window.printServiceLineTable = function(tableId) {
+    const tableElement = document.getElementById(tableId);
+    if (!tableElement) {
+        Swal.fire({ icon: 'warning', title: '⚠️', text: 'لم يتم العثور على جدول الخدمات.' });
+        return;
+    }
+
+    const serviceTable = $(tableElement).DataTable();
+    const selectedCheckboxes = serviceTable.$('input[type="checkbox"]:checked');
+    let rowsToProcess = selectedCheckboxes.length > 0
+        ? selectedCheckboxes.parents('tr')
+        : serviceTable.rows({ search: 'applied' }).nodes();
+
+    let printContents = `
+        <html>
+        <head>
+            <title>طباعة جدول الخدمات</title>
+            <style>
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                body { font-family: 'Arial', sans-serif; }
+                h2 { text-align: center; margin-bottom: 20px; }
+            </style>
+        </head>
+        <body>
+            <h2>قائمة الخدمات</h2>
+            <table>
+                <thead>
+                    <tr>`;
+
+    // الأعمدة
+    $(tableElement).find('thead th').each(function() {
+        const hasInput = $(this).find('input[type="checkbox"]').length > 0;
+        if (!hasInput && $(this).text().trim() !== '') {
+            printContents += '<th>' + $(this).text().trim() + '</th>';
+        }
+    });
+
+    printContents += `</tr></thead><tbody>`;
+
+    // الصفوف
+    $(rowsToProcess).each(function() {
+        printContents += '<tr>';
+        $(this).find('td').each(function(index) {
+            // تجاهل checkboxes وعمود الـ ID
+            if (index === 0) return;
+
+            // أخذ القيمة من input إذا وجد
+            const input = $(this).find('input');
+            const checkbox = $(this).find('input[type="checkbox"]');
+            if (input.length && !checkbox.length) {
+                printContents += '<td>' + input.val() + '</td>';
+            } else if (checkbox.length) {
+                printContents += '<td>' + (checkbox.is(':checked') ? '✔️' : '') + '</td>';
+            } else {
+                printContents += '<td>' + $(this).text().trim() + '</td>';
+            }
+        });
+        printContents += '</tr>';
+    });
+
+    printContents += `</tbody></table></body></html>`;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContents);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+    };
+
+    Swal.fire({ icon: 'success', title: 'تم الإرسال للطباعة', timer: 1500, showConfirmButton: false });
+};
+
+// ---------------------- تصدير جدول الخدمات إلى Excel ----------------------
+window.exportServiceLineExcel = function(tableId) {
+    const tableElement = document.getElementById(tableId);
+    if (!tableElement) {
+        Swal.fire({ icon: 'warning', title: '⚠️', text: 'لم يتم العثور على جدول الخدمات.' });
+        return;
+    }
+
+    const serviceTable = $(tableElement).DataTable();
+    const selectedCheckboxes = serviceTable.$('input[type="checkbox"]:checked');
+    const rowsToProcess = selectedCheckboxes.length > 0
+        ? selectedCheckboxes.parents('tr')
+        : serviceTable.rows({ search: 'applied' }).nodes();
+
+    const data = [];
+
+    // Header
+    const header = [];
+    $(tableElement).find('thead th').each(function(index) {
+        if (index === 0) return; // تجاهل ID/checkbox
+        header.push($(this).text().trim());
+    });
+    data.push(header);
+
+    // Rows
+    $(rowsToProcess).each(function() {
+        const rowData = [];
+        $(this).find('td').each(function(index) {
+            if (index === 0) return; // تجاهل ID/checkbox
+
+            const input = $(this).find('input');
+            const checkbox = $(this).find('input[type="checkbox"]');
+            if (input.length && !checkbox.length) {
+                rowData.push(input.val());
+            } else if (checkbox.length) {
+                rowData.push(checkbox.is(':checked') ? '✔️' : '');
+            } else {
+                rowData.push($(this).text().trim());
+            }
+        });
+        data.push(rowData);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Services");
+
+    const fileName = tableId === 'servicesTableEdit' ? 'services-data-edit.xlsx' : 'services-data.xlsx';
+    XLSX.writeFile(wb, fileName);
+
+    Swal.fire({ icon: 'success', title: 'تم تصدير البيانات بنجاح ✅', timer: 1500, showConfirmButton: false });
+};
+
+
+// ---------------------- طباعة جدول Confirmations ----------------------
+window.printConfirmationTable = function(tableId = 'confirmationsTable') {
+    const tableElement = document.getElementById(tableId);
+    if (!tableElement) {
+        Swal.fire({ icon: 'warning', title: '⚠️', text: 'لم يتم العثور على جدول Confirmations.' });
+        return;
+    }
+
+    const dataTable = $(tableElement).DataTable();
+    const selectedCheckboxes = dataTable.$('input[type="checkbox"]:checked');
+    const rowsToProcess = selectedCheckboxes.length > 0
+        ? selectedCheckboxes.parents('tr')
+        : dataTable.rows({ search: 'applied' }).nodes();
+
+    let printContents = `
+        <html>
+        <head>
+            <title>طباعة Confirmations</title>
+            <style>
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                body { font-family: 'Arial', sans-serif; }
+                h2 { text-align: center; margin-bottom: 20px; }
+            </style>
+        </head>
+        <body>
+            <h2>قائمة Confirmations</h2>
+            <table>
+                <thead><tr>`;
+
+    // الأعمدة (تجاهل checkboxes وعمود فارغ)
+    $(tableElement).find('thead th').each(function(index) {
+        const hasCheckbox = $(this).find('input[type="checkbox"]').length > 0;
+        if (!hasCheckbox && $(this).text().trim() !== '') {
+            printContents += '<th>' + $(this).text().trim() + '</th>';
+        }
+    });
+
+    printContents += `</tr></thead><tbody>`;
+
+    // الصفوف
+    $(rowsToProcess).each(function() {
+        printContents += '<tr>';
+        $(this).find('td').each(function(index) {
+            if (index === 0) return; // تجاهل العمود الأول للـ checkbox
+            const input = $(this).find('input');
+            const checkbox = $(this).find('input[type="checkbox"]');
+            if (input.length && !checkbox.length) {
+                printContents += '<td>' + input.val() + '</td>';
+            } else if (checkbox.length) {
+                printContents += '<td>' + (checkbox.is(':checked') ? '✔️' : '') + '</td>';
+            } else {
+                printContents += '<td>' + $(this).text().trim() + '</td>';
+            }
+        });
+        printContents += '</tr>';
+    });
+
+    printContents += `</tbody></table></body></html>`;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContents);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+    };
+
+    Swal.fire({ icon: 'success', title: 'تم إرسال أمر الطباعة بنجاح', timer: 1500, showConfirmButton: false });
+};
+
+// ---------------------- تصدير جدول Confirmations إلى Excel ----------------------
+window.exportConfirmationsExcelBtn = function(tableId = 'confirmationsTable') {
+    const tableElement = document.getElementById(tableId);
+    if (!tableElement) {
+        Swal.fire({ icon: 'warning', title: '⚠️', text: 'لم يتم العثور على جدول Confirmations.' });
+        return;
+    }
+
+    const dataTable = $(tableElement).DataTable();
+    const selectedCheckboxes = dataTable.$('input[type="checkbox"]:checked');
+    const rowsToProcess = selectedCheckboxes.length > 0
+        ? selectedCheckboxes.parents('tr')
+        : dataTable.rows({ search: 'applied' }).nodes();
+
+    const data = [];
+
+    // Header
+    const header = [];
+    $(tableElement).find('thead th').each(function(index) {
+        if (index === 0) return; // تجاهل العمود الأول للـ checkbox
+        header.push($(this).text().trim());
+    });
+    data.push(header);
+
+    // Rows
+    $(rowsToProcess).each(function() {
+        const rowData = [];
+        $(this).find('td').each(function(index) {
+            if (index === 0) return; // تجاهل العمود الأول للـ checkbox
+            const input = $(this).find('input');
+            const checkbox = $(this).find('input[type="checkbox"]');
+            if (input.length && !checkbox.length) {
+                rowData.push(input.val());
+            } else if (checkbox.length) {
+                rowData.push(checkbox.is(':checked') ? '✔️' : '');
+            } else {
+                rowData.push($(this).text().trim());
+            }
+        });
+        data.push(rowData);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Confirmations");
+
+    const fileName = tableId === 'confirmationsTableEdit' ? 'confirmations-data-edit.xlsx' : 'confirmations-data.xlsx';
+    XLSX.writeFile(wb, fileName);
+
+    Swal.fire({ icon: 'success', title: '✅ تم تصدير البيانات بنجاح إلى Excel', timer: 1500, showConfirmButton: false });
+};
+
+
+function duplicateConfirmation() {
+    const selected = document.querySelectorAll('.selectConfirmation:checked');
+    if (selected.length === 0) {
+        Swal.fire({ icon: 'warning', title: 'تنبيه ⚠️', text: 'يرجى اختيار Confirmation واحد للنسخ.' });
+        return;
+    }
+    if (selected.length > 1) {
+        Swal.fire({ icon: 'warning', title: 'تنبيه ⚠️', text: 'يمكنك نسخ Confirmation واحد فقط في كل مرة.' });
+        return;
+    }
+
+    const confirmationId = selected[0].value;
+
+    Swal.fire({
+        title: 'هل أنت متأكد من نسخ الـ Confirmation؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، انسخ',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        $.ajax({
+            url: '/confirmations/duplicate',
+            type: 'POST',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: { id: confirmationId },
+            success: function(response) {
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم النسخ ✅',
+                        text: `تم إنشاء Confirmation جديد برقم: ${response.newConfirmationNumber}`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    // تحديث الجدول مباشرة (مثال باستخدام DataTable)
+                    if (window.confirmationsTable) {
+                        window.confirmationsTable.ajax.reload(null, false);
+                    }
+                } else {
+                    Swal.fire({ icon: 'error', title: 'خطأ ❌', text: response.message });
+                }
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                Swal.fire({ icon: 'error', title: 'خطأ ❌', text: 'حدث خطأ أثناء النسخ.' });
+            }
+        });
+    });
+}
+
+function deleteSelectedConfirmation() {
+    const selected = document.querySelectorAll('.selectConfirmation:checked');
+
+    if (selected.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: '⚠️ تنبيه',
+            text: 'الرجاء اختيار Confirmation واحد على الأقل للحذف.'
+        });
+        return;
+    }
+
+    if (selected.length > 1) {
+        Swal.fire({
+            icon: 'warning',
+            title: '⚠️ تنبيه',
+            text: 'يمكنك حذف Confirmation واحد فقط في كل مرة.'
+        });
+        return;
+    }
+
+    const confirmationId = selected[0].value;
+
+    Swal.fire({
+        icon: 'warning',
+        title: 'تأكيد الحذف',
+        text: 'هل أنت متأكد من حذف الـ Confirmation المحدد؟',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        $.ajax({
+            url: `/confirmations/${confirmationId}`, // يجب أن يكون لديك Route DELETE على هذا الرابط
+            type: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            success: function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم الحذف ✅',
+                    text: 'تم حذف الـ Confirmation بنجاح.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                // إزالة الصف من الجدول مباشرة
+                selected[0].closest('tr').remove();
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ ❌',
+                    text: 'فشل في حذف الـ Confirmation.'
+                });
+            }
+        });
     });
 }
 

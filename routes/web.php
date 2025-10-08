@@ -28,7 +28,6 @@ use App\Http\Controllers\Confirmation\ConfirmationLineController;
 use App\Http\Controllers\Deliveries\DeliveryController; // تأكد من استدعاء المتحكم
 use App\Http\Controllers\Confirmation\ConfirmationController;
 use App\Http\Controllers\FinancialController;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -299,5 +298,4 @@ Route::delete('/confirmation-lines/{id}', [ConfirmationLineController::class, 'd
 Route::post('/confirmations/duplicate', [ConfirmationController::class, 'duplicate'])->name('confirmations.duplicate');
 Route::delete('/confirmations/{id}', [ConfirmationController::class, 'destroy'])->name('confirmations.destroy');
 
-// المسار: /financial
 Route::get('/financial', [FinancialController::class, 'index'])->name('financial.index');

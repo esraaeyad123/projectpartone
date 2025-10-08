@@ -12,11 +12,19 @@
                 <button title="Add Invoice" onclick="openConfModal()" class="btn-icon"><i class="fas fa-file"></i></button>
                 <button title="Edit Invoice" onclick="openEditDeliveriesModal()" class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedConfirmation()" class="btn-icon"><i class="fas fa-trash"></i></button>
+<<<<<<< HEAD
                 
                 <button title="Approve Delivery" onclick="approveDelivery()" class="btn-icon btn-approve" style="color: #28a745;">
                     <i class="fas fa-check-circle"></i> 
                 </button>
                 
+=======
+
+                <button title="Approve Delivery" onclick="approveDelivery()" class="btn-icon btn-approve" style="color: #28a745;">
+                    <i class="fas fa-check-circle"></i>
+                </button>
+
+>>>>>>> 481b24c0adab649a6e0a599943b50d3349cd41c6
                 <button title="Preview" onclick="previewDocument()" class="btn-icon"><i class="fas fa-eye"></i></button>
                 <button title="Send to Customer" onclick="sendToCustomer()" class="btn-icon"><i class="fas fa-envelope"></i></button>
             </div>
@@ -107,7 +115,7 @@
      * تعرض رسالة تحذيرية بأن الخدمة غير متوفرة حالياً.
      * */
     function sendToCustomer() {
-     
+
         Swal.fire({
                 title: "تنبيه",
                 text: "خدمة الإرسال إلى العميل غير متوفرة حالياً",
@@ -126,52 +134,52 @@
             // ... إعدادات أخرى ...
             columns: [
                 // 1. عمود الاختيار (Checkbox)
-                { data: null, orderable: false, searchable: false }, 
-                
+                { data: null, orderable: false, searchable: false },
+
                 // 2. Delivery No.
-                { data: 'delivery_no' }, 
-                
+                { data: 'delivery_no' },
+
                 // 3. Delivery Date
-                { data: 'delivery_date' }, 
-                
+                { data: 'delivery_date' },
+
                 // 4. Status
-                { data: 'status' }, 
-                
+                { data: 'status' },
+
                 // 5. Department
-                { data: 'department' }, 
-                
+                { data: 'department' },
+
                 // 6. Prepared By
-                { data: 'prepared_by' }, 
-                
+                { data: 'prepared_by' },
+
                 // 7. Delivered By
-                { data: 'delivered_by' }, 
-                
+                { data: 'delivered_by' },
+
                 // 8. Project Code (V. Code)
-                { data: 'project_code' }, 
-                
+                { data: 'project_code' },
+
                 // 9. Project Name
-                { data: 'project_name' }, 
-                
+                { data: 'project_name' },
+
                 // 10. Customer Name
-                { data: 'customer_name' }, 
-                
+                { data: 'customer_name' },
+
                 // 11. P. Number
-                { data: 'p_number' }, 
-                
+                { data: 'p_number' },
+
                 // 12. Recovered By
-                { data: 'recovered_by' }, 
-                
+                { data: 'recovered_by' },
+
                 // 13. Date Received (Date Rece...)
-                { data: 'date_received' }, 
-                
+                { data: 'date_received' },
+
                 // 14. Contract Name
-                { data: 'contract_name' }, 
-                
+                { data: 'contract_name' },
+
                 // 15. Contact Title
-                { data: 'contact_title' }, 
-                
+                { data: 'contact_title' },
+
                 // 16. Items
-                { data: 'items' } 
+                { data: 'items' }
             ]
             // ... إضافة وظيفة البحث الديناميكي هنا كما كانت في جدول العملاء
         });
