@@ -1,53 +1,61 @@
 @extends('layouts.app')
-@section('title', __('Confirmation'))
+@section('title', __('Deliveries'))
 @section('content')
 @include('deliveries.create') <!-- المودال -->
 
 <main class="main-content">
-    <section id="confirmation-section" class="section-content active">
+    <section id="deliveries-section" class="section-content active">
 
         <!-------------------------------------------Start Buttons-------------------------------------------->
         <div class="icon-toolbar">
             <div>
-                <button title="Add" onclick="openConfModal()" class="btn-icon"><i class="fas fa-file"></i></button>
-                <button title="Edit" onclick="openEditConfirmationModal()"  class="btn-icon"><i class="fas fa-pen"></i></button>
+                <button title="Add Invoice" onclick="openConfModal()" class="btn-icon"><i class="fas fa-file"></i></button>
+                <button title="Edit Invoice" onclick="openEditDeliveriesModal()" class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedConfirmation()" class="btn-icon"><i class="fas fa-trash"></i></button>
+
+                <button title="Approve Delivery" onclick="approveDelivery()" class="btn-icon btn-approve" style="color: #28a745;">
+                    <i class="fas fa-check-circle"></i>
+                </button>
+
+                <button title="Preview" onclick="previewDocument()" class="btn-icon"><i class="fas fa-eye"></i></button>
+                <button title="Send to Customer" onclick="sendToCustomer()" class="btn-icon"><i class="fas fa-envelope"></i></button>
             </div>
 
-        <div class="icon-separator"></div>
+            <div class="icon-separator"></div>
+
             <div>
-                <button title="Duplicate Confirmation" class="btn-icon" onclick="duplicateConfirmation()"><i class="fas fa-copy"></i> </button>
-                <button title="Export to Excel" class="btn-icon" onclick="exportConfirmationsExcelBtn()"><i class="fa-solid fa-table"></i></button>
-                <button title="Print" class="btn-icon" onclick="printConfirmationTable()"><i class="fas fa-print"></i></button>
+                <button title="Convert to PDF" class="btn-icon" onclick="exportToPdfBtn()"><i class="fas fa-file-pdf"></i></button>
+                <button title="Export to Excel" class="btn-icon" onclick="exportDeliveriesExcelBtn()"><i class="fa-solid fa-table"></i></button>
+                <button title="Print" class="btn-icon" onclick="printDeliveriesTable()"><i class="fas fa-print"></i></button>
             </div>
-
         </div>
         <!-------------------------------------------End Buttons----------------------------------------------->
         <!-------------------------------------------Start confirmationTable----------------------------------------------->
         <div class="table-responsive-container">
-            <table id="confirmationsTable" class="table table-bordered table-striped display responsive nowrap" style="width:100%">
+            <table id="deliveriesTable" class="table table-bordered table-striped display responsive nowrap" style="width:100%">
                 <thead>
                     <tr>
-                        <th><input type="checkbox" id="selectAllConfirmations"></th>
-                        <th>Conf. Category<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Conf. ID<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Date Confirmed<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-from"></th>
-                        <th>Conf. Source<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th><input type="checkbox" id="selectAllDeliveries"></th>
+
+                        <th>Delivery No.<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Delivery Date<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-from"></th>
+                        <th>Status<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Department<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Prepared By<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Delivered By<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Project Code<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Project Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Project Details<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Contract No<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Customer Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Validity<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Payment Terms<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Discount<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>VAT<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        <th>Currency<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>P. Number<br><input type="text" class="column-filter" placeholder="Search..."></th> <th>Recovered By<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Date Received<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-from"></th>
+                        <th>Contract Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Contact Title<br><input type="text" class="column-filter" placeholder="Search..."></th>
+                        <th>Items<br><input type="text" class="column-filter" placeholder="Search..."></th>
+
                     </tr>
                 </thead>
                 <tbody>
-
-                </tbody>
+                    </tbody>
             </table>
         </div>
         <!-------------------------------------------End confirmationTable------------------------------------------------->
@@ -68,7 +76,7 @@
 <script>
 
 
-//====================== Start Script ======================
+//====================================== Start Script =======================================
     function showAlert(message, type) {
         Swal.fire({
             title: type === 'success' ? 'Success!' : (type === 'error' ? 'Error!' : 'Warning!'),
@@ -93,31 +101,77 @@
             }
         });
     }
+
+    /**
+     * * تستدعي هذه الدالة عند الضغط على زر "Send to Customer".
+     * تعرض رسالة تحذيرية بأن الخدمة غير متوفرة حالياً.
+     * */
+    function sendToCustomer() {
+
+        Swal.fire({
+                title: "تنبيه",
+                text: "خدمة الإرسال إلى العميل غير متوفرة حالياً",
+                icon: "info",
+                confirmButtonText: "حسناً"
+            });
+    }
 //-------------------------------------------------------------------------------------------
 
     $(document).ready(function() {
 
         // 💡 تأكدي أن اسم الجدول هنا هو confirmationsTable
-        window.confirmationTable = $('#confirmationsTable').DataTable({
+        window.deliveriesTable = $('#deliveriesTable').DataTable({
             responsive: true,
             scrollX: true,
             // ... إعدادات أخرى ...
             columns: [
-                { data: null, orderable: false, searchable: false }, // Checkbox
-                { data: 'conf_category' },
-                { data: 'confirmation_id' },
-                { data: 'date_confirmed' },
-                { data: 'conf_source' },
+                // 1. عمود الاختيار (Checkbox)
+                { data: null, orderable: false, searchable: false },
+
+                // 2. Delivery No.
+                { data: 'delivery_no' },
+
+                // 3. Delivery Date
+                { data: 'delivery_date' },
+
+                // 4. Status
+                { data: 'status' },
+
+                // 5. Department
+                { data: 'department' },
+
+                // 6. Prepared By
+                { data: 'prepared_by' },
+
+                // 7. Delivered By
+                { data: 'delivered_by' },
+
+                // 8. Project Code (V. Code)
                 { data: 'project_code' },
+
+                // 9. Project Name
                 { data: 'project_name' },
-                { data: 'project_details' },
-                { data: 'contract_no' },
+
+                // 10. Customer Name
                 { data: 'customer_name' },
-                { data: 'validity' },
-                { data: 'payment_terms' },
-                { data: 'discount' },
-                { data: 'vat' },
-                { data: 'currency' }
+
+                // 11. P. Number
+                { data: 'p_number' },
+
+                // 12. Recovered By
+                { data: 'recovered_by' },
+
+                // 13. Date Received (Date Rece...)
+                { data: 'date_received' },
+
+                // 14. Contract Name
+                { data: 'contract_name' },
+
+                // 15. Contact Title
+                { data: 'contact_title' },
+
+                // 16. Items
+                { data: 'items' }
             ]
             // ... إضافة وظيفة البحث الديناميكي هنا كما كانت في جدول العملاء
         });
