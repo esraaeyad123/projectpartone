@@ -204,7 +204,7 @@ $('#editProjectCode, #editProjectName').on('change', function() {
         });
     }
 
-    loadConfirmations(sampleData);
+    loadConfirmations(confirmationsTable);
 });
 
 
@@ -394,36 +394,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // تعبئة تفاصيل المشروع وجهات الاتصال عند اختيار مشروع
-   function fillProjectData() {
-    const selectedCode = projectCodeSelect.value;
-    if (!selectedCode || !projectsMap[selectedCode]) {
-        projectDetailsInput.value = '';
-        contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
-        confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
-        projectNameSelect.value = '';
-        window.selectedProjectId = null; // ✅ افتراضي عند عدم الاختيار
-        return;
-    }
+    function fillProjectData() {
+        const selectedCode = projectCodeSelect.value;
+        if (!selectedCode || !projectsMap[selectedCode]) {
+            projectDetailsInput.value = '';
+            contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+            confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
+            projectNameSelect.value = '';
+            window.selectedProjectId = null; // ✅ افتراضي عند عدم الاختيار
+            return;
+        }
 
-       const project = projectsMap[selectedCode];
-    projectNameSelect.value = project.name;
-    projectDetailsInput.value = project.details;
-    window.selectedProjectId = project.id; // ✅ خزن project_id للاستخدام لاحقاً
+        const project = projectsMap[selectedCode];
+        projectNameSelect.value = project.name;
+        projectDetailsInput.value = project.details;
+        window.selectedProjectId = project.id; // ✅ خزن project_id للاستخدام لاحقاً
 
-        // ملء جهات الاتصال
-        contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
-        confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
-        project.contacts.forEach(item => {
-            const contactOption = document.createElement('option');
-            contactOption.value = item.contact;
-            contactOption.textContent = item.contact;
-            contactPersonSelect.appendChild(contactOption);
+            // ملء جهات الاتصال
+            contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+            confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
+            project.contacts.forEach(item => {
+                const contactOption = document.createElement('option');
+                contactOption.value = item.contact;
+                contactOption.textContent = item.contact;
+                contactPersonSelect.appendChild(contactOption);
 
-            const toOption = document.createElement('option');
-            toOption.value = item.to;
-            toOption.textContent = item.to;
-            confToSelect.appendChild(toOption);
-        });
+                const toOption = document.createElement('option');
+                toOption.value = item.to;
+                toOption.textContent = item.to;
+                confToSelect.appendChild(toOption);
+            });
     }
 
     // عند تغيير Project Name لتحديث الكود تلقائيًا
