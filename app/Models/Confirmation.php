@@ -49,6 +49,10 @@ class Confirmation extends Model
     return $this->hasMany(ConfirmationLine::class);
 }
     // علاقة مع خطوط التعميد
+    public function files()
+{
+    return $this->hasMany(ConfirmationFile::class, 'confirmation_id');
+}
 
 
     /**

@@ -84,4 +84,10 @@ public function contacts() {
             }
         });
     }
+
+    public function deliveries()
+{
+    return $this->hasMany(Delivery::class);
+}
+
 }

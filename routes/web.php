@@ -27,6 +27,7 @@ use App\Http\Controllers\Confirmation\ConfirmationLineController;
 
 use App\Http\Controllers\Deliveries\DeliveryController; // تأكد من استدعاء المتحكم
 use App\Http\Controllers\Confirmation\ConfirmationController;
+use App\Http\Controllers\Confirmation\ConfirmationFileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -281,9 +282,15 @@ Route::prefix('report-approval')->group(function () {
 });
 
 
+Route::resource('deliveries', DeliveryController::class);
+Route::get('/projects-with-relations', [DeliveryController::class, 'getProjectsWithRelations']);
+Route::post('/deliveries/{delivery}/approve', [DeliveryController::class, 'approvedeL'])
+     ->name('deliveries.approve');
+Route::post('/deliveries/{delivery}/send-to-customer', [DeliveryController::class, 'sendToCustomer'])->name('deliveries.send');
 
-Route::get('/deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');
+// Route::get('/deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');
 // هذا يُعرف مسار GET باسم deliveries.index
+// Route::post('/deliveries', [DeliveryController::class, 'store'])->name('deliveries.store');
 
 Route::resource('confirmations', ConfirmationController::class);
 
@@ -297,3 +304,18 @@ Route::delete('/confirmation-lines/{id}', [ConfirmationLineController::class, 'd
 // routes/web.php
 Route::post('/confirmations/duplicate', [ConfirmationController::class, 'duplicate'])->name('confirmations.duplicate');
 Route::delete('/confirmations/{id}', [ConfirmationController::class, 'destroy'])->name('confirmations.destroy');
+
+// جلب ملفات الـ Confirmation بصيغة JSON
+Route::get('confirmations/{id}/files-json', [ConfirmationFileController::class, 'filesJson']);
+
+// رفع ملف جديد للـ Confirmation
+Route::post('confirmations/{id}/files', [ConfirmationFileController::class, 'store']);
+
+// عرض الملف مباشرة
+Route::get('confirmations/files/view/{id}', [ConfirmationFileController::class, 'viewFile']);
+
+// تحميل الملف
+Route::get('confirmations/files/download/{id}', [ConfirmationFileController::class, 'download']);
+
+// حذف الملف
+Route::delete('confirmations/files/{id}', [ConfirmationFileController::class, 'destroy']);

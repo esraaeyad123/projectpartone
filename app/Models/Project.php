@@ -74,4 +74,9 @@ public function files()
     return $this->hasMany(QuotationHeader::class, 'project_id', 'id');
 }
 
+
+public function deliveries()
+    {
+        return $this->hasMany(Delivery::class);
+    }
 }
