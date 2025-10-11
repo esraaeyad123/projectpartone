@@ -79,4 +79,10 @@ public function deliveries()
     {
         return $this->hasMany(Delivery::class);
     }
+
+
+     public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }

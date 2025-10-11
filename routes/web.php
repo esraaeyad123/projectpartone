@@ -27,7 +27,7 @@ use App\Http\Controllers\Confirmation\ConfirmationController;
 use App\Http\Controllers\Confirmation\ConfirmationLineController;
 use App\Http\Controllers\Confirmation\ConfirmationFileController;
 use App\Http\Controllers\Deliveries\DeliveryController;
-use App\Http\Controllers\FinancialController;
+use App\Http\Controllers\Financial\FinancialController;
 
 /*
 |--------------------------------------------------------------------------

@@ -90,4 +90,9 @@ public function contacts() {
     return $this->hasMany(Delivery::class);
 }
 
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
 }
