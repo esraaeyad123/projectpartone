@@ -15,108 +15,114 @@
             <div id="confTab" class="form-tab-content active">
 
                 {{-- 1. Main Info (المعلومات الرئيسية) --}}
-                <fieldset class="form-section-fieldset">
-                    <legend>Main Info</legend>
-                    <input type="hidden" id="confId">
+             <fieldset class="form-section-fieldset">
+    <legend>Main Info</legend>
+    <input type="hidden" id="confId">
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="deliveryNo">Delivery No:</label>
-                            <input type="text" id="deliveryNo" name="delivery_no" value="AAM-DN-24-000081" readonly style="background-color: #e9ecef; cursor: not-allowed;">
-                        </div>
-                        <div class="form-group">
-                            <label for="deliveryDate">Delivery Date:</label>
-                            <input type="date" id="deliveryDate" name="delivery_date" value="{{ date('Y-m-d') }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="departmentSelect">Department:</label>
-                            <select id="departmentSelect" name="department">
-                                <option value="Materials Testing" selected>Materials Testing</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="deliveryNo">Delivery No:</label>
+            <input type="text" id="deliveryNo" name="delivery_no" value="AAM-DN-24-000081" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+        </div>
+        <div class="form-group">
+            <label for="deliveryDate">Delivery Date:</label>
+            <input type="date" id="deliveryDate" name="delivery_date" value="{{ date('Y-m-d') }}">
+        </div>
+        <div class="form-group">
+            <label for="departmentSelect">Department:</label>
+            <select id="departmentSelect" name="department">
+                <option value="Materials Testing" selected>Materials Testing</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+    </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="projectCodeSelect">Project Code:</label>
-                            <select id="projectCodeSelect" name="project_code">
-                                <option value="AAMP-4" selected>AAMP-4</option>
-                            
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="projectNo">Project No:</label>
-                            <input type="text" id="projectNo" name="project_no" placeholder="(فارغ)">
-                        </div>
-                        <div class="form-group">
-                            <label for="projectNameSelect">Project:</label>
-                            <select id="projectNameSelect" name="project_name">
-                                <option value="samer villa" selected>samer villa</option>
-                            
-                            </select>
-                        </div>
-                    </div>
+    {{-- ---------------------------------- --}}
+    {{-- Project Selection --}}
+    <div class="form-row">
+        <div class="form-group">
+            <label for="projectCodeSelect">Project Code:</label>
+            <select id="projectCodeSelect" name="project_code">
+                <option value="" disabled selected>[Select Project Code]</option>
+                @foreach($projects as $project)
+                    <option value="{{ $project->reference }}"
+                            data-id="{{ $project->id }}"
+                            data-name="{{ $project->name }}"
+                            data-details="{{ $project->project_details ?? '' }}"
+                            data-customer="{{ $project->customer_id }}">
+                        {{ $project->reference }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
-                    <div class="form-row">
-                        <div class="form-group full-width">
-                            <label for="projectDetails">Details:</label>
-                            <input type="text" id="projectDetails" name="project_details" value="samer villa">
-                        </div>
-                    </div>
-                </fieldset>
+        <div class="form-group">
+            <label for="projectNo">Project No:</label>
+            <input type="text" id="projectNo" name="project_no" placeholder="(فارغ)" readonly>
+        </div>
 
-                {{-- 2. Customer Info (معلومات العميل) --}}
-                <fieldset class="form-section-fieldset">
-                    <legend>Customer Info</legend>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="customerID">Customer ID:</label>
-                            <input type="text" id="customerID" name="customer_id_ref" value="AAMC-5" readonly style="background-color: #e9ecef; cursor: not-allowed;">
-                        </div>
-                        <div class="form-group">
-                            <label for="customerSelect">Customer:</label>
-                            <select id="customerSelect" name="customer_id">
-                                <option value="samer demo" selected>samer demo</option>
-                            
-                            </select>
-                        </div>
-                        <div class="form-group">
+        <div class="form-group">
+            <label for="projectNameSelect">Project Name:</label>
+            <input type="text" id="projectNameSelect" name="project_name" readonly>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group full-width">
+            <label for="projectDetails">Details:</label>
+            <input type="text" id="projectDetails" name="project_details" readonly>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset class="form-section-fieldset">
+    <legend>Customer Info</legend>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="customerID">Customer ID:</label>
+            <input type="text" id="customerID" name="customer_id_ref" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+        </div>
+        <div class="form-group">
+            <label for="customerSelect">Customer:</label>
+            <input type="text" id="customerSelect" name="customer_name" readonly>
+        </div>
+        <div class="form-group">
                             <label for="accountNo">Account No:</label>
                             <input type="text" id="accountNo" name="account_no" placeholder="(فارغ)">
                         </div>
-                        <div class="form-group">
-                            <label for="location">Location:</label>
-                            <input type="text" id="location" name="location" value="alhasa (الأحساء)">
-                        </div>
-                    </div>
-                </fieldset>
+        <div class="form-group">
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" readonly>
+        </div>
+    </div>
+</fieldset>
 
-                {{-- 3. Contact Info (معلومات الاتصال) --}}
-                <fieldset class="form-section-fieldset">
-                    <legend>Contact Info</legend>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="deliveryContact">Contact:</label>
-                            <input type="text" id="deliveryContact" name="contact_person" value="sam">
-                        </div>
-                        <div class="form-group">
-                            <label for="attnTo">Attn. To:</label>
-                            <input type="text" id="attnTo" name="attn_to" value="sam">
-                        </div>
-                        <div class="form-group">
-                            <label for="attnPos">Attn. Pos:</label>
-                            <input type="text" id="attnPos" name="attn_pos" value="site engineer (مهندس الموقع)">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group full-width">
-                            <label for="addressEmail">Address/Email:</label>
-                            <input type="text" id="addressEmail" name="address_email" value="Ehsa/Saudi Arabia E-mail: a2@ebc.com">
-                        </div>
-                    </div>
-                </fieldset>
-
+<fieldset class="form-section-fieldset">
+    <legend>Contact Info</legend>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="deliveryContact">Contact:</label>
+ <select id="deliveryContact" name="contact_person">
+        <option value="" disabled selected>[Select Contact]</option>
+        {{-- سيتم تعبئته بواسطة JS عند اختيار Project Code --}}
+    </select>
+</div>
+        <div class="form-group">
+            <label for="attnTo">Attn. To:</label>
+            <input type="text" id="attnTo" name="attn_to">
+        </div>
+        <div class="form-group">
+            <label for="attnPos">Attn. Pos:</label>
+            <input type="text" id="attnPos" name="attn_pos">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group full-width">
+            <label for="contactEmail">Address/Email:</label>
+            <input type="text" id="contactEmail" name="contactEmail">
+        </div>
+    </div>
+</fieldset>
                 {{-- 4. Delivery Info (معلومات إتمام التسليم) --}}
                 <fieldset class="form-section-fieldset">
                     <legend>Delivery Info</legend>
@@ -195,8 +201,8 @@
 
             <div class="form-buttons modal-bottom-buttons">
                 <button type="button" class="btn-primary" onclick="closeModal('confModal')"><i class="fas fa-times"></i> Close</button>
-                <button type="button" class="btn-success" onclick="saveConf(true)"><i class="fas fa-save"></i> Save & Close</button>
-                <button type="button" class="btn-primary" onclick="saveConf(false)"><i class="fas fa-save"></i> Save</button>
+                <button type="button" class="btn-success" onclick="saveDeli(true)"><i class="fas fa-save"></i> Save & Close</button>
+                <button type="button" class="btn-primary" onclick="saveDeli(false)"><i class="fas fa-save"></i> Save</button>
             </div>
         </form>
     </div>
@@ -253,17 +259,31 @@
                         <div class="form-group">
                             <label for="editProjectCodeSelect">Project Code:</label>
                             <select id="editProjectCodeSelect" name="project_code">
-                           
+
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="editProjectNo">Project No:</label>
-                            <input type="text" id="editProjectNo" name="project_no">
+                             <select id="editProjectNo" name="project_code">
+                <option value="" disabled selected>[Select Project Code]</option>
+                @foreach($projects as $project)
+                  <option value="{{ $project->reference }}"
+        data-id="{{ $project->id }}"
+        data-name="{{ $project->name }}"
+        data-details="{{ $project->project_details ?? '' }}"
+        data-customer="{{ $project->customer_id }}"
+        data-account="{{ $project->customer->account_no ?? '' }}"
+        data-location="{{ $project->customer->city ?? '' }}">
+    {{ $project->reference }}
+</option>
+
+                @endforeach
+            </select>
                         </div>
                         <div class="form-group">
                             <label for="editProjectNameSelect">Project:</label>
                             <select id="editProjectNameSelect" name="project_name">
-                               
+
                             </select>
                         </div>
                     </div>
@@ -287,7 +307,7 @@
                         <div class="form-group">
                             <label for="editCustomerSelect">Customer:</label>
                             <select id="editCustomerSelect" name="customer_id">
-                               
+
                             </select>
                         </div>
                         <div class="form-group">
@@ -474,3 +494,114 @@
     }
     /* يمكنك إضافة أي تنسيقات أخرى للجدول هنا */
 </style> -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const projectCodeSelect = document.getElementById('projectCodeSelect');
+    const projectNameInput = document.getElementById('projectNameSelect');
+    const projectDetailsInput = document.getElementById('projectDetails');
+    const projectNoInput = document.getElementById('projectNo');
+
+    const customerIdInput = document.getElementById('customerID');
+    const customerNameInput = document.getElementById('customerSelect');
+    const accountNoInput = document.getElementById('accountNo');
+    const locationInput = document.getElementById('location');
+
+    const deliveryContactSelect = document.getElementById('deliveryContact');
+    const attnToInput = document.getElementById('attnTo');
+    const attnPosInput = document.getElementById('attnPos');
+    const contactEmailInput = document.getElementById('contactEmail');
+    const contactPhoneInput = document.getElementById('contactPhone');
+    const contactMobileInput = document.getElementById('contactMobile');
+
+    // Projects map with contacts & customer
+    const projectsMap = {
+        @foreach($projects as $project)
+            "{{ $project->reference }}": {
+                id: @json($project->id),
+                name: @json($project->name),
+                details: @json($project->project_details ?? ''),
+                customer_id: @json($project->customer_id),
+                contacts: @json($project->contacts ?? [])
+            },
+        @endforeach
+    };
+
+    const customersMap = {
+        @foreach($customers as $customer)
+            "{{ $customer->id }}": {
+                customer_name: @json($customer->customer_name),
+                account_no: @json($customer->account_no ?? ''),
+                city: @json($customer->city ?? '')
+            },
+        @endforeach
+    };
+
+    // عند اختيار Project Code
+    projectCodeSelect.addEventListener('change', function() {
+        const selectedCode = projectCodeSelect.value;
+        if (!selectedCode || !projectsMap[selectedCode]) return;
+
+        const project = projectsMap[selectedCode];
+
+        // تعبئة بيانات المشروع
+        projectNameInput.value = project.name;
+        projectDetailsInput.value = project.details;
+        projectNoInput.value = project.id;
+
+        // تعبئة بيانات العميل
+        const customer = customersMap[project.customer_id];
+        if (customer) {
+            customerIdInput.value = project.customer_id;
+            customerNameInput.value = customer.customer_name;
+            accountNoInput.value = customer.account_no;
+            locationInput.value = customer.city;
+        }
+
+        // تعبئة جهات الاتصال الخاصة بالمشروع
+        deliveryContactSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+        project.contacts.forEach(contact => {
+            const option = document.createElement('option');
+            option.value = contact.id;
+            option.textContent = contact.mobile + (contact.name ? ' (' + contact.name + ')' : '');
+            // تخزين البيانات الكاملة كـ dataset لاستخدامها لاحقاً
+            option.dataset.name = contact.name;
+            option.dataset.position = contact.position || '';
+            option.dataset.email = contact.email || '';
+            option.dataset.mobile = contact.mobile || '';
+            deliveryContactSelect.appendChild(option);
+        });
+    });
+
+    // عند اختيار جهة اتصال
+    deliveryContactSelect.addEventListener('change', function() {
+        const selectedOption = deliveryContactSelect.selectedOptions[0];
+        if (!selectedOption) return;
+
+        attnToInput.value = selectedOption.dataset.name;
+        attnPosInput.value = selectedOption.dataset.position;
+        contactEmailInput.value = selectedOption.dataset.email;
+        contactPhoneInput.value = selectedOption.dataset.phone;
+        contactMobileInput.value = selectedOption.dataset.mobile;
+    });
+});
+
+
+$('#editProjectCodeSelect').on('change', function() {
+    const selectedOption = $(this).find('option:selected');
+
+    // تحديث Project Name / Project No / Details
+    $('#editProjectNameSelect').val(selectedOption.data('name'));
+    $('#editProjectNo').val(selectedOption.data('id'));
+    $('#editProjectDetails').val(selectedOption.data('details'));
+
+    // تحديث Customer
+    const customerId = selectedOption.data('customer');
+    $('#editCustomerID').val(customerId);
+    $('#editCustomerSelect').val(customerId);
+    $('#editAccountNo').val(selectedOption.data('account') || '');
+    $('#editLocation').val(selectedOption.data('location') || '');
+});
+
+
+
+</script>

@@ -204,7 +204,7 @@ $('#editProjectCode, #editProjectName').on('change', function() {
         });
     }
 
-    loadConfirmations(sampleData);
+    loadConfirmations(confirmationsTable);
 });
 
 
@@ -394,36 +394,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // تعبئة تفاصيل المشروع وجهات الاتصال عند اختيار مشروع
-   function fillProjectData() {
-    const selectedCode = projectCodeSelect.value;
-    if (!selectedCode || !projectsMap[selectedCode]) {
-        projectDetailsInput.value = '';
-        contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
-        confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
-        projectNameSelect.value = '';
-        window.selectedProjectId = null; // ✅ افتراضي عند عدم الاختيار
-        return;
-    }
+    function fillProjectData() {
+        const selectedCode = projectCodeSelect.value;
+        if (!selectedCode || !projectsMap[selectedCode]) {
+            projectDetailsInput.value = '';
+            contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+            confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
+            projectNameSelect.value = '';
+            window.selectedProjectId = null; // ✅ افتراضي عند عدم الاختيار
+            return;
+        }
 
-       const project = projectsMap[selectedCode];
-    projectNameSelect.value = project.name;
-    projectDetailsInput.value = project.details;
-    window.selectedProjectId = project.id; // ✅ خزن project_id للاستخدام لاحقاً
+        const project = projectsMap[selectedCode];
+        projectNameSelect.value = project.name;
+        projectDetailsInput.value = project.details;
+        window.selectedProjectId = project.id; // ✅ خزن project_id للاستخدام لاحقاً
 
-        // ملء جهات الاتصال
-        contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
-        confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
-        project.contacts.forEach(item => {
-            const contactOption = document.createElement('option');
-            contactOption.value = item.contact;
-            contactOption.textContent = item.contact;
-            contactPersonSelect.appendChild(contactOption);
+            // ملء جهات الاتصال
+            contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+            confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
+            project.contacts.forEach(item => {
+                const contactOption = document.createElement('option');
+                contactOption.value = item.contact;
+                contactOption.textContent = item.contact;
+                contactPersonSelect.appendChild(contactOption);
 
-            const toOption = document.createElement('option');
-            toOption.value = item.to;
-            toOption.textContent = item.to;
-            confToSelect.appendChild(toOption);
-        });
+                const toOption = document.createElement('option');
+                toOption.value = item.to;
+                toOption.textContent = item.to;
+                confToSelect.appendChild(toOption);
+            });
     }
 
     // عند تغيير Project Name لتحديث الكود تلقائيًا
@@ -836,6 +836,7 @@ function openEditConfirmationModal(id) {
                     `);
                 });
             }
+            loadConfirmationFiles(id, 'editConf');
 
             // عرض المودال بعد تعبئة كل شيء
             $('#editConfModal').show();
@@ -1509,6 +1510,162 @@ function deleteSelectedConfirmation() {
         });
     });
 }
+
+function openFileManager(modalType) {
+    let targetArea;
+    const confirmationId = window.currentConfirmationId; // تأكد أنه تم تعيينه عند فتح المودال
+    if (!confirmationId) {
+        Swal.fire('خطأ ❌', 'لم يتم تحديد رقم الـ Confirmation!', 'error');
+        return;
+    }
+
+    if (modalType === 'conf') targetArea = document.getElementById('uploadedFilesArea');
+    else if (modalType === 'editConf') targetArea = document.getElementById('editUploadedFilesArea');
+    else return console.error('Invalid modal type');
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.multiple = true;
+    fileInput.onchange = function(event) {
+        const files = Array.from(event.target.files);
+        files.forEach(file => uploadConfirmationFile(file, confirmationId, targetArea));
+    };
+    fileInput.click();
+}
+
+function uploadConfirmationFile(file, confirmationId, targetArea) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+    fetch(`/confirmations/${confirmationId}/files`, { method: 'POST', body: formData })
+    .then(res => res.json())
+    .then(file => renderConfirmationFileIcon(file, targetArea))
+    .catch(err => {
+        console.error(err);
+        Swal.fire('خطأ ❌', 'فشل رفع الملف.', 'error');
+    });
+}
+
+
+
+function getFileIcon(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    switch(ext) {
+        case 'pdf': return '<i class="far fa-file-pdf file-icon pdf-icon"></i>';
+        case 'doc':
+        case 'docx': return '<i class="far fa-file-word file-icon doc-icon"></i>';
+        case 'xls':
+        case 'xlsx': return '<i class="far fa-file-excel file-icon xls-icon"></i>';
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+        case 'gif': return '<i class="far fa-file-image file-icon img-icon"></i>';
+        default: return '<i class="far fa-file file-icon default-icon"></i>';
+    }
+}
+
+// الآن استدعي الدوال الأخرى بعد هذا
+function renderConfirmationFileIcon(file, container) {
+    const fileCard = document.createElement('div');
+    fileCard.className = 'file-card';
+    fileCard.dataset.fileId = file.id;
+
+    fileCard.innerHTML = `
+    <div class="file-card-content">
+        <input type="checkbox" class="selectFile file-card-checkbox" value="${file.id}">
+        ${getFileIcon(file.name)}
+        <span class="file-card-name" title="${file.name}">${file.name}</span>
+    </div>
+    <div class="file-card-hover-details">
+        <span class="file-card-date">Uploaded: ${file.created_at}</span>
+        <span class="file-card-size">Size: ${file.size}</span>
+        <div class="file-card-actions-hover">
+            <button type="button" class="btn-icon view-file-btn" title="View" onclick="viewConfirmationFile(${file.id})">
+                <i class="fas fa-eye"></i>
+            </button>
+            <button type="button" class="btn-icon download-file-btn" title="Download" onclick="downloadConfirmationFile(${file.id})">
+                <i class="fas fa-download"></i>
+            </button>
+            <button type="button" class="btn-icon delete-file-btn" title="Delete" onclick="deleteConfirmationFile(${file.id}, this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </div>
+`;
+    container.appendChild(fileCard);
+}
+
+
+function loadConfirmationFiles(confirmationId, modalType) {
+    let container;
+    if (modalType === 'conf') container = document.getElementById('uploadedFilesArea');
+    else if (modalType === 'editConf') container = document.getElementById('editUploadedFilesArea');
+    else return;
+
+    container.innerHTML = ''; // مسح القديم
+    fetch(`/confirmations/${confirmationId}/files-json`)
+        .then(res => res.json())
+        .then(files => {
+            if (!files.length) container.innerHTML = '<p class="text-muted">لا توجد ملفات مرفقة.</p>';
+            else files.forEach(file => renderConfirmationFileIcon(file, container));
+        });
+}
+
+// ==========================
+// عرض الملف في نافذة جديدة
+// ==========================
+function viewConfirmationFile(fileId) {
+    if (!fileId) return;
+    window.open(`/confirmations/files/view/${fileId}`, '_blank');
+}
+
+// ==========================
+// تحميل الملف
+// ==========================
+function downloadConfirmationFile(fileId) {
+    if (!fileId) return;
+    window.open(`/confirmations/files/download/${fileId}`, '_blank');
+}
+
+// ==========================
+// حذف الملف
+// ==========================
+function deleteConfirmationFile(fileId, btnElement, event) {
+    if(event) event.preventDefault();
+  Swal.fire({
+        icon: 'warning',
+        title: 'تأكيد الحذف؟',
+        text: 'هل أنت متأكد من حذف هذا الملف؟',
+        showCancelButton: true,
+        confirmButtonText: 'حذف',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/confirmations/files/${fileId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(() => {
+                // احذف فقط البطاقة من الـ DOM
+                const fileCard = btnElement.closest('.file-card');
+                if (fileCard) fileCard.remove();
+
+                Swal.fire('تم الحذف', '✔️ تم حذف الملف بنجاح', 'success');
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('خطأ ❌', 'فشل حذف الملف.', 'error');
+            });
+        }
+    });}
+
+
+
 
 
 

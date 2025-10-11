@@ -230,14 +230,17 @@
                     <p style="color: gray;">Use the File Manager button at the bottom to upload files from your device.</p>
                     <div id="uploadedFilesArea">
                         {{-- Files will be listed here --}}
+                        <div id="fileIconsContainer"></div>
+
                     </div>
                 </fieldset>
             </div>
 
             <div class="form-buttons modal-bottom-buttons">
                 <button type="button" class="btn-primary" onclick="closeModal('confModal')"><i class="fas fa-times"></i> Close</button>
-                <button type="button" class="btn-success" onclick="openFileManager('conf')"><i class="fas fa-folder-open"></i> File Manager</button>
-                <button type="button" class="btn-success" onclick="saveConf(true)"><i class="fas fa-save"></i> Save & Close</button>
+<button type="button" class="btn-success" onclick="openFileManager('conf')">
+    <i class="fas fa-folder-open"></i> File Manager
+</button>                <button type="button" class="btn-success" onclick="saveConf(true)"><i class="fas fa-save"></i> Save & Close</button>
                 <button type="button" class="btn-primary" onclick="saveConf(false)"><i class="fas fa-save"></i> Save</button>
             </div>
         </form>
@@ -463,11 +466,15 @@
                     <div id="editUploadedFilesArea">
                         {{-- Files will be listed here --}}
                     </div>
+
                 </fieldset>
+
             </div>
             <div class="form-buttons modal-bottom-buttons">
                 <button type="button" class="btn-primary" onclick="closeModal('editConfModal')"><i class="fas fa-times"></i> Close</button>
-                <button type="button" class="btn-success" onclick="openFileManager('editConf')"><i class="fas fa-folder-open"></i> File Manager</button>
+<button type="button" class="btn-success" onclick="openFileManager('editConf')">
+    <i class="fas fa-folder-open"></i> File Manager
+</button>
                 <button type="button" class="btn-success" onclick="saveEditConf(true)"><i class="fas fa-save"></i> Update & Close</button>
                 <button type="button" class="btn-primary" onclick="saveEditConf(false)"><i class="fas fa-save"></i> Update</button>
             </div>
