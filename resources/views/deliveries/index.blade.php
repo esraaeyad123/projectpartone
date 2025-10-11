@@ -12,19 +12,14 @@
                 <button title="Add Invoice" onclick="openConfModal()" class="btn-icon"><i class="fas fa-file"></i></button>
                 <button title="Edit Invoice" onclick="openEditDeliveriesModal()" class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedConfirmation()" class="btn-icon"><i class="fas fa-trash"></i></button>
-<<<<<<< HEAD
-                
-                <button title="Approve Delivery" onclick="approveDelivery()" class="btn-icon btn-approve" style="color: #28a745;">
-                    <i class="fas fa-check-circle"></i> 
-                </button>
-                
-=======
 
                 <button title="Approve Delivery" onclick="approveDelivery()" class="btn-icon btn-approve" style="color: #28a745;">
                     <i class="fas fa-check-circle"></i>
                 </button>
 
->>>>>>> 481b24c0adab649a6e0a599943b50d3349cd41c6
+
+                
+
                 <button title="Preview" onclick="previewDocument()" class="btn-icon"><i class="fas fa-eye"></i></button>
                 <button title="Send to Customer" onclick="sendToCustomer()" class="btn-icon"><i class="fas fa-envelope"></i></button>
             </div>

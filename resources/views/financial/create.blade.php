@@ -18,6 +18,7 @@
                 <fieldset class="form-section-fieldset">
                     <legend>Invoice Information</legend>
                     <input type="hidden" id="confId">
+<input type="hidden" id="projectNo">
 
                     <div class="form-row">
                         <div class="form-group">
@@ -56,15 +57,22 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="projectCodeSelect">Project Code:</label>
-                            <select id="projectCodeSelect" name="project_code">
-                                <option value="AAMP-4" selected>AAMP-4</option>
-                            </select>
+                                <select id="projectCodeSelect" name="project_code">
+                <option value="" disabled selected>[Select Project Code]</option>
+                @foreach($projects as $project)
+                    <option value="{{ $project->reference }}"
+                            data-id="{{ $project->id }}"
+                            data-name="{{ $project->name }}"
+                            data-details="{{ $project->project_details ?? '' }}"
+                            data-customer="{{ $project->customer_id }}">
+                        {{ $project->reference }}
+                    </option>
+                @endforeach
+            </select>
                         </div>
                         <div class="form-group">
                             <label for="projectNameSelect">Project Name:</label>
-                            <select id="projectNameSelect" name="project_name">
-                                <option value="samer villa" selected>samer villa</option>
-                            </select>
+                           <input type="text" id="projectNameSelect" name="project_name" readonly>
                         </div>
                         <div class="form-group">
                             <label for="contractNo">Contract #:</label>
@@ -74,8 +82,9 @@
 
                     <div class="form-row">
                         <div class="form-group full-width">
-                            <label for="projectDetails">Project:</label>
-                            <input type="text" id="projectDetails" name="project" value="samer villa">
+
+                               <label for="projectDetails">Details:</label>
+                               <input type="text" id="projectDetails" name="project_details" readonly>
                         </div>
                     </div>
                 </fieldset>
@@ -84,16 +93,14 @@
                 <fieldset class="form-section-fieldset">
                     <legend>Customer Information</legend>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="customerID">Customer ID:</label>
-                            <input type="text" id="customerID" name="customer_id_ref" value="AAMC-5" readonly style="background-color: #e9ecef; cursor: not-allowed;">
-                        </div>
-                        <div class="form-group">
-                            <label for="customerSelect">Customer:</label>
-                            <select id="customerSelect" name="customer_id">
-                                <option value="samer demo" selected>samer demo</option>
-                            </select>
-                        </div>
+                       <div class="form-group">
+    <label for="customerID">Customer ID:</label>
+    <input type="text" id="customerID" name="customer_id_ref" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+</div>
+<div class="form-group">
+    <label for="customerSelect">Customer:</label>
+    <input type="text" id="customerName" name="customer_name" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+</div>
                         <div class="form-group">
                             <label for="accountNo">Account #:</label>
                             <input type="text" id="accountNo" name="account_no" placeholder="(فارغ)">
@@ -270,7 +277,7 @@
             <button id="edit-conf-btn" onclick="switchTab('edit-conf')" class="active"><i class="fas fa-file-invoice"></i> Invoice Header</button>
             <button id="edit-contact-btn" onclick="switchTab('edit-contact')"><i class="fas fa-list-ol"></i> Invoice Lines</button>
         </div>
-        
+
         <form id="editConfForm">
             {{-- // ---------------------------------------------------------------------------------------- --}}
             {{-- // INVOICE HEADER TAB (EDIT) --}}
@@ -347,6 +354,8 @@
                 <fieldset class="form-section-fieldset">
                     <legend>Customer Information</legend>
                     <div class="form-row">
+
+
                         <div class="form-group">
                             <label for="editCustomerID">Customer ID:</label>
                             <input type="text" id="editCustomerID" name="customer_id_ref" readonly style="background-color: #e9ecef; cursor: not-allowed;">
@@ -494,7 +503,7 @@
                     </div>
                 </fieldset>
             </div>
-            
+
             <div class="form-buttons modal-bottom-buttons">
                 <button type="button" class="btn-primary" onclick="closeModal('editConfModal')"><i class="fas fa-times"></i> Close</button>
                 <button type="button" class="btn-success" onclick="saveEditConf(true)"><i class="fas fa-save"></i> Update & Close</button>
@@ -562,6 +571,8 @@
         </div>
     </div>
 </div>
+
+
 <style>
     /* تنسيق CSS لتمييز الصف المحدد */
     .row-selected {
@@ -571,3 +582,127 @@
     }
     /* يمكنك إضافة أي تنسيقات أخرى للجدول هنا */
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const projectCodeSelect = document.getElementById('projectCodeSelect');
+    const projectNameInput = document.getElementById('projectNameSelect');
+    const projectDetailsInput = document.getElementById('projectDetails');
+    const projectNoInput = document.getElementById('projectNo');
+
+    const customerIdInput = document.getElementById('customerID');
+    const customerNameInput = document.getElementById('customerSelect');
+    const accountNoInput = document.getElementById('accountNo');
+    const locationInput = document.getElementById('location');
+
+    const deliveryContactSelect = document.getElementById('deliveryContact');
+    const attnToInput = document.getElementById('attnTo');
+    const attnPosInput = document.getElementById('attnPos');
+    const contactEmailInput = document.getElementById('contactEmail');
+    const contactPhoneInput = document.getElementById('contactPhone');
+    const contactMobileInput = document.getElementById('contactMobile');
+
+    // Projects map with contacts & customer
+    const projectsMap = {
+        @foreach($projects as $project)
+            "{{ $project->reference }}": {
+                id: @json($project->id),
+                name: @json($project->name),
+                details: @json($project->project_details ?? ''),
+                customer_id: @json($project->customer_id),
+                contacts: @json($project->contacts ?? [])
+            },
+        @endforeach
+    };
+
+    const customersMap = {
+        @foreach($customers as $customer)
+            "{{ $customer->id }}": {
+                customer_name: @json($customer->customer_name),
+                account_no: @json($customer->account_no ?? ''),
+                city: @json($customer->city ?? '')
+            },
+        @endforeach
+    };
+
+    // عند اختيار Project Code
+    projectCodeSelect.addEventListener('change', function() {
+        const selectedCode = projectCodeSelect.value;
+        if (!selectedCode || !projectsMap[selectedCode]) return;
+
+        const project = projectsMap[selectedCode];
+
+        // تعبئة بيانات المشروع
+        projectNameInput.value = project.name;
+        projectDetailsInput.value = project.details;
+        projectNoInput.value = project.id;
+
+        // تعبئة بيانات العميل
+        const customer = customersMap[project.customer_id];
+        if (customer) {
+            customerIdInput.value = project.customer_id;
+            customerNameInput.value = customer.customer_name;
+            accountNoInput.value = customer.account_no;
+            locationInput.value = customer.city;
+        }
+
+        // تعبئة جهات الاتصال الخاصة بالمشروع
+        deliveryContactSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+        project.contacts.forEach(contact => {
+            const option = document.createElement('option');
+            option.value = contact.id;
+            option.textContent = contact.mobile + (contact.name ? ' (' + contact.name + ')' : '');
+            // تخزين البيانات الكاملة كـ dataset لاستخدامها لاحقاً
+            option.dataset.name = contact.name;
+            option.dataset.position = contact.position || '';
+            option.dataset.email = contact.email || '';
+            option.dataset.mobile = contact.mobile || '';
+            deliveryContactSelect.appendChild(option);
+        });
+    });
+
+    // عند اختيار جهة اتصال
+    deliveryContactSelect.addEventListener('change', function() {
+        const selectedOption = deliveryContactSelect.selectedOptions[0];
+        if (!selectedOption) return;
+
+        attnToInput.value = selectedOption.dataset.name;
+        attnPosInput.value = selectedOption.dataset.position;
+        contactEmailInput.value = selectedOption.dataset.email;
+        contactPhoneInput.value = selectedOption.dataset.phone;
+        contactMobileInput.value = selectedOption.dataset.mobile;
+    });
+});
+
+
+$('#editProjectCodeSelect').on('change', function() {
+    const selectedOption = $(this).find('option:selected');
+
+    // تحديث Project Name / Project No / Details
+    $('#editProjectNameSelect').val(selectedOption.data('name'));
+    $('#editProjectNo').val(selectedOption.data('id'));
+    $('#editProjectDetails').val(selectedOption.data('details'));
+
+    // تحديث Customer
+    const customerId = selectedOption.data('customer');
+    $('#editCustomerID').val(customerId);
+    $('#editCustomerSelect').val(customerId);
+    $('#editAccountNo').val(selectedOption.data('account') || '');
+    $('#editLocation').val(selectedOption.data('location') || '');
+});
+
+
+document.getElementById('projectSelect').addEventListener('change', function() {
+    const selected = this.selectedOptions[0];
+    if (!selected) return;
+
+    // جلب بيانات العميل من الـ data attributes
+    const customerId = selected.dataset.customerId;
+    const customerName = selected.dataset.customerName;
+
+    document.getElementById('customerID').value = customerId;
+    document.getElementById('customerName').value = customerName;
+});
+</script>
+
+

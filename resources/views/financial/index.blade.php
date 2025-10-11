@@ -1,5 +1,5 @@
-@extends('layouts.app') 
-@section('title', __('Financial Transactions')) 
+@extends('layouts.app')
+@section('title', __('Financial Transactions'))
 @section('content')
 @include('financial.create') <!-- المودال -->
 
@@ -13,11 +13,11 @@
                 <button title="Add Invoice" onclick="openConfModal()" class="btn-icon"><i class="fas fa-file"></i></button>
                 <button title="Edit Invoice" onclick="openEditDeliveriesModal()" class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedConfirmation()" class="btn-icon"><i class="fas fa-trash"></i></button>
-                
+
                 <button title="Approve Invoice" onclick="approveInvoice()" class="btn-icon btn-approve" style="color: #28a745;">
-                    <i class="fas fa-check-circle"></i> 
+                    <i class="fas fa-check-circle"></i>
                 </button>
-                
+
                 <button title="Preview" onclick="previewDocument()" class="btn-icon"><i class="fas fa-eye"></i></button>
                 <button title="Send to Customer" onclick="sendToCustomer()" class="btn-icon"><i class="fas fa-envelope"></i></button>
             </div>
@@ -40,15 +40,15 @@
 
                         <th>Invoice #<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Invoice Date<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-from"></th>
-                        
+
                         <th>Status<br><input type="text" class="column-filter" placeholder="Search..."></th>
 
                         <th>Net Amount<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>VAT Amount<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Total Due<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        
+
                         <th>Due Date<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-to"></th>
-                        
+
                         <th>Customer Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>TRN<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Project Code<br><input type="text" class="column-filter" placeholder="Search..."></th>
@@ -56,7 +56,7 @@
 
                         <th>Account Manager<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Department<br><input type="text" class="column-filter" placeholder="Search..."></th>
-                        
+
                         <th>Items Count<br><input type="text" class="column-filter" placeholder="Search..."></th>
 
                     </tr>
@@ -114,7 +114,7 @@
      * تعرض رسالة تحذيرية بأن الخدمة غير متوفرة حالياً.
      * */
     function sendToCustomer() {
-     
+
         Swal.fire({
                 title: "تنبيه",
                 text: "خدمة الإرسال إلى العميل غير متوفرة حالياً",
@@ -130,75 +130,75 @@ $(document).ready(function() {
     window.invoicesTable = $('#invoicesTable').DataTable({
         responsive: true,
         scrollX: true,
-        
+
         // ❌ تم حذف خاصية 'ajax'
         // ❌ تم حذف خاصية 'serverSide: true' - (هذا هو المفتاح للعمل بالـ Frontend فقط)
         processing: true, // يمكن الاحتفاظ بها لكنها لن تفعل شيئًا بدون جلب بيانات
-        
+
         // ترتيب افتراضي (حسب تاريخ الفاتورة تنازليًا - العمود الثالث)
-        order: [[2, 'desc']], 
+        order: [[2, 'desc']],
 
         // 💡 ملاحظة: عند العمل بالـ Frontend فقط، يجب إما حذف مصفوفة 'columns'
         // أو استخدام 'data: null' للأعمدة التي تريد التعامل مع محتواها يدوياً.
-        // بما أن البيانات ستُقرأ مباشرة من <tbody>، سنقوم بإزالتها لتبسيط الكود، 
+        // بما أن البيانات ستُقرأ مباشرة من <tbody>، سنقوم بإزالتها لتبسيط الكود،
         // لكن سأتركها مع 'data: null' للوضوح.
 
         columns: [
             // 1. عمود الاختيار (Checkbox)
-            { 
-                data: null, 
-                orderable: false, 
-                searchable: false, 
+            {
+                data: null,
+                orderable: false,
+                searchable: false,
                 render: function (data, type, row) {
                     // هذا الـ render لن يعمل بشكل صحيح إلا إذا كانت هناك بيانات في وضع الـ Ajax
                     // لذا يفضل وضع الـ checkbox داخل الـ HTML مباشرة في وضع الـ Frontend
                     return '<input type="checkbox" class="select-row-checkbox" value="' + (data ? data.id : '') + '">';
                 }
-            }, 
-            
+            },
+
             // 2. Invoice # (سيُقرأ من محتوى الخلية في <tbody>)
-            { data: null }, 
-            
+            { data: null },
+
             // 3. Invoice Date
-            { data: null }, 
-            
+            { data: null },
+
             // 4. Status (الحالة) - يجب أن يكون كود التلوين في الـ HTML مباشرة
-            { data: null }, 
+            { data: null },
 
-            // 5. Net Amount 
-            { data: null }, 
-            
+            // 5. Net Amount
+            { data: null },
+
             // 6. VAT Amount
-            { data: null }, 
-            
-            // 7. Total Due 
-            { data: null }, 
+            { data: null },
 
-            // 8. Due Date 
-            { data: null }, 
-            
+            // 7. Total Due
+            { data: null },
+
+            // 8. Due Date
+            { data: null },
+
             // 9. Customer Name
-            { data: null }, 
+            { data: null },
 
             // 10. TRN
-            { data: null }, 
-            
+            { data: null },
+
             // 11. Project Code
-            { data: null }, 
-            
+            { data: null },
+
             // 12. Project Name
-            { data: null }, 
-            
+            { data: null },
+
             // 13. Account Manager
-            { data: null }, 
+            { data: null },
 
             // 14. Department
-            { data: null }, 
-            
+            { data: null },
+
             // 15. Items Count
-            { data: null } 
+            { data: null }
         ]
-        
+
     });
 
     // 2. وظيفة البحث الديناميكي لكل عمود (Column Filters)
@@ -206,9 +206,9 @@ $(document).ready(function() {
     $('#invoicesTable thead .column-filter').each(function(i) {
         var that = this;
         var table = window.invoicesTable;
-        
+
         // لا نريد تفعيل الفلترة على أول عمود (Checkbox)
-        var columnIndex = i + 1; 
+        var columnIndex = i + 1;
 
         $(this).on('keyup change clear', function() {
             if (table.column(columnIndex).search() !== this.value) {
@@ -355,8 +355,6 @@ $(document).ready(function() {
         }
     }
 //-------------------------------------------------------------------------------------------
-
-
 
 
 </script>
