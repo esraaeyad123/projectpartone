@@ -9,8 +9,9 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+   public function up(): void
+{
+    if (!Schema::hasTable('confirmations')) {
         Schema::create('confirmations', function (Blueprint $table) {
             $table->id();
             $table->string('category')->nullable();
@@ -19,7 +20,7 @@ return new class extends Migration
 
             // 🔗 العلاقات (Relations)
             $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
-           $table->foreignId('customer_id')->nullable()->constrained('customers')->onDelete('set null');
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->onDelete('set null');
 
             // ✳️ باقي الحقول
             $table->string('subject')->nullable();
@@ -40,6 +41,8 @@ return new class extends Migration
             $table->timestamps();
         });
     }
+}
+
 
     /**
      * Reverse the migrations.

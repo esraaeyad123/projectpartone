@@ -10,9 +10,10 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
+{
+    if (!Schema::hasTable('confirmation_files')) {
         Schema::create('confirmation_files', function (Blueprint $table) {
-                 $table->id();
+            $table->id();
             $table->unsignedBigInteger('confirmation_id');
             $table->string('name');
             $table->string('path');
@@ -26,6 +27,8 @@ return new class extends Migration
                   ->onDelete('cascade');
         });
     }
+}
+
 
     /**
      * Reverse the migrations.

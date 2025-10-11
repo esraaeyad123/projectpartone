@@ -591,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const projectNoInput = document.getElementById('projectNo');
 
     const customerIdInput = document.getElementById('customerID');
-    const customerNameInput = document.getElementById('customerSelect');
+const customerNameInput = document.getElementById('customerName');
     const accountNoInput = document.getElementById('accountNo');
     const locationInput = document.getElementById('location');
 
@@ -692,17 +692,7 @@ $('#editProjectCodeSelect').on('change', function() {
 });
 
 
-document.getElementById('projectSelect').addEventListener('change', function() {
-    const selected = this.selectedOptions[0];
-    if (!selected) return;
 
-    // جلب بيانات العميل من الـ data attributes
-    const customerId = selected.dataset.customerId;
-    const customerName = selected.dataset.customerName;
-
-    document.getElementById('customerID').value = customerId;
-    document.getElementById('customerName').value = customerName;
-});
 </script>
 
 
