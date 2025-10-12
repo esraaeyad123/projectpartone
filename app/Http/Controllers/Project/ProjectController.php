@@ -90,6 +90,15 @@ public function show(Project $project)
     return response()->json($project);
 }
 
+public function getContacts($id)
+{
+    $project = Project::with('contacts')->findOrFail($id);
+    return response()->json([
+        'contacts' => $project->contacts
+    ]);
+}
+
+
 public function destroy(Project $project)
 {
     $project->delete();

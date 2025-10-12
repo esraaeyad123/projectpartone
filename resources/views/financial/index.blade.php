@@ -11,7 +11,7 @@
         <div class="icon-toolbar">
             <div>
                 <button title="Add Invoice" onclick="openConfModal()" class="btn-icon"><i class="fas fa-file"></i></button>
-                <button title="Edit Invoice" onclick="openEditDeliveriesModal()" class="btn-icon"><i class="fas fa-pen"></i></button>
+                <button title="Edit Invoice" onclick="openEditInvModal()" class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedConfirmation()" class="btn-icon"><i class="fas fa-trash"></i></button>
 
                 <button title="Approve Invoice" onclick="approveInvoice()" class="btn-icon btn-approve" style="color: #28a745;">
@@ -126,106 +126,95 @@
 
 $(document).ready(function() {
 
-    // 1. تحديث اسم الجدول إلى #invoicesTable
+    // ===============================
+    // 1️⃣ تهيئة جدول Invoices
+    // ===============================
     window.invoicesTable = $('#invoicesTable').DataTable({
         responsive: true,
         scrollX: true,
-
-        // ❌ تم حذف خاصية 'ajax'
-        // ❌ تم حذف خاصية 'serverSide: true' - (هذا هو المفتاح للعمل بالـ Frontend فقط)
-        processing: true, // يمكن الاحتفاظ بها لكنها لن تفعل شيئًا بدون جلب بيانات
-
-        // ترتيب افتراضي (حسب تاريخ الفاتورة تنازليًا - العمود الثالث)
-        order: [[2, 'desc']],
-
-        // 💡 ملاحظة: عند العمل بالـ Frontend فقط، يجب إما حذف مصفوفة 'columns'
-        // أو استخدام 'data: null' للأعمدة التي تريد التعامل مع محتواها يدوياً.
-        // بما أن البيانات ستُقرأ مباشرة من <tbody>، سنقوم بإزالتها لتبسيط الكود،
-        // لكن سأتركها مع 'data: null' للوضوح.
-
+        autoWidth: false,
+        columnDefs: [
+            { orderable: false, targets: [0] } // عمود الشيكبوكس لا يقبل الفرز
+        ],
         columns: [
-            // 1. عمود الاختيار (Checkbox)
-            {
-                data: null,
-                orderable: false,
-                searchable: false,
-                render: function (data, type, row) {
-                    // هذا الـ render لن يعمل بشكل صحيح إلا إذا كانت هناك بيانات في وضع الـ Ajax
-                    // لذا يفضل وضع الـ checkbox داخل الـ HTML مباشرة في وضع الـ Frontend
-                    return '<input type="checkbox" class="select-row-checkbox" value="' + (data ? data.id : '') + '">';
-                }
-            },
-
-            // 2. Invoice # (سيُقرأ من محتوى الخلية في <tbody>)
-            { data: null },
-
-            // 3. Invoice Date
-            { data: null },
-
-            // 4. Status (الحالة) - يجب أن يكون كود التلوين في الـ HTML مباشرة
-            { data: null },
-
-            // 5. Net Amount
-            { data: null },
-
-            // 6. VAT Amount
-            { data: null },
-
-            // 7. Total Due
-            { data: null },
-
-            // 8. Due Date
-            { data: null },
-
-            // 9. Customer Name
-            { data: null },
-
-            // 10. TRN
-            { data: null },
-
-            // 11. Project Code
-            { data: null },
-
-            // 12. Project Name
-            { data: null },
-
-            // 13. Account Manager
-            { data: null },
-
-            // 14. Department
-            { data: null },
-
-            // 15. Items Count
-            { data: null }
+            { data: 'checkbox', orderable: false, searchable: false }, // ✅ خانة التحديد
+            { data: 'invoice_no' },
+            { data: 'invoice_date' },
+            { data: 'status' },
+            { data: 'net_amount' },
+            { data: 'vat_amount' },
+            { data: 'total_due' },
+            { data: 'due_date' },
+            { data: 'customer_name' },
+            { data: 'trn' },
+            { data: 'project_code' },
+            { data: 'project_name' },
+            { data: 'account_manager' },
+            { data: 'department' },
+            { data: 'items_count' }
         ]
-
     });
 
-    // 2. وظيفة البحث الديناميكي لكل عمود (Column Filters)
-    // هذا الجزء سيعمل بشكل سليم لأنه يعتمد على محتويات الجدول بعد تهيئة DataTables
-    $('#invoicesTable thead .column-filter').each(function(i) {
-        var that = this;
-        var table = window.invoicesTable;
+    // ===============================
+    // 2️⃣ تحميل بيانات الفواتير من السيرفر
+    // ===============================
+    loadInvoices();
 
-        // لا نريد تفعيل الفلترة على أول عمود (Checkbox)
-        var columnIndex = i + 1;
-
-        $(this).on('keyup change clear', function() {
-            if (table.column(columnIndex).search() !== this.value) {
-                table
-                    .column(columnIndex)
-                    .search(this.value)
-                    .draw();
-            }
-        });
+    // ===============================
+    // 3️⃣ تحديد الكل / إلغاء الكل
+    // ===============================
+    $('#selectAllInvoices').on('change', function() {
+        let rows = invoicesTable.rows({ 'search': 'applied' }).nodes();
+        $('input.invoice-checkbox', rows).prop('checked', this.checked);
     });
 
-    // 3. معالج الاختيار الشامل
-    $('#selectAllInvoices').on('click', function(){
-        $('.select-row-checkbox').prop('checked', this.checked);
+    $('#invoicesTable tbody').on('change', 'input.invoice-checkbox', function() {
+        let allChecked = $('.invoice-checkbox').length === $('.invoice-checkbox:checked').length;
+        $('#selectAllInvoices').prop('checked', allChecked);
     });
-
 });
+
+
+// ===============================
+// 4️⃣ دالة تحميل بيانات الفواتير (AJAX)
+// ===============================
+function loadInvoices() {
+    $.ajax({
+        url: '/financial', // تأكد أن يرجع JSON
+        type: 'GET',
+        dataType: 'json',
+        success: function(invoices) {
+            invoicesTable.clear();
+
+            invoices.forEach(inv => {
+                invoicesTable.row.add({
+                    checkbox: `<input type="checkbox" class="invoice-checkbox" value="${inv.id}">`,
+                    invoice_no: inv.invoice_no ?? '',
+                    invoice_date: inv.invoice_date ?? '',
+                    status: inv.status ?? '',
+                    net_amount: inv.net_amount ?? '0',
+                    vat_amount: inv.vat_amount ?? '0',
+                    total_due: inv.total_due ?? '0',
+                    due_date: inv.due_date ?? '',
+                    customer_name: inv.customer_name ?? (inv.customer?.customer_name ?? ''),
+                    trn: inv.trn ?? (inv.customer?.trn ?? ''),
+                    project_code: inv.project_code ?? (inv.project?.reference ?? ''),
+                    project_name: inv.project_name ?? (inv.project?.name ?? ''),
+                    account_manager: inv.account_manager ?? '',
+                    department: inv.department ?? '',
+                    items_count: inv.items_count ?? (inv.items?.length ?? 0)
+                });
+            });
+
+            invoicesTable.draw();
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading invoices:', error);
+            Swal.fire('خطأ', 'حدث خطأ أثناء تحميل بيانات الفواتير من السيرفر', 'error');
+        }
+    });
+}
+
 //-------------------------------------------------------------------------------------------
     function openConfModal() {
         // 💡 التعديل: تصفير النموذج الخاص بالتعميد
@@ -355,6 +344,327 @@ $(document).ready(function() {
         }
     }
 //-------------------------------------------------------------------------------------------
+
+function saveInvoice(closeAfter = false) {
+    const invoiceData = {
+        // 🧾 معلومات الفاتورة
+        invoice_no: document.getElementById('deliveryNo').value,
+        invoice_date: document.getElementById('deliveryDate').value,
+        department: document.getElementById('departmentSelect').value,
+        prof_date: document.getElementById('profDate').value,
+        account_date: document.getElementById('accountDate').value,
+        due_date: document.getElementById('dueDate').value,
+
+        // 🏗️ معلومات المشروع
+        project_id: document.getElementById('projectNo').value,
+         project: document.getElementById('projectNo').value,
+        project_code: document.getElementById('projectCodeSelect').value,
+        project_name: document.getElementById('projectNameSelect').value,
+        project_details: document.getElementById('projectDetails').value,
+        contract_no: document.getElementById('contractNo').value,
+
+        // 👤 معلومات العميل
+customer_id: $('#editCustomerID').data('id') || $('#editCustomerID').val(),
+        customer_name: document.getElementById('customerName').value,
+        account_no: document.getElementById('accountNo').value,
+        trn_no: document.getElementById('trnNo').value,
+        location: document.getElementById('location').value,
+
+        // 📞 معلومات الاتصال
+        account_manager: document.getElementById('accountManager').value,
+        contact_person: document.getElementById('contactMobile').value,
+        attn_to: document.getElementById('attnTo').value,
+        attn_pos: document.getElementById('attnPos').value,
+        address_email: document.getElementById('addressEmail').value,
+
+        // 💰 الشروط والإعدادات المالية
+        payment_terms: document.getElementById('paymentTerms').value,
+        payment_method: document.getElementById('paymentMethod').value,
+        vat_profile: document.getElementById('vatProfile').value,
+        discount_pct: document.getElementById('discountPct').value,
+        sales_tax_pct: document.getElementById('salesTaxPct').value,
+        retention_pct: document.getElementById('retentionPct').value,
+        currency: document.getElementById('currency').value,
+    };
+
+    fetch('/financial', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(invoiceData)
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.message?.includes('success')) {
+            Swal.fire({
+                icon: 'success',
+                title: 'تم الحفظ بنجاح ✅',
+                text: 'تم إنشاء الفاتورة بنجاح.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            if (closeAfter) {
+                setTimeout(() => {
+                    window.location.href = '/financial';
+                }, 2000);
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ خطأ',
+                text: result.message || 'حدث خطأ أثناء حفظ الفاتورة.',
+            });
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        Swal.fire({
+            icon: 'error',
+            title: '⚠️ خطأ',
+            text: 'حدث خطأ أثناء إرسال البيانات للسيرفر.',
+        });
+    });
+}
+
+
+// ===============================
+// ✳️ فتح مودال تعديل الفاتورة المختارة
+// ===============================
+// ===============================
+// ✳️ فتح مودال تعديل الفاتورة المختارة
+// ===============================
+function openEditInvModal() {
+    const selectedIds = [];
+    $('.invoice-checkbox:checked').each(function () {
+        selectedIds.push($(this).val());
+    });
+
+    if (selectedIds.length === 0) {
+        Swal.fire('تنبيه', 'الرجاء اختيار فاتورة واحدة للتعديل', 'warning');
+        return;
+    }
+
+    if (selectedIds.length > 1) {
+        Swal.fire('تنبيه', 'الرجاء اختيار فاتورة واحدة فقط للتعديل', 'warning');
+        return;
+    }
+
+    const invoiceId = selectedIds[0];
+
+    // جلب بيانات الفاتورة من السيرفر عبر AJAX
+    $.ajax({
+        url: `/financial/${invoiceId}`,
+        type: 'GET',
+        dataType: 'json',
+        success: function (invoice) {
+
+            // تعبئة الحقول داخل المودال
+            $('#editConfId').val(invoice.id);
+            $('#editDeliveryNo').val(invoice.invoice_no);
+            $('#editDeliveryDate').val(invoice.invoice_date);
+            $('#editDepartmentSelect').val(invoice.department);
+
+            $('#editProfDate').val(invoice.prof_date);
+            $('#editAccountDate').val(invoice.account_date);
+            $('#editDueDate').val(invoice.due_date);
+
+            $('#editProjectCodeSelect').val(invoice.project_code ?? invoice.project?.reference ?? '');
+            $('#editProjectNameSelect').val(invoice.project_name ?? invoice.project?.name ?? '')
+            $('#editProject').val(invoice.project_details ?? invoice.project?.project_details ?? '');
+
+            $('#editContractNo').val(invoice.contract_no ?? '');
+
+          $('#editCustomerID').val(invoice.customer?.id ?? ''); // رقم العميل مثل AAMC-1001
+$('#editCustomerSelect').val(invoice.customer?.customer_name ?? ''); // اسم العميل مثل أحمد علي محمد
+
+            $('#editAccountNo').val(invoice.account_no ?? '');
+            $('#editTrnNo').val(invoice.trn_no ?? invoice.customer?.trn ?? '');
+            $('#editLocation').val(invoice.location ?? '');
+
+            $('#editAccountManager').val(invoice.account_manager ?? '');
+            $('#editDeliveryContact').val(invoice.contact_person ?? '');
+            $('#editAttnTo').val(invoice.attn_to ?? '');
+            $('#editAttnPos').val(invoice.attn_pos ?? '');
+            $('#editAddressEmail').val(invoice.address_email ?? '');
+
+            $('#editPaymentTerms').val(invoice.payment_terms ?? '');
+            $('#editPaymentMethod').val(invoice.payment_method ?? 'Bank Transfer');
+            $('#editVatProfile').val(invoice.vat_profile ?? '');
+            $('#editDiscountPct').val(invoice.discount_pct ?? 0);
+            $('#editSalesTaxPct').val(invoice.sales_tax_pct ?? 0);
+            $('#editRetentionPct').val(invoice.retention_pct ?? 0);
+            $('#editCurrency').val(invoice.currency ?? 'SAR');
+
+            // فتح المودال
+            $('#editConfModal').show().addClass('show');
+
+            $('#editCustomerID')
+    .val(invoice.customer?.id ?? '')
+    .data('id', invoice.customer?.id ?? '');
+
+            // تحميل بنود الفاتورة (Invoice Lines)
+            loadInvoiceLines(invoiceId);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error loading invoice:', error);
+            Swal.fire('خطأ', 'تعذر تحميل بيانات الفاتورة من السيرفر', 'error');
+        }
+    });
+}
+
+// ===============================
+// ✳️ تحميل تفاصيل بنود الفاتورة (Invoice Lines)
+// ===============================
+function loadInvoiceLines(invoiceId) {
+    $.ajax({
+        url: `/financial/${invoiceId}/lines`,
+        type: 'GET',
+        dataType: 'json',
+        success: function (lines) {
+            const table = $('#servicesTableEdit').DataTable();
+            table.clear();
+
+            lines.forEach(line => {
+                table.row.add([
+                    line.id ?? '',
+                    line.name ?? '',
+                    line.method ?? '',
+                    line.unit ?? '',
+                    line.price ?? 0,
+                    line.price_only ? '✅' : '',
+                    line.quantity ?? 1
+                ]);
+            });
+
+            table.draw();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error loading invoice lines:', error);
+            Swal.fire('خطأ', 'تعذر تحميل بنود الفاتورة من السيرفر', 'error');
+        }
+    });
+}
+
+
+
+function saveEditConf(closeAfterSave = true) {
+    const invoiceId = $('#editConfId').val();
+    if (!invoiceId) {
+        Swal.fire("خطأ", "رقم الفاتورة غير صالح.", "error");
+        return;
+    }
+
+    const data = {
+        invoice_no: $('#editDeliveryNo').val(),
+        invoice_date: $('#editDeliveryDate').val(),
+        department: $('#editDepartmentSelect').val(),
+        prof_date: $('#editProfDate').val(),
+        account_date: $('#editAccountDate').val(),
+        due_date: $('#editDueDate').val(),
+
+        project_code: $('#editProjectCodeSelect').val(),
+        project_name: $('#editProjectNameSelect').val(),
+        project_details: $('#editProject').val(),
+        contract_no: $('#editContractNo').val(),
+
+        customer_id: $('#editCustomerID').val(),
+        account_no: $('#editAccountNo').val(),
+        trn_no: $('#editTrnNo').val(),
+        location: $('#editLocation').val(),
+
+        account_manager: $('#editAccountManager').val(),
+        contact_person: $('#editDeliveryContact').val(),
+        contact_mobile: $('#editContactMobile').val() || '',
+        attn_to: $('#editAttnTo').val(),
+        attn_pos: $('#editAttnPos').val(),
+        address_email: $('#editAddressEmail').val(),
+
+        payment_terms: $('#editPaymentTerms').val(),
+        payment_method: $('#editPaymentMethod').val(),
+        vat_profile: $('#editVatProfile').val(),
+        discount_pct: parseFloat($('#editDiscountPct').val()) || 0,
+        sales_tax_pct: parseFloat($('#editSalesTaxPct').val()) || 0,
+        retention_pct: parseFloat($('#editRetentionPct').val()) || 0,
+        currency: $('#editCurrency').val(),
+        _token: $('meta[name="csrf-token"]').attr('content')
+    };
+
+    // التحقق من الحقول الأساسية
+    if (!data.project_code) {
+        Swal.fire("تحذير", "⚠️ الرجاء اختيار المشروع.", "warning");
+        return;
+    }
+    if (!data.customer_id) {
+        Swal.fire("تحذير", "⚠️ الرجاء اختيار العميل.", "warning");
+        return;
+    }
+
+    // إرسال الطلب عبر Ajax
+    $.ajax({
+        url: `/financial/${invoiceId}`,
+        type: 'PUT',
+        data: data,
+        success: function (response) {
+            Swal.fire({
+                icon: 'success',
+                title: response.message,
+                timer: 1500,
+                showConfirmButton: false
+            });
+            loadInvoices();
+            if (closeAfterSave) $('#editConfModal').hide();
+        },
+        error: function (xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ ❌',
+                html: xhr.responseJSON?.message || 'حدث خطأ غير معروف'
+            });
+        }
+    });
+}
+
+
+// دالة لإغلاق المودال
+function closeEditConfModal() {
+    $('#editConfModal').hide().removeClass('show');
+}
+
+// ===============================
+// ✳️ تحميل تفاصيل بنود الفاتورة (Invoice Lines)
+// ===============================
+function loadInvoiceLines(invoiceId) {
+    $.ajax({
+        url: `/financial/${invoiceId}/lines`,
+        type: 'GET',
+        dataType: 'json',
+        success: function (lines) {
+            const table = $('#servicesTableEdit').DataTable();
+            table.clear();
+
+            lines.forEach(line => {
+                table.row.add([
+                    line.id ?? '',
+                    line.name ?? '',
+                    line.method ?? '',
+                    line.unit ?? '',
+                    line.price ?? 0,
+                    line.price_only ? '✅' : '',
+                    line.quantity ?? 1
+                ]);
+            });
+
+            table.draw();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error loading invoice lines:', error);
+            Swal.fire('خطأ', 'تعذر تحميل بنود الفاتورة من السيرفر', 'error');
+        }
+    });
+}
 
 
 </script>

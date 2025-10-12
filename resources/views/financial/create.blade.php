@@ -128,8 +128,15 @@
                         </div>
                         <div class="form-group">
                             <label for="deliveryContact">Contact:</label>
-                            <input type="text" id="deliveryContact" name="contact_person" value="sami">
-                        </div>
+   <select id="deliveryContact" name="contact_person">
+        <option value="" disabled selected>[Select Contact]</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="ContactMobile">Mobile:</label>
+    <input type="text" id="contactMobile" name="contact_mobile"  value="">
+</div>
                         <div class="form-group">
                             <label for="attnTo">Attn. To:</label>
                             <input type="text" id="attnTo" name="attn_to" value="sami">
@@ -243,11 +250,18 @@
                 </fieldset>
             </div>
 
-            <div class="form-buttons modal-bottom-buttons">
-                <button type="button" class="btn-primary" onclick="closeModal('confModal')"><i class="fas fa-times"></i> Close</button>
-                <button type="button" class="btn-success" onclick="saveConf(true)"><i class="fas fa-save"></i> Save & Close</button>
-                <button type="button" class="btn-primary" onclick="saveConf(false)"><i class="fas fa-save"></i> Save</button>
-            </div>
+           <div class="form-buttons modal-bottom-buttons">
+    <button type="button" class="btn-primary" onclick="closeModal('confModal')">
+        <i class="fas fa-times"></i> Close
+    </button>
+    <button type="button" class="btn-success" onclick="saveInvoice(true)">
+        <i class="fas fa-save"></i> Save & Close
+    </button>
+    <button type="button" class="btn-primary" onclick="saveInvoice(false)">
+        <i class="fas fa-save"></i> Save
+    </button>
+</div>
+
         </form>
     </div>
 </div>
@@ -326,26 +340,40 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editProjectCodeSelect">Project Code:</label>
-                            <select id="editProjectCodeSelect" name="project_code">
-                                <option value="AAMP-4">AAMP-4</option>
-                            </select>
+                       <select id="editProjectCodeSelect" name="project_code">
+    <option value="" disabled selected>[Select Project Code]</option>
+    @foreach($projects as $project)
+        <option value="{{ $project->reference }}"
+                data-id="{{ $project->id }}"
+                data-name="{{ $project->name }}"
+                data-details="{{ $project->project_details ?? '' }}"
+                 data-customer-id="{{ $project->customer_id }}"
+                data-customer-name="{{ $project->customer->customer_name ?? '' }}">
+
+            {{ $project->reference }}
+        </option>
+    @endforeach
+</select>
+
                         </div>
-                        <div class="form-group">
-                            <label for="editProjectNameSelect">Project Name:</label>
-                            <select id="editProjectNameSelect" name="project_name">
-                                <option value="samer villa">samer villa</option>
-                            </select>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="editProject">Project:</label>
+                            <input type="text" id="editProjectNameSelect" name="project_name">
+
                         </div>
+                    </div>
                         <div class="form-group">
                             <label for="editContractNo">Contract #:</label>
                             <input type="text" id="editContractNo" name="contract_no">
                         </div>
                     </div>
-
-                    <div class="form-row">
+  <div class="form-row">
                         <div class="form-group full-width">
-                            <label for="editProject">Project:</label>
-                            <input type="text" id="editProject" name="project">
+
+                               <label for="editProject">Details:</label>
+                               <input type="text" id="editProject" name="project_details" readonly>
                         </div>
                     </div>
                 </fieldset>
@@ -362,9 +390,9 @@
                         </div>
                         <div class="form-group">
                             <label for="editCustomerSelect">Customer:</label>
-                            <select id="editCustomerSelect" name="customer_id">
-                                <option value="samer demo">samer demo</option>
-                            </select>
+
+                                <input type="text" id="editCustomerSelect" name="customer_name" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+
                         </div>
                         <div class="form-group">
                             <label for="editAccountNo">Account #:</label>
@@ -591,18 +619,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const projectNoInput = document.getElementById('projectNo');
 
     const customerIdInput = document.getElementById('customerID');
-const customerNameInput = document.getElementById('customerName');
+    const customerNameInput = document.getElementById('customerName');
     const accountNoInput = document.getElementById('accountNo');
     const locationInput = document.getElementById('location');
 
     const deliveryContactSelect = document.getElementById('deliveryContact');
     const attnToInput = document.getElementById('attnTo');
+    const ContactMobileInput = document.getElementById('ContactMobile');
     const attnPosInput = document.getElementById('attnPos');
-    const contactEmailInput = document.getElementById('contactEmail');
+    const contactEmailInput = document.getElementById('addressEmail');
     const contactPhoneInput = document.getElementById('contactPhone');
     const contactMobileInput = document.getElementById('contactMobile');
 
-    // Projects map with contacts & customer
+    // ✅ Projects map with customer & contacts
     const projectsMap = {
         @foreach($projects as $project)
             "{{ $project->reference }}": {
@@ -615,17 +644,18 @@ const customerNameInput = document.getElementById('customerName');
         @endforeach
     };
 
+    // ✅ Customers map
     const customersMap = {
         @foreach($customers as $customer)
             "{{ $customer->id }}": {
-                customer_name: @json($customer->customer_name),
+                name: @json($customer->customer_name),
                 account_no: @json($customer->account_no ?? ''),
                 city: @json($customer->city ?? '')
             },
         @endforeach
     };
 
-    // عند اختيار Project Code
+    // ✅ عند اختيار Project Code
     projectCodeSelect.addEventListener('change', function() {
         const selectedCode = projectCodeSelect.value;
         if (!selectedCode || !projectsMap[selectedCode]) return;
@@ -633,15 +663,15 @@ const customerNameInput = document.getElementById('customerName');
         const project = projectsMap[selectedCode];
 
         // تعبئة بيانات المشروع
-        projectNameInput.value = project.name;
-        projectDetailsInput.value = project.details;
-        projectNoInput.value = project.id;
+        projectNameInput.value = project.name || '';
+        projectDetailsInput.value = project.details || '';
+        projectNoInput.value = project.id || '';
 
         // تعبئة بيانات العميل
         const customer = customersMap[project.customer_id];
         if (customer) {
             customerIdInput.value = project.customer_id;
-            customerNameInput.value = customer.customer_name;
+            customerNameInput.value = customer.name;
             accountNoInput.value = customer.account_no;
             locationInput.value = customer.city;
         }
@@ -651,48 +681,55 @@ const customerNameInput = document.getElementById('customerName');
         project.contacts.forEach(contact => {
             const option = document.createElement('option');
             option.value = contact.id;
-            option.textContent = contact.mobile + (contact.name ? ' (' + contact.name + ')' : '');
-            // تخزين البيانات الكاملة كـ dataset لاستخدامها لاحقاً
-            option.dataset.name = contact.name;
+            option.textContent = `${contact.mobile || ''} (${contact.name || 'N/A'})`;
+            // ✅ تخزين البيانات الإضافية لاستخدامها لاحقاً
+            option.dataset.name = contact.name || '';
             option.dataset.position = contact.position || '';
             option.dataset.email = contact.email || '';
             option.dataset.mobile = contact.mobile || '';
+            option.dataset.phone = contact.phone || '';
             deliveryContactSelect.appendChild(option);
         });
     });
 
-    // عند اختيار جهة اتصال
+    // ✅ عند اختيار جهة اتصال
     deliveryContactSelect.addEventListener('change', function() {
         const selectedOption = deliveryContactSelect.selectedOptions[0];
         if (!selectedOption) return;
 
-        attnToInput.value = selectedOption.dataset.name;
-        attnPosInput.value = selectedOption.dataset.position;
-        contactEmailInput.value = selectedOption.dataset.email;
-        contactPhoneInput.value = selectedOption.dataset.phone;
-        contactMobileInput.value = selectedOption.dataset.mobile;
+        attnToInput.value = selectedOption.dataset.name || '';
+        attnPosInput.value = selectedOption.dataset.position || '';
+        contactEmailInput.value = selectedOption.dataset.email || '';
+        contactMobileInput.value = selectedOption.dataset.mobile || '';
     });
-});
 
 
-$('#editProjectCodeSelect').on('change', function() {
-    const selectedOption = $(this).find('option:selected');
 
-    // تحديث Project Name / Project No / Details
-    $('#editProjectNameSelect').val(selectedOption.data('name'));
-    $('#editProjectNo').val(selectedOption.data('id'));
-    $('#editProjectDetails').val(selectedOption.data('details'));
 
-    // تحديث Customer
-    const customerId = selectedOption.data('customer');
+
+    
+    $('#editProjectCodeSelect').on('change', function() {
+    const selected = $(this).find('option:selected');
+    const projectName = selected.data('name') || '';
+    const projectDetails = selected.data('details') || '';
+    const customerId = selected.data('customer-id') || '';
+    const customerName = selected.data('customer-name') || '';
+
+    // تعبئة حقول المشروع
+    $('#editProjectNameSelect').val(projectName);
+    $('#editProject').val(projectDetails);
+
+    // تعبئة العميل
     $('#editCustomerID').val(customerId);
-    $('#editCustomerSelect').val(customerId);
-    $('#editAccountNo').val(selectedOption.data('account') || '');
-    $('#editLocation').val(selectedOption.data('location') || '');
+    $('#editCustomerSelect').val(customerName); // لأنه صار input وليس select
 });
 
 
+});
+
+// ✅ نسخة محرر (edit) - لضمان عملها بشكل متكامل مع نفس البيانات
 
 </script>
+
 
 

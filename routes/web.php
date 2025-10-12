@@ -208,4 +208,7 @@ Route::delete('confirmations/files/{id}', [ConfirmationFileController::class, 'd
 
 
 // ======================= Financial =======================
-Route::get('/financial', [FinancialController::class, 'index'])->name('financial.index');
+
+Route::resource('financial', FinancialController::class);
+Route::get('/projects/{id}/contacts', [ProjectController::class, 'getContacts']);
+Route::get('/projects/{id}', [ProjectController::class, 'show']);

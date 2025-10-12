@@ -934,38 +934,29 @@ function saveEditConf(closeAfterSave = true) {
     };
 
     // 4. إرسال البيانات إلى السيرفر
-    $.ajax({
-        url: `/confirmations/${confirmationId}`,
-        type: 'PUT',
-        data: data,
-        success: function(response) {
-            Swal.fire({
-                icon: 'success',
-                title: 'تم التعديل بنجاح ✅',
-                timer: 2000,
-                showConfirmButton: false
-            });
+   $.ajax({
+    url: `/financial/${invoiceId}`,
+    type: 'PUT',
+    data: data,
+    success: function(response) {
+        Swal.fire({
+            icon: 'success',
+            title: response.message,
+            timer: 1500,
+            showConfirmButton: false
+        });
+        loadInvoices();
+        if (closeAfterSave) $('#editConfModal').hide();
+    },
+    error: function(xhr) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'تنبيه ⚠️',
+            html: xhr.responseJSON?.message || 'حدث خطأ غير معروف'
+        });
+    }
+});
 
-            // تحديث الجدول أو الواجهة بعد التعديل
-            loadConfirmations(); // دالة تقوم بإعادة تحميل الجدول
-            if (closeAfterSave) closeEditConfModal();
-        },
-        error: function(xhr) {
-            console.error(xhr.responseText);
-            const errorResponse = xhr.responseJSON;
-
-            const validationErrors = errorResponse && errorResponse.errors
-                ? Object.values(errorResponse.errors).map(e => e.join(', ')).join('<br>')
-                : errorResponse && errorResponse.message ? errorResponse.message : 'حدث خطأ غير معروف أثناء التعديل.';
-
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ في الخادم ❌',
-                html: validationErrors,
-                confirmButtonText: 'حسناً'
-            });
-        }
-    });
 }
 
 
