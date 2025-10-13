@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Mail;
+use Barryvdh\DomPDF\Facade\Pdf;
 class FinancialController extends Controller
 {
     /**
@@ -24,7 +26,7 @@ class FinancialController extends Controller
 
         // ✅ للعرض داخل Blade
         $invoices = Invoice::with(['customer', 'project'])->get();
-        $customers = Customer::all();
+        $customers = Customer::with('contacts')->get(); // العميل مع جهات الاتصال
         $projects = Project::with(['customer' ,'contacts'])->get();
 
         return view('financial.index', compact('invoices', 'customers', 'projects'));
@@ -139,4 +141,85 @@ class FinancialController extends Controller
 
         return response()->json($lines);
     }
+
+
+    public function deleteMultiple(Request $request)
+{
+    $ids = $request->input('ids');
+
+    if (empty($ids) || !is_array($ids)) {
+        return response()->json([
+            'message' => 'لم يتم إرسال أي فواتير للحذف ⚠️'
+        ], 422);
+    }
+
+    try {
+        // حذف الفواتير المحددة
+          Invoice::whereIn('id', $ids)->delete();
+
+        return response()->json([
+            'message' => 'تم حذف الفواتير المحددة بنجاح ✅'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'حدث خطأ أثناء حذف الفواتير ❌',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+public function approveInvoice(Invoice $invoice)
+{
+    try {
+        $invoice->status = 'Approved'; // أو "approved" حسب ما تستخدم
+        $invoice->save();
+
+        return response()->json([
+            'message' => 'تم اعتماد الفاتورة بنجاح ✅',
+            'invoice' => $invoice
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'حدث خطأ أثناء اعتماد الفاتورة ❌',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+public function sendToCustomer(Invoice $invoice)
+{
+    try {
+        // 🔹 استخدام البريد الموجود مباشرة في الفاتورة
+        $customerEmail = $invoice->address_email;
+
+        if (!$customerEmail) {
+            return response()->json(['message' => 'لا يوجد بريد إلكتروني صالح في الفاتورة'], 400);
+        }
+
+        // 🔹 إنشاء ملف PDF من الفاتورة
+        $pdf = Pdf::loadView('financial.invoice-pdf', compact('invoice'));
+
+        // 🔹 إرسال البريد مباشرة
+        Mail::send([], [], function ($message) use ($customerEmail, $pdf, $invoice) {
+            $message->to($customerEmail)
+                ->subject("فاتورة رقم {$invoice->invoice_no}")
+                ->attachData($pdf->output(), "Invoice-{$invoice->invoice_no}.pdf")
+                ->setBody('مرفق مع البريد نسخة من الفاتورة الخاصة بكم. شكرًا لتعاملكم معنا.');
+        });
+
+        return response()->json(['message' => 'تم إرسال الفاتورة مباشرة إلى البريد الموجود في الفاتورة ✅']);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'حدث خطأ أثناء إرسال الفاتورة ❌',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+
 }

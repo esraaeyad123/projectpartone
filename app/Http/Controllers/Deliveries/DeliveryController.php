@@ -21,7 +21,7 @@ public function index(Request $request)
 
     // 🖥️ عرض البيانات في صفحة Blade
     $deliveries =Delivery::with(['customer', 'project'])->get();
-    $customers = Customer::all();
+    $customers = Customer::with(['contacts', 'projects', 'confirmations', 'deliveries', 'invoices'])->get();
     $projects = Project::with(['contacts', 'customer'])->get();
     return view('deliveries.index', compact('deliveries', 'customers', 'projects'));
 }
@@ -166,27 +166,31 @@ public function approvedeL(Delivery $delivery)
 
 
 
+
 public function sendToCustomer(Delivery $delivery)
 {
-    $contacts = $delivery->customer->contacts ?? collect();
-    if ($contacts->isEmpty()) {
-        return response()->json(['message' => 'لا توجد جهات اتصال لإرسال الفاتورة'], 400);
+    // التحقق من وجود البريد الإلكتروني في الحقل address_email
+    if (!$delivery->address_email) {
+        return response()->json([
+            'message' => 'لا يوجد بريد إلكتروني صالح في الحقل address_email'
+        ], 400);
     }
 
-    $customerEmail = $contacts->first()->email;
-    if (!$customerEmail) {
-        return response()->json(['message' => 'لا يوجد بريد إلكتروني صالح'], 400);
-    }
+    $customerEmail = $delivery->address_email;
 
+    // توليد PDF للفاتورة
     $pdf = PDF::loadView('deliveries.invoice', compact('delivery'));
 
+    // إرسال البريد
     Mail::send([], [], function ($message) use ($customerEmail, $pdf, $delivery) {
         $message->to($customerEmail)
             ->subject("Delivery Invoice: {$delivery->delivery_no}")
             ->attachData($pdf->output(), "Delivery-{$delivery->delivery_no}.pdf");
     });
 
-    return response()->json(['message' => 'تم إرسال الفاتورة للعميل بنجاح ✅']);
+    return response()->json([
+        'message' => 'تم إرسال الفاتورة للعميل بنجاح ✅'
+    ]);
 }
 
 }

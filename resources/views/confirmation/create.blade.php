@@ -608,3 +608,116 @@
     }
     /* يمكنك إضافة أي تنسيقات أخرى للجدول هنا */
 </style>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const customerSelect = document.getElementById('customerSelect');
+    const projectCodeSelect = document.getElementById('projectCodeSelect');
+    const projectNameSelect = document.getElementById('projectNameSelect');
+    const projectDetailsInput = document.getElementById('projectDetails');
+    const contactPersonSelect = document.getElementById('contactPersonSelect');
+    const confToSelect = document.getElementById('confToSelect');
+
+    // -----------------------------
+    // جهات الاتصال لكل عميل
+    // -----------------------------
+    const customerContactsMap = {
+        @foreach($customers as $customer)
+        "{{ $customer->id }}": [
+            @foreach($customer->contacts as $contact)
+            { name: @json($contact->name), to: @json($contact->phone) },
+            @endforeach
+        ],
+        @endforeach
+    };
+
+    // -----------------------------
+    // المشاريع
+    // -----------------------------
+    const projectsMap = {
+        @foreach($projects as $project)
+        "{{ $project->id }}": {
+            code: "{{ $project->reference }}",
+            name: "{{ $project->name }}",
+            details: "{{ $project->project_details ?? '' }}",
+            customer_id: "{{ $project->customer_id }}"
+        },
+        @endforeach
+    };
+
+    // -----------------------------
+    // عند اختيار العميل
+    // -----------------------------
+    function fillDataForCustomer() {
+        const customerId = customerSelect.value;
+
+        // مسح المشاريع القديمة
+        projectCodeSelect.innerHTML = '<option value="" disabled selected>[Select Project Code]</option>';
+        projectNameSelect.innerHTML = '<option value="" disabled selected>[Select Project Name]</option>';
+
+        // تعبئة المشاريع الخاصة بالعميل
+        for (const id in projectsMap) {
+            const project = projectsMap[id];
+            if (project.customer_id == customerId) {
+                projectCodeSelect.append(new Option(project.code, id));
+                projectNameSelect.append(new Option(project.name, id));
+            }
+        }
+
+        // مسح الحقول القديمة
+        projectDetailsInput.value = '';
+        contactPersonSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+        confToSelect.innerHTML = '<option value="" disabled selected>[Select Destination]</option>';
+
+        // تعبئة جهات الاتصال
+        if(customerContactsMap[customerId]) {
+            customerContactsMap[customerId].forEach(item => {
+                contactPersonSelect.append(new Option(item.name, item.name));
+                confToSelect.append(new Option(item.to, item.to));
+            });
+        }
+    }
+
+    // -----------------------------
+    // عند اختيار مشروع
+    // -----------------------------
+    function fillProjectData(projectId) {
+        if (!projectsMap[projectId]) return;
+        const project = projectsMap[projectId];
+
+        // مزامنة الكود والاسم
+        projectCodeSelect.value = projectId;
+        projectNameSelect.value = projectId;
+
+        // تعبئة تفاصيل المشروع
+        projectDetailsInput.value = project.details;
+
+        // اختيار العميل تلقائيًا
+        customerSelect.value = project.customer_id;
+        fillDataForCustomer();
+    }
+
+    // -----------------------------
+    // Event Listeners
+    // -----------------------------
+    customerSelect.addEventListener('change', fillDataForCustomer);
+    projectCodeSelect.addEventListener('change', function() {
+        fillProjectData(this.value);
+    });
+    projectNameSelect.addEventListener('change', function() {
+        fillProjectData(this.value);
+    });
+
+    // -----------------------------
+    // إذا كان هناك بيانات محددة مسبقًا (Edit)
+    // -----------------------------
+    if(customerSelect.value) {
+        fillDataForCustomer();
+    }
+    if(projectCodeSelect.value) {
+        fillProjectData(projectCodeSelect.value);
+    }
+});
+</script>
+

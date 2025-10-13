@@ -210,5 +210,12 @@ Route::delete('confirmations/files/{id}', [ConfirmationFileController::class, 'd
 // ======================= Financial =======================
 
 Route::resource('financial', FinancialController::class);
+
 Route::get('/projects/{id}/contacts', [ProjectController::class, 'getContacts']);
 Route::get('/projects/{id}', [ProjectController::class, 'show']);
+
+Route::post('/financial/{invoice}/approve', [FinancialController::class, 'approveInvoice'])
+    ->name('financial.approve');
+
+Route::post('/financial/{invoice}/send-to-customer', [FinancialController::class, 'sendToCustomer'])
+    ->name('financial.sendToCustomer');

@@ -513,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const contactPhoneInput = document.getElementById('contactPhone');
     const contactMobileInput = document.getElementById('contactMobile');
 
-    // Projects map with contacts & customer
+    // Projects map with customer_id
     const projectsMap = {
         @foreach($projects as $project)
             "{{ $project->reference }}": {
@@ -521,17 +521,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: @json($project->name),
                 details: @json($project->project_details ?? ''),
                 customer_id: @json($project->customer_id),
-                contacts: @json($project->contacts ?? [])
             },
         @endforeach
     };
 
+    // Customers map with contacts
     const customersMap = {
         @foreach($customers as $customer)
             "{{ $customer->id }}": {
                 customer_name: @json($customer->customer_name),
                 account_no: @json($customer->account_no ?? ''),
-                city: @json($customer->city ?? '')
+                city: @json($customer->city ?? ''),
+                contacts: @json($customer->contacts ?? [])
             },
         @endforeach
     };
@@ -555,21 +556,21 @@ document.addEventListener('DOMContentLoaded', function() {
             customerNameInput.value = customer.customer_name;
             accountNoInput.value = customer.account_no;
             locationInput.value = customer.city;
-        }
 
-        // تعبئة جهات الاتصال الخاصة بالمشروع
-        deliveryContactSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
-        project.contacts.forEach(contact => {
-            const option = document.createElement('option');
-            option.value = contact.id;
-            option.textContent = contact.mobile + (contact.name ? ' (' + contact.name + ')' : '');
-            // تخزين البيانات الكاملة كـ dataset لاستخدامها لاحقاً
-            option.dataset.name = contact.name;
-            option.dataset.position = contact.position || '';
-            option.dataset.email = contact.email || '';
-            option.dataset.mobile = contact.mobile || '';
-            deliveryContactSelect.appendChild(option);
-        });
+            // تعبئة جهات الاتصال الخاصة بالعميل
+            deliveryContactSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+            customer.contacts.forEach(contact => {
+                const option = document.createElement('option');
+                option.value = contact.id;
+                option.textContent = contact.mobile + (contact.name ? ' (' + contact.name + ')' : '');
+                // تخزين البيانات الكاملة كـ dataset لاستخدامها لاحقاً
+                option.dataset.name = contact.name;
+                option.dataset.position = contact.position || '';
+                option.dataset.email = contact.email || '';
+                option.dataset.mobile = contact.mobile || '';
+                deliveryContactSelect.appendChild(option);
+            });
+        }
     });
 
     // عند اختيار جهة اتصال
@@ -580,12 +581,12 @@ document.addEventListener('DOMContentLoaded', function() {
         attnToInput.value = selectedOption.dataset.name;
         attnPosInput.value = selectedOption.dataset.position;
         contactEmailInput.value = selectedOption.dataset.email;
-        contactPhoneInput.value = selectedOption.dataset.phone;
-        contactMobileInput.value = selectedOption.dataset.mobile;
+        contactPhoneInput.value = selectedOption.dataset.phone || '';
+        contactMobileInput.value = selectedOption.dataset.mobile || '';
     });
 });
 
-
+// نسخة JQuery لصفحة تعديل المشروع
 $('#editProjectCodeSelect').on('change', function() {
     const selectedOption = $(this).find('option:selected');
 
@@ -601,7 +602,8 @@ $('#editProjectCodeSelect').on('change', function() {
     $('#editAccountNo').val(selectedOption.data('account') || '');
     $('#editLocation').val(selectedOption.data('location') || '');
 });
-
-
-
 </script>
+
+
+
+

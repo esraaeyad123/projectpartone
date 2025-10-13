@@ -134,7 +134,7 @@
 </div>
 
 <div class="form-group">
-    <label for="ContactMobile">Mobile:</label>
+    <label for="contactMobile">Mobile:</label>
     <input type="text" id="contactMobile" name="contact_mobile"  value="">
 </div>
                         <div class="form-group">
@@ -625,13 +625,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const deliveryContactSelect = document.getElementById('deliveryContact');
     const attnToInput = document.getElementById('attnTo');
-    const ContactMobileInput = document.getElementById('ContactMobile');
     const attnPosInput = document.getElementById('attnPos');
     const contactEmailInput = document.getElementById('addressEmail');
-    const contactPhoneInput = document.getElementById('contactPhone');
     const contactMobileInput = document.getElementById('contactMobile');
 
-    // ✅ Projects map with customer & contacts
+    // -----------------------------
+    // Projects map with customer & contacts
+    // -----------------------------
     const projectsMap = {
         @foreach($projects as $project)
             "{{ $project->reference }}": {
@@ -639,25 +639,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: @json($project->name),
                 details: @json($project->project_details ?? ''),
                 customer_id: @json($project->customer_id),
-                contacts: @json($project->contacts ?? [])
             },
         @endforeach
     };
 
-    // ✅ Customers map
+    // -----------------------------
+    // Customers map with contacts
+    // -----------------------------
     const customersMap = {
         @foreach($customers as $customer)
             "{{ $customer->id }}": {
                 name: @json($customer->customer_name),
                 account_no: @json($customer->account_no ?? ''),
-                city: @json($customer->city ?? '')
+                city: @json($customer->city ?? ''),
+                contacts: [
+                    @foreach($customer->contacts as $contact)
+                        {
+                            id: @json($contact->id),
+                            name: @json($contact->name),
+                            position: @json($contact->position ?? ''),
+                            email: @json($contact->email ?? ''),
+                            mobile: @json($contact->mobile ?? ''),
+                            phone: @json($contact->phone ?? '')
+                        },
+                    @endforeach
+                ]
             },
         @endforeach
     };
 
-    // ✅ عند اختيار Project Code
+    // -----------------------------
+    // عند اختيار Project Code
+    // -----------------------------
     projectCodeSelect.addEventListener('change', function() {
-        const selectedCode = projectCodeSelect.value;
+        const selectedCode = this.value;
         if (!selectedCode || !projectsMap[selectedCode]) return;
 
         const project = projectsMap[selectedCode];
@@ -674,27 +689,28 @@ document.addEventListener('DOMContentLoaded', function() {
             customerNameInput.value = customer.name;
             accountNoInput.value = customer.account_no;
             locationInput.value = customer.city;
-        }
 
-        // تعبئة جهات الاتصال الخاصة بالمشروع
-        deliveryContactSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
-        project.contacts.forEach(contact => {
-            const option = document.createElement('option');
-            option.value = contact.id;
-            option.textContent = `${contact.mobile || ''} (${contact.name || 'N/A'})`;
-            // ✅ تخزين البيانات الإضافية لاستخدامها لاحقاً
-            option.dataset.name = contact.name || '';
-            option.dataset.position = contact.position || '';
-            option.dataset.email = contact.email || '';
-            option.dataset.mobile = contact.mobile || '';
-            option.dataset.phone = contact.phone || '';
-            deliveryContactSelect.appendChild(option);
-        });
+            // تعبئة جهات الاتصال الخاصة بالعميل فقط
+            deliveryContactSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+            customer.contacts.forEach(contact => {
+                const option = document.createElement('option');
+                option.value = contact.id;
+                option.textContent = `${contact.name} (${contact.mobile || ''})`;
+                option.dataset.name = contact.name || '';
+                option.dataset.position = contact.position || '';
+                option.dataset.email = contact.email || '';
+                option.dataset.mobile = contact.mobile || '';
+                option.dataset.phone = contact.phone || '';
+                deliveryContactSelect.appendChild(option);
+            });
+        }
     });
 
-    // ✅ عند اختيار جهة اتصال
+    // -----------------------------
+    // عند اختيار جهة اتصال
+    // -----------------------------
     deliveryContactSelect.addEventListener('change', function() {
-        const selectedOption = deliveryContactSelect.selectedOptions[0];
+        const selectedOption = this.selectedOptions[0];
         if (!selectedOption) return;
 
         attnToInput.value = selectedOption.dataset.name || '';
@@ -702,34 +718,9 @@ document.addEventListener('DOMContentLoaded', function() {
         contactEmailInput.value = selectedOption.dataset.email || '';
         contactMobileInput.value = selectedOption.dataset.mobile || '';
     });
-
-
-
-
-
-    
-    $('#editProjectCodeSelect').on('change', function() {
-    const selected = $(this).find('option:selected');
-    const projectName = selected.data('name') || '';
-    const projectDetails = selected.data('details') || '';
-    const customerId = selected.data('customer-id') || '';
-    const customerName = selected.data('customer-name') || '';
-
-    // تعبئة حقول المشروع
-    $('#editProjectNameSelect').val(projectName);
-    $('#editProject').val(projectDetails);
-
-    // تعبئة العميل
-    $('#editCustomerID').val(customerId);
-    $('#editCustomerSelect').val(customerName); // لأنه صار input وليس select
 });
-
-
-});
-
-// ✅ نسخة محرر (edit) - لضمان عملها بشكل متكامل مع نفس البيانات
-
 </script>
+
 
 
 

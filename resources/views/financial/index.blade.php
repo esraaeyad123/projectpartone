@@ -113,7 +113,7 @@
      * * تستدعي هذه الدالة عند الضغط على زر "Send to Customer".
      * تعرض رسالة تحذيرية بأن الخدمة غير متوفرة حالياً.
      * */
-    function sendToCustomer() {
+    function sendToCustomer5() {
 
         Swal.fire({
                 title: "تنبيه",
@@ -665,6 +665,148 @@ function loadInvoiceLines(invoiceId) {
         }
     });
 }
+
+
+function deleteSelectedConfirmation() {
+    if (typeof invoicesTable === 'undefined' || invoicesTable === null) {
+        Swal.fire("خطأ", "لم يتم تهيئة جدول الفواتير (invoicesTable).", "error");
+        return;
+    }
+
+    // 1️⃣ جمع معرّفات الفواتير المحددة
+    const selectedIds = [];
+    const rowsToDelete = [];
+
+    invoicesTable.$('.invoice-checkbox:checked').each(function() {
+        const row = $(this).closest('tr');
+        const id = $(this).val(); // القيمة المفترضة داخل الـ checkbox
+        selectedIds.push(id);
+        rowsToDelete.push(row);
+    });
+
+    if (selectedIds.length === 0) {
+        Swal.fire("تحذير", "⚠️ الرجاء تحديد فاتورة واحدة على الأقل للحذف.", "warning");
+        return;
+    }
+
+    // 2️⃣ تأكيد الحذف عبر SweetAlert
+    Swal.fire({
+        title: "هل أنت متأكد؟",
+        text: `أنت على وشك حذف ${selectedIds.length} فاتورة/فواتير. لا يمكن التراجع عن هذا الإجراء!`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "نعم، احذف!",
+        cancelButtonText: "إلغاء",
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // 3️⃣ إرسال طلب AJAX للحذف
+            $.ajax({
+                url: `/financial/delete-multiple`,
+                type: 'POST',
+                data: {
+                    ids: selectedIds,
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    _method: 'DELETE'
+                },
+                success: function(response) {
+                    // إزالة الصفوف من DataTables
+                    invoicesTable.rows(rowsToDelete).remove().draw(false);
+                    $('#selectAllInvoices').prop('checked', false);
+
+                    Swal.fire("تم الحذف! ✅", response.message || "تم حذف الفواتير بنجاح.", "success");
+                },
+                error: function(xhr) {
+                    console.error("AJAX Error:", xhr.responseText);
+                    Swal.fire("خطأ ❌", xhr.responseJSON?.message || "حدث خطأ أثناء حذف الفواتير.", "error");
+                }
+            });
+        }
+    });
+}
+
+
+function approveInvoice() {
+    const selected = $('.invoice-checkbox:checked');
+
+    if (selected.length === 0) {
+        Swal.fire('⚠️', 'الرجاء اختيار فاتورة لاعتمادها', 'warning');
+        return;
+    }
+
+    if (selected.length > 1) {
+        Swal.fire('⚠️', 'الرجاء اختيار فاتورة واحدة فقط', 'warning');
+        return;
+    }
+
+    const invoiceId = selected.val();
+
+    $.ajax({
+        url: `/financial/${invoiceId}/approve`,
+        type: 'POST',
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (response) {
+            Swal.fire({
+                icon: 'success',
+                title: response.message,
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            // 🔄 تحديث جدول الفواتير بعد الاعتماد
+            loadInvoices();
+        },
+        error: function (xhr) {
+            Swal.fire('❌ خطأ', xhr.responseJSON?.message || 'فشل اعتماد الفاتورة', 'error');
+            console.error(xhr.responseJSON);
+        }
+    });
+}
+
+function sendToCustomer() {
+    const selected = $('.invoice-checkbox:checked');
+
+    if (selected.length === 0) {
+        Swal.fire('⚠️', 'الرجاء اختيار فاتورة لإرسالها للعميل', 'warning');
+        return;
+    }
+    if (selected.length > 1) {
+        Swal.fire('⚠️', 'الرجاء اختيار فاتورة واحدة فقط', 'warning');
+        return;
+    }
+
+    const invoiceId = selected.val();
+
+    $.ajax({
+        url: `/financial/${invoiceId}/send-to-customer`,
+        type: 'POST',
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (response) {
+            Swal.fire({
+                icon: 'success',
+                title: 'تم الإرسال بنجاح ✅',
+                text: response.message,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        },
+        error: function (xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ خطأ',
+                text: xhr.responseJSON?.message || 'فشل إرسال الفاتورة للعميل'
+            });
+            console.error(xhr.responseJSON);
+        }
+    });
+}
+
+
+
 
 
 </script>
