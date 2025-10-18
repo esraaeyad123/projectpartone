@@ -1,10 +1,11 @@
 
 <nav class="main-menu">
     <button onclick="window.location.href='/'"><i class="fas fa-layer-group"></i> <span data-key="General">General</span></button>
-    <button onclick="window.location.href = 'testing.html'">
+    <button onclick="window.location.href='{{ route('testing.index') }}'">
     <i class="fas fa-bug"></i>
     <span data-key="Testing">Testing</span>
 </button>
+
   <!-- <button onclick="window.location.href = 'geotech.html'"><i class="fas fa-mountain"></i> <span data-key="Geotechnical">Geotechnical</span></button> -->
     <!-- <button onclick="window.location.href = 'calibration.html'"><i class="fas fa-ruler"></i> <span data-key="Calibration">Calibration</span></button> -->
     <!-- <button onclick="window.location.href = 'fleet.html'"><i class="fas fa-truck-fast"></i> <span data-key="Fleet">Fleet</span></button> -->

@@ -85,4 +85,9 @@ public function deliveries()
     {
         return $this->hasMany(Invoice::class);
     }
+
+
+    public function orders() {
+        return $this->hasMany(Order::class);
+    }
 }

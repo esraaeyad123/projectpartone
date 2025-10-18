@@ -4,42 +4,49 @@
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/quotation.css') }}">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- NEW: FixedColumns CSS for fixed headers -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 
+</head>
+<body>
 <section id="quotation-section" class="section-content active">
     <div class="icon-toolbar">
         <div>
             <button title="Add" onclick="openQuotationModal()" class="btn-icon">
                 <i class="fas fa-file"></i>
             </button>
-            <button title="Edit" onclick="editQuotationModal(getSingleSelectedQuotationId())" class="btn-icon">
+
+            <button title="Edit" id="quote-editBtn" onclick="editQuotationModal()" class="btn-icon" >
                 <i class="fas fa-pen"></i>
             </button>
-            <button title="Delete" onclick="deleteSelectedQuotation()" class="btn-icon">
+
+            <button title="Delete" id="quote-deleteBtn" onclick="deleteSelectedQuotation()" class="btn-icon" >
                 <i class="fas fa-trash"></i>
             </button>
 
-            <button title="Revise" onclick="reviseQuotation(getSingleSelectedQuotationId())" class="btn-icon">
+            <button title="Revise" id="quote-reviseBtn" onclick="reviseQuotation()" class="btn-icon" >
                 <i class="fas fa-pen-to-square"></i>
             </button>
-            <button class="btn btn-success btn-add-price" onclick="openAddPriceModal()">
-        <i class="fas fa-plus"></i>
-    </button>
         </div>
 
         <div class="icon-separator"></div>
 
         <div>
-            <button title="Save" onclick="saveQuotationChanges()" class="btn-icon">
+            <button title="Save" id="quote-saveBtn" onclick="saveQuotationChanges()" class="btn-icon" >
                 <i class="fas fa-save"></i>
             </button>
-            <button title="Submit for Approval" onclick="submitForApproval(getSingleSelectedQuotationId())" class="btn-icon">
+
+            <button title="Submit for Approval" id="quote-submitBtn" onclick="submitForApproval()" class="btn-icon" >
                 <i class="fas fa-upload"></i>
             </button>
-            <button title="Confirm" onclick="confirmQuotation(getSingleSelectedQuotationId())" class="btn-icon">
+
+            <button title="Confirm" id="quote-confirmBtn" onclick="confirmQuotation()" class="btn-icon" >
                 <i class="fas fa-check-circle"></i>
             </button>
-           <button title="Send to Customer" onclick="sendQuotationToCustomer(getSingleSelectedQuotationId())" class="btn-icon">
+
+            <button title="Send to Customer" id="quote-sendBtn" onclick="sendQuotationToCustomer()" class="btn-icon" >
                 <i class="fas fa-share-from-square"></i>
             </button>
         </div>
@@ -50,23 +57,24 @@
             <button title="Search" onclick="searchQuotation()" class="btn-icon">
                 <i class="fas fa-search"></i>
             </button>
-            <button title="Open PDF" onclick="openQuotationPDF(getSingleSelectedQuotationId())" class="btn-icon">
+
+            <button title="Create PDF" id="quote-openPdfBtn" onclick="openQuotationPDF()" class="btn-icon" >
                 <i class="fas fa-file-pdf"></i>
             </button>
 
- <button title="Preview" onclick="previewQuotation()" class="btn-icon">
-    <i class="fas fa-file-invoice"></i>
-</button>
+            <button title="Preview" onclick="previewQuotation()" class="btn-icon">
+                <i class="fas fa-file-invoice"></i>
+            </button>
 
-        <button title="Export to Excel" onclick="exportSelectedToExcel()" class="btn-icon">
+            <button title="Export to Excel" id="quote-exportBtn" onclick="exportSelectedToExcel()" class="btn-icon" >
                 <i class="fas fa-file-excel"></i>
             </button>
-            <button title="Print" onclick="printSelectedRows()" class="btn-icon">
+
+            <button title="Print" id="quote-printBtn" onclick="printSelectedRows()" class="btn-icon" >
                 <i class="fas fa-print"></i>
             </button>
         </div>
     </div>
-
 </section>
 
 
@@ -1573,7 +1581,7 @@ body.dark-mode {
             <table id="quotationTable" class="quotation-table" data-ignore-lang>
                 <thead>
                     <tr>
-                       <th><input type="checkbox" onclick="toggleSelectAllQuotationsMin(this)" id="selectQuotationsMin" /></th>
+                       <th><input type="checkbox" id="quote-masterCheckbox" title="Select All/Deselect All"></th>
 
                             <th><i class="fas fa-circle" style="color: grey;" title="جديد / قيد الإنشاء"></i></th>
             <th><i class="fas fa-list-alt" style="color: blue;" title="مكتمل / مرسل"></i></th>
@@ -1662,6 +1670,7 @@ body.dark-mode {
 
     <div id="quotationModal" class="modal" style="display: none;">
         <div class="modal-content large-modal quotation-modal-grid">
+          <form id="quotationForm">
             <span class="close" onclick="closeQuotationModal()">&times;</span>
 
             <ul class="tab-list">
@@ -1678,8 +1687,8 @@ body.dark-mode {
                 <div id="headerTab" class="tab-content active">
                     <div class="left-form-section">
                         <fieldset class="form-section">
-                            <input type="hidden" id="currentQuotationId" value="">
                             <legend>Quote Info</legend>
+                             <input type="hidden" id="originalQuoteId" />
                             <div class="form-grid-2-col">
                                 <label for="quoteCategory">Category:<span class="required-star">*</span></label>
 <div class="input-with-button" style="position: relative;">
@@ -1740,7 +1749,7 @@ body.dark-mode {
 
 
                                 <label for="quoteProjectDetails">Project Details:</label>
-                                <input type="text" id="quoteProjectDetails" autocomplete="off">
+                                <input type="text" id="quoteProjectDetails" readonly>
 
                                 <label for="quoteSubject">Subject:<span class="required-star">*</span></label>
                                 <input type="text" id="quoteSubject" required autocomplete="off">
@@ -1951,11 +1960,51 @@ body.dark-mode {
                          <div class="modal-footer">
                 <button type="button" id="closeHeaderTabBtn" class="btn btn-secondary">Close</button>
                 <div class="footer-spacer"></div> <!-- Spacer to push save buttons to right -->
-                    <button type="button" id="saveHeaderTabBtn" class="btn btn-primary">Save Header</button>
-                    <button type="button" id="saveAndCloseHeaderTabBtn" class="btn btn-success">Save Header & Close</button>
-            </div>
-                    </div>
+                <!-- ✅ زر الحفظ -->
+<button type="button" id="saveHeaderTabBtn" class="btn btn-primary" onclick="handleSaveHeader(false)">
+    Save Header
+</button>
 
+<button type="button" id="saveAndCloseHeaderTabBtn" class="btn btn-success" onclick="handleSaveHeader(true)">
+    Save Header & Close
+</button>
+
+
+  <button type="button" id="saveEditedQuotationBtn" class="btn btn-success" onclick="saveEditedQuotation()">Save Edits</button>
+
+
+                   </div>
+
+                   </form>
+   </div>
+
+   <style>
+
+
+
+     /* 1. الحاوية الرئيسية (Modal Content) و الـ FORM */
+.modal-content.quotation-modal-grid,
+#quotationForm {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 95vh !important;
+    height: 100% !important; /* مهم للفورم لملء محتواه */
+}
+
+/* 2. الـ Scroll الرأسي على الجسم (Body) */
+.modal-body-content {
+    flex-grow: 1 !important;
+    overflow-y: auto !important; /* تفعيل السكرول الرأسي */
+    /* ... باقي الخصائص ... */
+}
+
+/* 3. الـ Scroll الأفقي على التبويب النشط */
+#headerTab.tab-content.active {
+    flex-wrap: nowrap !important; /* منع الالتفاف */
+    overflow-x: auto !important; /* تفعيل السكرول الأفقي */
+    /* ... باقي الخصائص ... */
+}
+   </style>
                     <!-- Financials and Quote Status sections for the Header tab -->
                     <div class="right-sidebar-section">
                         <fieldset class="form-section">
@@ -1988,9 +2037,11 @@ body.dark-mode {
                                 <input type="text" id="quoteLastConfirmed" autocomplete="off">
                             </div>
                         </fieldset>
+
                     </div>
 
                 </div>
+
 
                 <!-- START: Updated Quote Lines Tab Content -->
                 <div id="linesTab" class="tab-content lines-tab-layout">
@@ -2013,7 +2064,7 @@ body.dark-mode {
                             <table id="quotationLinesTable" class="quotation-lines-table" data-ignore-lang>
                                 <thead>
                                     <tr>
-                                        <th><input type="checkbox" class="select-all-lines" onclick="toggleSelectAllQuoteLines(this)" /></th>
+                                        <th><input type="checkbox" id= "checkbox" class="select-all-lines" onclick="toggleSelectAllQuoteLines(this)" /></th>
                                         <th>Service/Test Id</th>
                                         <th>Line Description</th>
                                         <th>Accounted</th>
@@ -2167,43 +2218,6 @@ body.dark-mode {
         </form>
     </div>
 </div>
-<div id="addPriceModal" class="modal" style="display: none;">
-    <div class="modal-content small-modal">
-        <span class="close" id="closeAddPriceModalBtn">&times;</span>
-        <div class="modal-header-title">
-            <h2>Add New Price Item</h2>
-        </div>
-        <div class="modal-body-content">
-            <form id="addPriceForm">
-                <label for="priceServiceId">Service ID:</label>
-                <input type="text" id="priceServiceId" name="service_id" required placeholder="مثال: LIMS-001" autocomplete="off">
-
-                <label for="priceName">Name:</label>
-                <input type="text" id="priceName" name="name" required autocomplete="off">
-
-                <label for="priceMethod">Method:</label>
-                <select id="priceMethod" name="method" required>
-                    <option value="list">List</option>
-                    <option value="fixed">Fixed</option>
-                    <option value="calculated">Calculated</option>
-                </select>
-
-                <label for="priceUnit">Unit:</label>
-                <input type="text" id="priceUnit" name="unit" autocomplete="off">
-
-                <label for="priceAmount">Price:</label>
-                <input type="number" id="priceAmount" name="price" step="0.01" required>
-
-                <label><input type="checkbox" id="priceOnly" name="priceOnly"> Price Only</label>
-                <label><input type="checkbox" id="priceActive" name="active" checked> Active</label>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-cancel" id="cancelAddPriceBtn">Cancel</button>
-            <button type="button" class="btn btn-primary" id="savePriceBtn">Save</button>
-        </div>
-    </div>
-</div>
 
 <div id="custom-toast-container">
     <div id="custom-toast">
@@ -2214,32 +2228,28 @@ body.dark-mode {
         <div class="custom-toast-body" id="customToastBody"></div>
     </div>
 </div>
-<script>
-    window.routes = {
-        quotationsDelete: "{{ route('quotations.delete') }}"
-    };
-</script>
-<!-- jQuery (لازم يجي أول) -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <!-- NEW: FixedColumns JS for fixed headers -->
+    <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-<!-- Buttons Plugin -->
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-<!-- JSZip (مطلوب لـ Excel) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
 
-<!-- pdfmake (مطلوب لـ PDF) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+
 
 <!-- ملفات المشروع -->
 <script src="{{ asset('js/main.js') }}"></script>

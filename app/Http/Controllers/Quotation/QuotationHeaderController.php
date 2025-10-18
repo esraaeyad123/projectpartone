@@ -8,6 +8,11 @@ use App\Models\QuotationHeader;
 use App\Models\Customer;
 use App\Models\Project;
 use App\Models\ProjectContact;
+use App\Models\Employee;
+use App\Models\QuotationCounter;
+
+
+
 
 
 class QuotationHeaderController extends Controller
@@ -21,50 +26,63 @@ class QuotationHeaderController extends Controller
     return view('quotation.index', compact('quotations'));
     }
 
-    public function getProjects()
-{
-    // جلب المشاريع مع علاقة العميل
-    $projects = Project::with('customer')->get()->map(function($project) {
-        return [
-                'id' => $project->id,
-        'code' => $project->reference,
-        'name' => $project->name,
-        'customer' => $project->customer->customer_name ?? '',
-        'customer_id' => $project->customer->id ?? null, // 🔹 أضف هذا
 
-        ];
-    });
+
+public function getProjects()
+{
+    // تحميل كل العلاقات المحتملة
+    $projects = Project::with(['customer', 'owner', 'consultant', 'contractor'])
+        ->get()
+        ->map(function ($project) {
+            // اختيار العميل الفعلي حسب أول علاقة غير فارغة
+            $actualCustomer = $project->customer
+                ?? $project->owner
+                ?? $project->consultant
+                ?? $project->contractor;
+
+            return [
+                'id' => $project->id,
+                'code' => $project->reference,
+                'name' => $project->name,
+                'arabic_name' => $project->arabic_name,
+                'registration_date' => $project->registration_date,
+                'region' => $project->region,
+                'project_details' => $project->project_details,
+
+                // العميل الحقيقي
+                'customer_id' => $actualCustomer->id ?? null,
+                'customer_name' => $actualCustomer->customer_name ?? null,
+
+                // بقية الأطراف (للعرض فقط)
+                'owner_name' => $project->owner->customer_name ?? null,
+                'consultant_name' => $project->consultant->customer_name ?? null,
+                'contractor_name' => $project->contractor->customer_name ?? null,
+            ];
+        });
 
     return response()->json($projects);
-
 }
+
+
 
 // Route: GET /quotation/contacts
 public function getContacts(Request $request)
 {
-    $projectRef = $request->query('project');
+   $projectRef = $request->query('project');
     $customerId = $request->query('customer');
 
+    // جلب المشروع مع التحقق من العميل إذا تم تمريره
     $project = Project::where('reference', $projectRef)
         ->when($customerId, fn($q) => $q->where('customer_id', $customerId))
         ->first();
 
-    if (!$project) {
+    if (!$project || !$project->customer) {
         return response()->json([
-            'project_contacts' => [],
             'customer_contacts' => []
         ]);
     }
 
-    // جهات اتصال المشروع
-    $projectContacts = $project->contacts()
-        ->get(['id','name','position as title','email','mobile','phone'])
-        ->map(function ($c) use ($project) {
-            $c->city = $project->customer->city ?? null;
-            return $c;
-        });
-
-    // جهات اتصال العميل
+    // جهات اتصال العميل فقط
     $customerContacts = $project->customer->contacts()
         ->get(['id','name','position as title','email','mobile','phone'])
         ->map(function ($c) use ($project) {
@@ -73,68 +91,66 @@ public function getContacts(Request $request)
         });
 
     return response()->json([
-        'project_contacts' => $projectContacts,
         'customer_contacts' => $customerContacts
     ]);
 }
 
 
-      public function list(Request $request)
-{
-    $quotations = QuotationHeader::with(['customer', 'project', 'contact'])->get()->map(function($q) {
+
+ public function list()
+    {
+         $quotations = QuotationHeader::with(['customer.contacts', 'project', 'contact'])->get();
+
+    $data = $quotations->map(function($q) {
+        $contact = $q->contact; // قد يكون null
+        $customerContacts = $q->customer ? $q->customer->contacts : collect();
+
+        // نختار أول جهة اتصال للعرض في الجدول، أو يمكن تعديل حسب الحاجة
+        $firstCustomerContact = $customerContacts->first();
+
         return [
-            'id' => $q->id,
-            'customer_id' => $q->customer_id,
-            'project_id' => $q->project_id,
-            'contact_id' => $q->contact_id,
-            'quote_no' => $q->quote_no,
-            'rev' => $q->rev,
-            'quote_date' => $q->quote_date,
-            'quote_category' => $q->quote_category,
-            'project_code' => $q->project->reference ?? '',
-            'customer_name' => $q->customer->customer_name ?? '',
-            'project_name' => $q->project->name ?? '',
-            'legacy_date' => $q->legacy_date,
-            'legacy_no' => $q->legacy_no,
-            'subject' => $q->subject,
-            'contact_from' => $q->contact_from,
-            'inquiry' => $q->inquiry,
-            'contact' => $q->contact->name ?? '',
-            'to' => ($q->customer->city ?? '') . ' - ' . ($q->contact->email ?? ''),
-            'attn_to' => $q->contact->name ?? '',
-            'attn_pos' => $q->contact->position ?? '',
-            'contact_email' => $q->contact->email ?? '',
-            'contact_mobile' => $q->contact->mobile ?? '',
-            'currency' => $q->currency,
-            'discount' => $q->discount,
-            'vat' => $q->vat,
-            'validity' => $q->validity_days,
-            'payment_terms' => $q->payment_terms,
-            'method' => $q->method,
-            'use_alt_form' => $q->use_alt_form,
-            'remarks' => $q->remarks,
-            'quote_file' => $q->quote_file,
-            'file_status' => $q->file_status,
-            'declined' => $q->declined,
-            'declined_message' => $q->declined_message,
-            'total_lines' => $q->total_lines,
-            'discount_amount' => $q->discount_amount,
-            'tax_amount' => $q->tax_amount,
-            'grand_total' => $q->grand_total,
-            'overall_status' => $q->overall_status,
-            'last_confirmation' => $q->last_confirmation,
-            'last_confirmed' => $q->last_confirmed,
-            'project_details' => $q->project_details,
-            'isNew' => !$q->quote_file, // مثال: إذا لم يكن هناك ملف، اعتبره جديد
-            'isSent' => $q->file_status === 'sent', // مثال: حالة الإرسال
-            'isActive' => $q->overall_status === 'active',
-            'isApproved' => $q->overall_status === 'approved',
-            'isRejected' => $q->overall_status === 'rejected',
+            'id'              => $q->id,
+            'quote_category'  => $q->quote_category,
+            'quote_no'        => $q->quote_no,
+            'rev'             => $q->rev,
+            'quote_date'      => $q->quote_date,
+            'project_code'    => optional($q->project)->reference,
+            'legacy_no'       => $q->legacy_no,
+            'legacy_date'     => $q->legacy_date,
+            'customer_name'   => optional($q->customer)->customer_name,
+            'project_name'    => optional($q->project)->name,
+            'project_details' => optional($q->project)->project_details,
+            'subject'         => $q->subject,
+            'contact_from'    => $q->contact_from,
+            'inquiry'         => $q->inquiry,
+            'contact'         => optional($firstCustomerContact)->name,
+            'to'              => optional($firstCustomerContact)->email,
+            'attn_to'         => optional($firstCustomerContact)->name,
+            'attn_pos'        => optional($firstCustomerContact)->position,
+            'contact_email'   => optional($firstCustomerContact)->email,
+            'contact_mobile'  => optional($firstCustomerContact)->mobile,
+            'contact_phone'   => optional($firstCustomerContact)->phone,
+            'discount'        => $q->discount,
+            'vat'             => $q->vat,
+            'validity'        => $q->validity_days,
+            'currency'        => $q->currency,
+            'payment_terms'   => $q->payment_terms,
+            'method'          => $q->method,
+            'remarks'         => $q->remarks,
+            'quote_file'      => $q->quote_file,
+            'file_status'     => $q->file_status,
+            'declined'        => $q->declined,
+            'declined_message'=> $q->declined_message,
+            'isNew'           => true,
+            'isSent'          => false,
+            'isActive'        => false,
+            'isApproved'      => false,
+            'isRejected'      => false,
         ];
     });
 
-    return response()->json($quotations);
-}
+    return response()->json($data);
+    }
 
 
 
@@ -151,35 +167,72 @@ public function getContacts(Request $request)
     /**
      * Store a newly created resource in storage.
      */
-    public function saveHeader(Request $request)
+
+
+
+// توليد رقم عرض السعر (يقبل أي فئة)
+private function generateQuotationNumber(string $category): string
+{
+    $prefix = 'AAM';
+    $year = date('y');
+
+    // تحويل الفئة إلى اختصار تلقائي (أول حرف من كل كلمة، مع إزالة الأحرف غير الأبجدية)
+    $words = preg_split('/\s+/', $category); // تقسيم على المسافات
+    $categoryPrefix = '';
+    foreach ($words as $word) {
+        $firstChar = preg_replace('/[^A-Za-z0-9]/', '', $word); // إزالة الأحرف الغريبة
+        if (!empty($firstChar)) {
+            $categoryPrefix .= strtoupper($firstChar[0]);
+        }
+    }
+
+    if (empty($categoryPrefix)) {
+        $categoryPrefix = 'XX'; // افتراضي إذا الفئة فارغة أو تحتوي أحرف غير صالحة
+    }
+
+    // التعامل مع العداد
+    $counter = QuotationCounter::firstOrCreate(
+        ['category' => $category],
+        ['last_number' => 0]
+    );
+    $counter->increment('last_number');
+
+    $formatted = str_pad($counter->last_number, 5, '0', STR_PAD_LEFT);
+
+    return "$prefix-$categoryPrefix-Q-$year-$formatted";
+}
+
+
+
+// حفظ أو إنشاء عرض سعر
+public function store(Request $request)
 {
     $validated = $request->validate([
-        'id'             => 'nullable|integer|exists:quotation_headers,id',
-        'customer_id'    => 'required|integer|exists:customers,id',
-        'project_id'     => 'required|integer|exists:projects,id',
-        'contact_id'     => 'required|integer|exists:contacts,id',
-        'quote_category' => 'required|string|max:255',
-        'quote_no'       => 'required|string|max:255',
-        'rev'            => 'nullable|string|max:50',
-        'quote_date'     => 'nullable|date',
-        'legacy_no'      => 'nullable|string|max:255',
-        'legacy_date'    => 'nullable|date',
-        'subject'        => 'nullable|string|max:255',
-        'currency'       => 'nullable|string|max:10',
-        'discount'       => 'nullable|numeric',
-        'vat'            => 'nullable|numeric',
-        'validity_days'  => 'nullable|integer',
-        'payment_terms'  => 'nullable|string|max:255',
-        'method'         => 'nullable|string|max:255',
-        'remarks'        => 'nullable|string',
-        'quote_file'     => 'nullable|string|max:255',
-        'file_status'    => 'nullable|string|max:50',
-        'declined'       => 'nullable|boolean',
-        'declined_message'=> 'nullable|string',
-        'total_lines'    => 'nullable|numeric',
-        'discount_amount'=> 'nullable|numeric',
-        'tax_amount'     => 'nullable|numeric',
-        'grand_total'    => 'nullable|numeric',
+        'id'               => 'nullable|integer|exists:quotation_headers,id',
+        'customer_id'      => 'required|integer|exists:customers,id',
+        'project_id'       => 'required|integer|exists:projects,id',
+        'contact_id'       => 'required|integer|exists:contacts,id',
+        'quote_category'   => 'required|string|max:255',
+        'rev'              => 'nullable|string|max:50',
+        'quote_date'       => 'nullable|date',
+        'legacy_no'        => 'nullable|string|max:255',
+        'legacy_date'      => 'nullable|date',
+        'subject'          => 'nullable|string|max:255',
+        'currency'         => 'nullable|string|max:10',
+        'discount'         => 'nullable|numeric',
+        'vat'              => 'nullable|numeric',
+        'validity_days'    => 'nullable|integer',
+        'payment_terms'    => 'nullable|string|max:255',
+        'method'           => 'nullable|string|max:255',
+        'remarks'          => 'nullable|string',
+        'quote_file'       => 'nullable|string|max:255',
+        'file_status'      => 'nullable|string|max:50',
+        'declined'         => 'nullable|boolean',
+        'declined_message' => 'nullable|string',
+        'total_lines'      => 'nullable|numeric',
+        'discount_amount'  => 'nullable|numeric',
+        'tax_amount'       => 'nullable|numeric',
+        'grand_total'      => 'nullable|numeric',
         'inquiry'          => 'nullable|string|max:255',
         'contact_from'     => 'nullable|string|max:255',
         'attn_to'          => 'nullable|string|max:255',
@@ -194,20 +247,22 @@ public function getContacts(Request $request)
     ]);
 
     if (!empty($validated['id'])) {
-        // ✅ تحديث
+        // تحديث عرض سعر موجود
         $quotation = QuotationHeader::findOrFail($validated['id']);
         $quotation->update($validated);
         $message = 'Quotation updated successfully!';
     } else {
-        // ✅ إنشاء جديد
+        // إنشاء عرض سعر جديد
+        $validated['quote_no'] = $this->generateQuotationNumber($validated['quote_category']);
         $quotation = QuotationHeader::create($validated);
         $message = 'Quotation created successfully!';
     }
 
     return response()->json([
-        'success'       => true,
-        'quotation_id'  => $quotation->id,
-        'message'       => $message,
+        'success'      => true,
+        'quotation_id' => $quotation->id,
+        'quote_no'     => $quotation->quote_no,
+        'message'      => $message,
     ]);
 }
 
@@ -215,63 +270,63 @@ public function getContacts(Request $request)
     /**
      * Display the specified resource.
      */
-    public function show($id)
-      {
+   public function show($id)
+{
     $quotation = QuotationHeader::with(['customer','project','contact'])->findOrFail($id);
 
     return response()->json([
+        'header' => [
             'id' => $quotation->id,
-        'customer_id' => $quotation->customer_id,
-        'project_id' => $quotation->project_id,
-        'contact_id' => $quotation->contact_id,
-        'quote_no' => $quotation->quote_no,
-        'rev' => $quotation->rev,
-        'quote_date' => $quotation->quote_date,
-        'quote_category' => $quotation->quote_category,
-        'project_code' => $quotation->project->reference  ?? '',
-        'customer_name' => $quotation->customer->customer_name ?? '',
-        'projectName' => $quotation->project->name ?? '',
-        'legacy_date' => $quotation->legacy_date,
-        'contact_from' => $quotation->contact_from,
-        'inquiry' => $quotation->inquiry,
-        'legacy_no' => $quotation->legacy_no,
-        'subject' => $quotation->subject,
-        'contact_person' => $quotation->contact->name ?? '',
-        'contact_id' => $quotation->contact_id,
-        'contact_to' => ($quotation->customer->city ?? '') . ' - ' . ($quotation->contact->email ?? ''),
-        'attn_to' => $quotation->contact->name ?? '',
-        'attn_pos' => $quotation->contact->position ?? '',
-        'contact_email' => $quotation->contact->email,
-        'contact_mobile' => $quotation->contact->mobile,
-        'currency' => $quotation->currency,
-        'discount' => $quotation->discount,
-        'vat' => $quotation->vat,
-        'validity_days' => $quotation->validity_days,
-        'payment_terms' => $quotation->payment_terms,
-        'method' => $quotation->method,
-        'use_alt_form' => $quotation->use_alt_form,
-        'remarks' => $quotation->remarks,
-        'quote_file' => $quotation->quote_file,
-        'file_status' => $quotation->file_status,
-        'declined' => $quotation->declined,
-        'declined_message' => $quotation->declined_message,
-        'total_lines' => $quotation->total_lines,
-        'discount_amount' => $quotation->discount_amount,
-        'tax_amount' => $quotation->tax_amount,
-        'grand_total' => $quotation->grand_total,
-        'overall_status' => $quotation->overall_status,
-        'last_confirmation' => $quotation->last_confirmation,
-        'last_confirmed' => $quotation->last_confirmed,
-        'project_details' => $quotation->project_details,
-        'isNew' => !$quotation->quote_file, // مثال: إذا لم يكن هناك ملف، اعتبره جديد
-            'isSent' => $quotation->file_status === 'sent', // مثال: حالة الإرسال
+            'customer_id' => $quotation->customer_id,
+            'project_id' => $quotation->project_id,
+            'contact_id' => $quotation->contact_id,
+            'quote_no' => $quotation->quote_no,
+            'rev' => $quotation->rev,
+            'quote_date' => $quotation->quote_date,
+            'quote_category' => $quotation->quote_category,
+            'project_code' => $quotation->project->reference ?? '',
+            'customer_name' => $quotation->customer->customer_name ?? '',
+            'project_name' => $quotation->project->name ?? '',
+            'legacy_date' => $quotation->legacy_date,
+            'contact_from' => $quotation->contact_from,
+            'inquiry' => $quotation->inquiry,
+            'legacy_no' => $quotation->legacy_no,
+            'subject' => $quotation->subject,
+            'contact_person' => $quotation->contact->name ?? '',
+            'contact_to' => ($quotation->customer->city ?? '') . ' - ' . ($quotation->contact->email ?? ''),
+            'attn_to' => $quotation->contact->name ?? '',
+            'attn_pos' => $quotation->contact->position ?? '',
+            'contact_email' => $quotation->contact->email ?? '',
+            'contact_mobile' => $quotation->contact->mobile ?? '',
+            'currency' => $quotation->currency,
+            'discount' => $quotation->discount,
+            'vat' => $quotation->vat,
+            'validity_days' => $quotation->validity_days,
+            'payment_terms' => $quotation->payment_terms,
+            'method' => $quotation->method,
+            'use_alt_form' => $quotation->use_alt_form,
+            'remarks' => $quotation->remarks,
+            'quote_file' => $quotation->quote_file,
+            'file_status' => $quotation->file_status,
+            'declined' => $quotation->declined,
+            'declined_message' => $quotation->declined_message,
+            'total_lines' => $quotation->total_lines,
+            'discount_amount' => $quotation->discount_amount,
+            'tax_amount' => $quotation->tax_amount,
+            'grand_total' => $quotation->grand_total,
+            'overall_status' => $quotation->overall_status,
+            'last_confirmation' => $quotation->last_confirmation,
+            'last_confirmed' => $quotation->last_confirmed,
+            'project_details' => $quotation->project_details,
+            'isNew' => !$quotation->quote_file,
+            'isSent' => $quotation->file_status === 'sent',
             'isActive' => $quotation->overall_status === 'active',
             'isApproved' => $quotation->overall_status === 'approved',
             'isRejected' => $quotation->overall_status === 'rejected',
+        ],
+        'lines' => $quotation->lines ?? []
     ]);
 }
-
-
 
     /**
      * Show the form for editing the specified resource.
@@ -371,5 +426,22 @@ public function generatePdf($id)
         'file_status' => $quotation->file_status
     ]);
 }
+
+
+public function getEmployees()
+{
+    // جلب كل الموظفين من قاعدة البيانات
+    $employees = Employee::select('initials', 'full_name', 'title')->get();
+
+    return response()->json($employees);
+}
+
+
+
+
+
+
+
+
 
 }

@@ -605,37 +605,51 @@
     cursor: pointer;
 }
 
-/* تنسيق القائمة المنسدلة لـ Payment Terms */
-.custom-dropdown-payment-terms {
-    position: absolute;
-    background-color: #fff;
-    border: 1px solid #d4d4d4;
-    z-index: 1000;
-    width: 100%;
-    max-height: 200px;
-    overflow-y: auto;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    border-radius: 4px;
-    margin-top: 2px;
-}
-.custom-dropdown-payment-terms .dropdown-options-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.custom-dropdown-payment-terms .dropdown-options-list li {
-    padding: 8px 12px;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 14px;
-    color: #333;
-}
-.custom-dropdown-payment-terms .dropdown-options-list li:hover {
-    background-color: #f5f5f5;
+/* 1. التنسيق الإلزامي للحاوية الأب (التي تحتوي على الحقل والأيقونة) */
+/* هذه الخطوة حاسمة لربط موضع القائمة المنسدلة بالحقل */
+.input-with-icon,
+.custom-autocomplete-container {
+    position: relative; /* يجب أن يكون تموضع القائمة المنسدلة مطلقاً بالنسبة لهذه الحاوية */
+    /* ضمان أن هذه الحاوية تأخذ عرض الحقل */
+    width: 100%; 
 }
 
+/* 2. التنسيق الإلزامي للقوائم المنسدلة نفسها (Sample Type و Payment Terms) */
+#sample-type-dropdown,
+#payment-terms-dropdown {
+    /* [الخصائص التي طلبتها في التنسيق السابق] */
+    background-color: #fff !important;
+    border: 1px solid #d4d4d4 !important;
+    z-index: 1000 !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+    border-radius: 4px !important;
+    margin-top: 2px !important;
+
+ 
+    position: absolute !important; /* تجعل التموضع مطلقاً بالنسبة للعنصر الأب (Input Container) */
+    top: 100% !important; /* تضع القائمة أسفل حقل الإدخال مباشرة (100% من ارتفاع الأب) */
+    left: 0 !important;      /* تبدأ من الحافة اليسرى للحقل */
+    width: 100% !important;  /* تجعل عرض القائمة يطابق عرض الحقل تماماً */
+}
+
+/* 3. تنسيق عناصر القائمة (للتأكد من النمط المطلوب) */
+#sample-type-dropdown .dropdown-options-list li,
+#payment-terms-dropdown .dropdown-options-list li {
+    padding: 8px 12px !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 14px !important;
+    color: #333 !important;
+}
+
+#sample-type-dropdown .dropdown-options-list li:hover,
+#payment-terms-dropdown .dropdown-options-list li:hover {
+    background-color: #f5f5f5 !important;
+}
 /* تنسيق القائمة المنسدلة لـ Nominal Size */
 .custom-dropdown-nominal-size {
     position: absolute;
@@ -785,11 +799,7 @@
     color: #ccc;
 }
 
-/*
-     ================================================
-     إصلاحات إضافية
-     ================================================
-*/
+
 
 /* تنسيق حقول Nominal Size و Sequential */
 .nominal-size-input {
@@ -811,4 +821,889 @@
 
 .input-with-icon .fa-calendar-alt {
     display: block;
+} 
+
+/* ------------------------------------------- */
+/* 1. النمط الأساسي لجميع رؤوس التبويب */
+/* ------------------------------------------- */
+.tab {
+    /* يجعل لون الخلفية رمادي فاتح للتبويبات غير النشطة */
+    background-color: #f0f0f0; 
+    /* يجعل النص داكناً */
+    color: #333; 
+    /* يضيف حدودا دائرية بسيطة */
+    border-radius: 5px 5px 0 0; 
+    /* يضيف تأثير انتقالي سلس */
+    transition: background-color 0.2s, color 0.2s; 
+    /* تأكد من أن التبويب يتصرف كزر يمكن النقر عليه */
+    cursor: pointer; 
+}
+
+
+/* ------------------------------------------- */
+/* 2. تأثير تمرير الماوس (Hover Effect) */
+/* ------------------------------------------- */
+/* عند تمرير الماوس على أي تبويب غير نشط، يصبح لونه أبيض */
+.tab:not(.active-tab):hover {
+    background-color: #ffffff; /* اللون الأبيض عند التمرير */
+    color: #000; /* يمكن جعل النص أسود أو أي لون واضح */
+}
+
+/* ------------------------------------------- */
+/* 3. التبويب النشط (Active Tab) */
+/* ------------------------------------------- */
+.active-tab {
+    /* الخلفية البيضاء الثابتة */
+    background-color: #ffffff !important; 
+    /* النص الأساسي */
+    color: #000 !important; 
+    /* يزيل الظل/الحد السفلي لـ "ربط" التبويب بالمحتوى */
+    border-bottom: 3px solid transparent; 
+}
+
+/* لمنع ظهور تأثير الـ Hover على التبويب المفتوح حالياً */
+.active-tab:hover {
+    background-color: #ffffff !important;
+}
+
+/* CSS لإشعار النجاح الاحترافي (Toast) */
+.professional-success-toast {
+    /* التموضع والتوسيط */
+    position: fixed;
+    top: 20px; 
+    left: 50%; /* لوضعها في المنتصف الأفقي */
+    transform: translate(-50%, -100%); /* إخفاءها للأعلى */
+    
+    /* المظهر */
+    opacity: 0;
+    padding: 15px 30px;
+    background-color: #28a745; /* لون أخضر للنجاح */
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10000; /* للتأكد من أنها تظهر فوق كل العناصر الأخرى */
+    
+    /* التحريك (Transition) */
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    
+    /* الخط واللغة */
+    font-family: 'Arial', sans-serif;
+    text-align: right;
+    direction: rtl; 
+}
+
+/* تنسيق للخطوط داخل الإشعار */
+.professional-success-toast strong {
+    font-size: 1.1em;
+}
+
+.professional-success-toast small {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+/* تنسيق شريط الأدوات الرئيسي */
+.preview-toolbar {
+    background-color: #f8f9fa; /* لون فاتح للخلفية */
+    border-bottom: 1px solid #ddd;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: flex-end; /* وضع الأزرار على اليسار (أو اليمين حسب اتجاه الصفحة) */
+    gap: 10px;
+    position: sticky; /* لجعل الشريط ثابتاً عند التمرير */
+    top: 0;
+    z-index: 900;
+}
+
+/* تنسيق أزرار الطباعة والإغلاق */
+.preview-toolbar .btn-print {
+    background-color: #007bff;
+    color: white;
+}
+
+.preview-toolbar .btn-close-preview {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* ------------------------------------------- */
+
+/* تنسيق شريط التنقل الفرعي (Sub-Navbar) */
+.preview-sub-navbar {
+    display: flex;
+    justify-content: flex-start;
+    background-color: #e9ecef;
+    border-bottom: 1px solid #ccc;
+    padding: 0 20px;
+    margin-bottom: 20px;
+}
+
+.preview-nav-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #495057;
+    transition: background-color 0.2s;
+}
+
+.preview-nav-item:hover {
+    background-color: #dee2e6;
+}
+
+.active-nav-item {
+    color: #007bff;
+    border-bottom: 3px solid #007bff;
+    background-color: #f1f1f1;
+}
+
+.your-tab-header-class:not(.active-tab) {
+    background-color: #f8f9fa; /* لون رمادي فاتح */
+    color: #6c757d; /* لون النص الرمادي */
+}
+
+@media print {
+    
+    /* 1. إعدادات الصفحة والهوامش (مقاس A4 وتقليل الهامش الخارجي) */
+    @page {
+        /* تحديد حجم A4 بدقة */
+        size: 21cm 29.7cm !important; 
+
+        margin: 0.5cm !important; 
+    }
+
+    /* 2. الإخفاء المستهدف (لضمان ظهور التقرير فقط) */
+    /* إخفاء كل العناصر الزائدة */
+    body > *:not(#preview-content-area):not(#preview-bg-container) {
+        display: none !important;
+        visibility: hidden !important; 
+    }
+    
+  
+    html, body, 
+    #preview-bg-container,
+    #preview-content,
+    #preview-content-area {
+        display: block !important; 
+        visibility: visible !important;
+        position: static !important;
+        background-color: white !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important; 
+        height: auto !important;
+    }
+    
+
+    /* 4. حاوية التقرير (#report-page-container) - التقليص الهيكلي وتقليل البادينغ */
+    #report-page-container {
+        /* نجعل العرض 100% لملء المساحة المتاحة بعد خصم 0.5 سم هامش */
+        width: 100% !important; 
+        /* نجعل الارتفاع تلقائي للسماح بالتقليص وتجنب الصفحات الزائدة */
+        min-height: auto !important; 
+        box-shadow: none !important;
+
+        padding: 1cm !important; 
+        
+        font-size: initial !important; /* إزالة حجم الخط المخصص */
+        
+        margin: 0 !important; 
+        box-sizing: border-box !important;
+    
+        transform-origin: top left !important;
+        transform: scale(0.97) !important; 
+        
+        /* ضبط موضع العنصر لتعويض تأثير الـ scale */
+        margin: 0 -0.5% !important; /* تعديل بسيط لتعويض التقليص */
+        
+        /* توكيد طباعة الألوان والخلفيات */
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
+    }
+    
+    /* 5. توكيد ظهور وتنسيق محتويات التقرير */
+    #report-page-container * {
+        visibility: visible !important; 
+        line-height: 1.4 !important;
+        font-size: inherit !important; 
+    }
+
+    /* 6. إخفاء العناصر غير المرغوب فيها (التاريخ/Registration/شريط الأدوات) */
+    .registration-header, 
+    .date-display-area,
+    #pdf-toolbar {
+        display: none !important;
+    }
+    
+    /* 7. توكيد التنسيق العام للجداول */
+    .report-main-table, .test-data-table, .remarks-notes-table, .signature-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        /* هذا هو المفتاح لإجبار المحتوى على أن يكون في صفحة واحدة قدر الإمكان */
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important; 
+        display: table !important;
+    }
+
+    .report-main-table th, .report-main-table td, 
+    .test-data-table th, .test-data-table td,
+    .remarks-notes-table th, .remarks-notes-table td,
+    .signature-table th, .signature-table td {
+        border: 1px solid #000 !important; 
+        padding: 3px !important; /* تقليل بادينغ الخلايا أيضًا */
+    }
+}
+/* التفعيل: الزر النشط باللون الأزرق */
+        .toolbar-btn.active {
+            color: white !important;
+            background-color: #007BFF !important;
+        }
+        .toolbar-center span {
+            font-size: 9px;
+            font-weight: bold;
+            color: #44474B;
+            padding: 0 5px;
+        }
+        
+
+.action-dropdown-container {
+    position: relative; 
+}
+
+
+/* Styling for the icon within the Actions button */
+#actions-btn i {
+    font-size: 0.9rem; /* Matched to footer buttons */
+}
+
+#actions-btn:disabled {
+    background-color: #e9ecef; /* Matched to footer buttons */
+    color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+}
+
+
+#actions-btn:active {
+    /* تطبيق لون رمادي داكن للخلفية عند الضغط عليه */
+    background-color: #6c757d !important; 
+    
+    /* إبقاء لون النص داكناً (#333) لمنع تحوله إلى الأبيض */
+    color: #333 !important; 
+    
+    transform: none !important; 
+    box-shadow: none !important; 
+}
+
+
+#actions-btn:hover:enabled {
+    /* تغيير الخلفية إلى رمادي محايد */
+    background-color: #98a4af; 
+
+    /* إبقاء لون النص داكناً (#333) لمنع تحوله إلى اللون الفاتح */
+    color: #333; 
+
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+/* Main styling for the dropdown menu */
+.action-dropdown-menu {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    
+
+    z-index: 9999; 
+    
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    min-width: 250px;
+    display: none;
+    margin-bottom: 0;
+    padding: 2px;
+    list-style: none;
+    max-height: 250px; 
+    overflow-y: auto;
+}
+
+/* Styling for the list items inside the dropdown */
+.action-dropdown-menu li {
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: #333;
+    border-radius: 6px;
+}
+
+.action-dropdown-menu li:hover {
+    background-color: #f0f4f7;
+    color: #2980b9;
+}
+
+/* Styling for icons inside the list items */
+.action-dropdown-menu li .fas {
+    font-size: 0.8rem;
+    color: #888;
+    transition: color 0.2s;
+}
+
+.action-dropdown-menu li:hover .fas {
+    color: #3498db;
+}       
+   
+   /* تنسيق الخلية المدمجة لـ Test Method */
+.test-data-table .merged-cell {
+    /* يجعل العناصر داخلها متجاورة ومرتبة */
+    display: flex;
+    align-items: center;
+    /* يضمن أن الخلية لا تتجاوز عرضها المحدد */
+    width: 100%; 
+}
+
+/* تنسيق خانة الاختيار داخل الخلية المدمجة */
+.test-data-table .merged-checkbox {
+    /* مساحة ثابتة لمربع الاختيار */
+    width: 20px; 
+    height: 20px; 
+    margin-right: 5px; /* مسافة بين المربع والحقل */
+    flex-shrink: 0; /* يمنع المربع من الانكماش */
+}
+
+/* يضمن أن حقل الإدخال يستخدم المساحة المتبقية */
+.test-data-table .merged-cell .form-control {
+    flex-grow: 1; /* يسمح للحقل بالتمدد لملء المساحة المتبقية */
+}     
+
+/* 1. تنسيق زر الحاوية (Button Container) */
+.items-dropdown-btn {
+    /* لإلغاء التباعد الداخلي الافتراضي وجعله مربعاً */
+    padding: 0;
+    
+    /* تحديد أبعاد ثابتة مناسبة لجدول مدمج */
+    height: 25px; 
+    width: 25px;
+    
+    /* التأكد من محاذاة الأيقونة في المنتصف تماماً */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* لون خلفية Info (أزرق سماوي/فاتح) */
+    background-color: #17a2b8; 
+    border-color: #17a2b8;
+    
+    /* حواف دائرية خفيفة */
+    border-radius: 4px;
+    
+    /* تأثير انتقال ناعم عند التفاعل */
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+/* 2. تأثير التفاعل (Hover Effect) للزر */
+.items-dropdown-btn:hover {
+    background-color: #138496; /* لون أغمق قليلاً عند التحويم */
+    border-color: #117a8b;
+}
+
+/* 3. تنسيق الأيقونة الداخلية (i element) */
+.items-dropdown-btn .items-icon {
+    /* لون الأيقونة (عادةً أبيض على خلفية ملونة) */
+    color: #fff; 
+    
+    /* حجم الأيقونة */
+    font-size: 12px;
+}
+
+/* 4. تنسيق الخلية نفسها لضمان عدم وجود تباعد إضافي غير مرغوب فيه */
+td {
+    vertical-align: middle; /* محاذاة رأسية للعناصر */
+}
+  /* 1. التنسيقات الأساسية للنافذة (Mini Modal) */
+.compact-popover-items {
+    display: none; /* مخفي افتراضياً */
+    position: fixed; /* تموضع ثابت بالنسبة لنافذة المتصفح (Viewport) */
+    z-index: 2000; /* قيمة عالية جداً لضمان ظهورها فوق كل شيء */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px; /* حواف أكثر نعومة */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* ظل أعمق لإبرازها */
+    
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* إزاحة النافذة بنصف عرضها ونصف ارتفاعها لتكون في المنتصف تماماً */
+
+
+    width: 500px; 
+    max-width: 90%; /* عرض أقصى لضمان استجابتها على الشاشات الصغيرة */
+}
+
+.popover-content {
+    padding: 15px; /* زيادة التباعد الداخلي */
+}
+
+/* 2. تنسيق منطقة الإدخال والتوليد (للتأكيد على التنسيق المدمج) */
+.popover-header-input {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.popover-header-input label {
+    font-size: 13px; /* تكبير الخط قليلاً ليتناسب مع الحجم الجديد */
+    font-weight: 600;
+}
+
+/* 3. تنسيق حاوية الجدول (للسماح بالتمرير) */
+.popover-table-container {
+    max-height: 300px; /* زيادة ارتفاع الجدول الداخلي */
+    overflow-y: auto; 
+    margin-bottom: 15px;
+}
+
+/* 4. تنسيق الجدول الداخلي ليكون واضحاً */
+.generated-items-table {
+    width: 100%;
+    font-size: 12px; /* خط أكبر قليلاً */
+}
+
+.generated-items-table th,
+.generated-items-table td {
+    padding: 4px 6px;
+}
+
+.generated-items-table input.form-control-sm {
+    height: 22px;
+    padding: 2px 4px;
+    font-size: 12px;
+}
+
+/* 5. تنسيق أزرار التذييل */
+.popover-footer-actions {
+    padding-top: 10px;
+    border-top: 1px solid #e0e0e0;
+}    
+
+/* 1. التنسيقات الأساسية للنافذة (Mini Modal) - (نفس التوسيط السابق) */
+.mini-modal-items {
+    display: none; 
+    position: fixed; 
+    z-index: 2000; 
+    background-color: #fff;
+    border-radius: 8px; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    width: 650px; /* زيادة العرض لاستيعاب الـ 6 حقول بشكل مريح */
+    max-width: 95%; 
+}
+
+.modal-content-items {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* 2. رأس النافذة (Header) */
+.modal-header-items {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.close-btn-items {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+/* 1. التنسيقات الأساسية للنافذة (Mini Modal) */
+.mini-modal-items {
+    display: none; 
+    position: fixed; 
+    z-index: 2000; 
+    background-color: #fff;
+    border-radius: 8px; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    
+
+    width: 900px; 
+    max-width: 95%; 
+}
+
+.modal-content-items {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* 2. رأس النافذة والجسم (Body) - (كما في السابق) */
+.modal-header-items {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.close-btn-items {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.modal-body-items {
+    padding: 15px;
+    flex-grow: 1; 
+    overflow-y: auto; 
+}
+
+
+.input-controls-grid {
+    display: grid;
+    /* تقسيم المساحة إلى 7 أعمدة متساوية (لكل خانة/زر عمود) */
+    grid-template-columns: repeat(7, 1fr); 
+    gap: 10px; /* تباعد أقل بين الحقول */
+    margin-bottom: 20px;
+}
+
+.control-group label {
+    font-size: 12px;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 3px;
+    white-space: nowrap; /* لمنع الكلمات من النزول لسطر جديد */
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.form-control.form-control-sm {
+    height: 30px;
+    font-size: 13px;
+    padding: 4px 8px;
+}
+
+/* محاذاة الأزرار مع الحقول */
+.action-button-group {
+    display: flex;
+    align-items: flex-end; 
+}
+
+.btn-action-top {
+    width: 100%;
+    height: 30px; 
+    font-size: 12px;
+    padding: 0 5px; /* تباعد جانبي أقل */
+    white-space: nowrap;
+}
+
+/* 4. تنسيق حاوية الجدول */
+.popover-table-container {
+    max-height: 400px; /* ارتفاع مناسب للجدول */
+    overflow-y: auto; 
+    border: 1px solid #e0e0e0; 
+}
+
+/* 5. تنسيق الجدول القابل للتعبئة */
+.generated-items-table {
+    width: 100%;
+    font-size: 12px; 
+    min-width: 850px; /* ضمان عرض الجدول ليناسب الأعمدة */
+}
+
+.generated-items-table th,
+.generated-items-table td {
+    padding: 4px 6px;
+    vertical-align: middle;
+}
+
+.generated-items-table tbody td input {
+    height: 25px; 
+    font-size: 12px;
+}
+
+/* 6. شريط الأزرار السفلي (Footer) */
+.modal-footer-items {
+    display: none; /* إخفاء الأزرار السفلية واستخدام أزرار الـ grid */
+}
+
+/* ========================================================= */
+/* 1. التغطية الخارجية (Overlay) - تستخدم ID النافذة مباشرةً */
+/* ========================================================= */
+#orderModal {
+    /* الإخفاء الافتراضي: يتم الإظهار بواسطة JavaScript فقط (modal.style.display = 'flex') */
+    display: none; 
+
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* خلفية شبه شفافة */
+    
+    /* السماح بالتمرير الرأسي والأفقي إذا كانت النافذة المنبثقة أكبر من الشاشة */
+    overflow: auto;
+    
+    /* خصائص التوسيط (تضاف بواسطة JS لضمان التوسيط الأفقي والعمودي عند العرض) */
+    /* justify-content: center; */ 
+    /* align-items: center; */
+}
+
+
+/* ========================================================= */
+/* 2. محتوى النافذة المنبثقة (Modal Content) */
+/* ========================================================= */
+#orderModal .modal-content {
+    background-color: #fefefe;
+    margin: 20px auto; /* توسيط أفقي وترك مسافة 20px من الأعلى والأسفل */
+    padding: 0;
+    border: 1px solid #888;
+    width: 90%; 
+    min-width: 1000px; /* ضمان ظهور شريط التمرير الأفقي على الشاشات الصغيرة */
+    max-width: 1200px; 
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    display: flex;
+    flex-direction: column;
+    
+    /* تحديد ارتفاع النافذة ومنع التمرير الرأسي عليها */
+    height: 95vh; 
+    max-height: 98vh; 
+    
+    /* تمكين التمرير الأفقي للنافذة إذا تجاوز المحتوى العرض الأقصى (1200px) */
+    overflow-x: auto;
+    overflow-y: hidden; /* نعتمد على .form-body-container للتمرير الرأسي */
+}
+
+
+/* ========================================================= */
+/* 3. هيكل النافذة والتبويبات */
+/* ========================================================= */
+#orderModal .order-header-tabs {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #e9ecef;
+    border-bottom: 1px solid #ddd;
+    /* لجعل الرأس ثابتاً عند التمرير الأفقي داخل .modal-content */
+    flex-shrink: 0; 
+}
+#orderModal .tab {
+    padding: 5px 15px;
+    margin-right: 5px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    font-weight: bold;
+}
+#orderModal .tab.active {
+    background-color: #fefefe;
+    border-color: #ddd;
+}
+#orderModal .close-btn {
+    margin-left: auto;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+#orderModal .close-btn:hover, #orderModal .close-btn:focus {
+    color: #000;
+}
+
+
+/* ========================================================= */
+/* 4. جسم النافذة (Body Container) - يضيف التمرير الرأسي */
+/* ========================================================= */
+#orderModal .form-body-container {
+    display: flex;
+    flex-grow: 1; 
+    padding: 15px;
+    
+
+    overflow-y: auto; 
+    overflow-x: hidden;
+}
+
+
+/* ========================================================= */
+/* 5. الشريط الجانبي للإجماليات (Totals Sidebar) - مثبت */
+/* ========================================================= */
+#orderModal .totals-sidebar {
+    width: 250px;
+    min-width: 250px;
+    padding: 15px;
+    background-color: #f7f7f7;
+    border-left: 1px solid #eee;
+    margin-left: 15px;
+    
+  
+    position: sticky; 
+    top: 0; 
+    align-self: flex-start; /* لضمان عدم تمدده في الارتفاع */
+    height: fit-content; /* للتأكد من أنه يأخذ ارتفاع المحتوى فقط */
+}
+/* تنسيق قسم الإجماليات الداخلي */
+#orderModal .totals-sidebar .total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    font-size: 0.9em;
+}
+#orderModal .totals-sidebar h4 {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 1em;
+    color: #333;
+}
+#orderModal .totals-sidebar .grand-total {
+    font-weight: bold;
+    border-top: 1px dashed #999;
+    padding-top: 5px;
+    margin-top: 5px;
+}
+
+
+/* ========================================================= */
+/* 6. لوحة إدخال البيانات (Data Entry Panel) */
+/* ========================================================= */
+#orderModal .data-entry-panel {
+    flex-grow: 1;
+    /* تمت إزالة overflow-y: auto لأنها في .form-body-container */
+    padding-right: 15px; /* لمنع المحتوى من الالتصاق بحافة التمرير */
+}
+
+
+/* ========================================================= */
+/* 7. تنسيقات النموذج الداخلية */
+/* ========================================================= */
+#orderModal .form-section {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+#orderModal .form-section legend {
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 0 10px;
+    width: auto;
+    color: #007bff;
+}
+#orderModal .form-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 2fr 1fr 2fr; /* 3 أزواج من التسمية + حقل الإدخال */
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+#orderModal .form-row label {
+    text-align: right;
+    font-weight: 500;
+}
+#orderModal .form-row input[type="text"], 
+#orderModal .form-row input[type="date"],
+#orderModal .form-row select {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* تنسيقات حقول النصوص الكبيرة (Remarks/Footer) */
+#orderModal .form-row-full {
+    display: grid;
+    grid-template-columns: 1fr 5fr; /* مساحة أكبر لـ textarea */
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: flex-start; 
+}
+#orderModal .form-row-full textarea {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical; 
+}
+
+/* تنسيقات جهات الاتصال */
+#orderModal .form-row-two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* عمودان متساويان */
+    gap: 20px; 
+}
+#orderModal .contact-group {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* تنسيق التسمية والحقل داخل مجموعة الاتصال */
+    gap: 5px 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+#orderModal .contact-group label {
+    text-align: right;
+    font-weight: 500;
+}
+
+
+/* ========================================================= */
+/* 8. تذييل النافذة (Footer/Actions) */
+/* ========================================================= */
+#orderModal .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 15px;
+    border-top: 1px solid #ddd;
+    background-color: #e9ecef;
+    flex-shrink: 0; /* لجعل التذييل ثابتاً ولا يتقلص */
+}
+#orderModal .action-btn {
+    padding: 8px 15px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+#orderModal .close-btn-footer { background-color: #6c757d; color: white; }
+#orderModal .save-close-btn { background-color: #007bff; color: white; }
+#orderModal .save-btn { background-color: #28a745; color: white; }
+
+/* تنسيق إضافي لحقول القائمة المنسدلة في الشريط الجانبي (Totals Sidebar) */
+#orderModal .totals-sidebar .total-row select.input-full-width {
+    width: 100px; /* تحديد عرض مناسب للقائمة المنسدلة */
+    padding: 3px;
 }

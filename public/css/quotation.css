@@ -1,6 +1,4 @@
-/* quotation.css - Complete CSS with Fixed Modal Width and Single Right Scroll */
 
-/* Variables - Define your color palette and sizes */
 :root {
     --primary-color: #007BFF;
     --primary-hover-color: #0056b3;
@@ -95,6 +93,60 @@ body.dark-mode {
     --group-header-text: #e0e0e0; /* Lighter text for dark mode group headers */
 }
 
+/* -------------------------------------------------------------------------- */
+/* الحل الأقوى: استهداف رؤوس الأعمدة الثابتة (يغطي الأعمدة من 2 إلى 6) */
+/* -------------------------------------------------------------------------- */
+
+/* استهداف الخلايا TH ضمن الرأس الثابت (#dataTables_scrollHead) */
+div.dataTables_scrollHead th:nth-child(2),
+div.dataTables_scrollHead th:nth-child(3),
+div.dataTables_scrollHead th:nth-child(4),
+div.dataTables_scrollHead th:nth-child(5),
+div.dataTables_scrollHead th:nth-child(6),
+
+/* إضافة استهداف الرأس الأصلي (#quotationTable thead) */
+#quotationTable thead th:nth-child(2),
+#quotationTable thead th:nth-child(3),
+#quotationTable thead th:nth-child(4),
+#quotationTable thead th:nth-child(5),
+#quotationTable thead th:nth-child(6) {
+
+    width: 20px !important;
+    max-width: 20px !important;
+    min-width: 20px !important;
+
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+/* إخفاء رأس الجدول الأصلي (thead) لإبقاء رأس الجدول الثابت (المكرر) فقط */
+#quotationTable thead {
+    display: none !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* استهداف خلايا جسم الجدول (<td>) لضمان التناسق */
+/* -------------------------------------------------------------------------- */
+
+#quotationTable td:nth-child(2),
+#quotationTable td:nth-child(3),
+#quotationTable td:nth-child(4),
+#quotationTable td:nth-child(5),
+#quotationTable td:nth-child(6) {
+    width: 20px !important;
+    max-width: 20px !important;
+    min-width: 20px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    text-align: center;
+    overflow: hidden;
+}
 /* General Modal Styling */
 .modal {
     display: none; /* Hidden by default - JavaScript will change this to 'flex' */
@@ -203,6 +255,7 @@ body.dark-mode {
 
 /* Modal Body Content (main area below tabs) */
 .modal-body-content {
+  overflow-x: auto;
     display: flex;
     flex-direction: column; /* Stack tab-content */
     gap: 25px; /* Space between tabs if more than one */
@@ -237,6 +290,7 @@ body.dark-mode {
     height: auto; /* Let content define height */
     min-height: 0;
     overflow: visible;
+    overflow-x: auto;
 }
 
 #headerTab .left-form-section {
@@ -246,6 +300,7 @@ body.dark-mode {
     gap: 25px;
     overflow: visible;
     min-height: fit-content;
+
 }
 
 #headerTab .right-sidebar-section {
@@ -386,7 +441,7 @@ textarea {
 }
 
 .custom-dropdown-list {
-    
+
     position: absolute;
     top: 100%;
     left: 0;
@@ -528,12 +583,7 @@ textarea {
     flex-wrap: wrap; /* Allow wrapping on small screens */
     gap: 10px; /* Space between length and filter if they wrap */
 }
-.dataTables_wrapper .dataTables_length {
-    float: none; /* Override default float */
-    margin-bottom: 0; /* Override default margin */
-    display: flex; /* Ensure inline for its content */
-    align-items: center;
-}
+
 .dataTables_wrapper .dataTables_filter {
     float: none; /* Override default float */
     margin-bottom: 0; /* Override default margin */
@@ -585,8 +635,7 @@ textarea {
 }
 
 
-.quotation-table th,
-.quotation-table td,
+
 .quotation-lines-table th,
 .quotation-lines-table td,
 .price-list-table th, /* NEW: Include price-list-table */
@@ -598,6 +647,40 @@ textarea {
     font-size: 0.95em;
     overflow: hidden; /* Hide overflowing content */
     text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+
+
+
+}
+/* تنسيقات عامة للجدول */
+.quotation-table,
+.quotation-lines-table {
+    table-layout: fixed;
+}
+
+
+/* تنسيقات رؤوس وأعمدة الجدول بشكل عام (مقاسها 150 بكسل) */
+.quotation-table th,
+.quotation-table td {
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+}
+/* تنسيقات أعمدة الحالة (مقاسها 20 بكسل) - لا يوجد تغيير هنا */
+.quotation-table th.status-column,
+.quotation-table td.status-column {
+    width: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    text-align: center !important;
+    padding: 0px !important;
+    box-sizing: border-box !important;
 }
 
 /* Professional Table Headers and Rows (applied to all tables) */
@@ -610,7 +693,7 @@ textarea {
     position: sticky;
     top: 0;
     z-index: 2;
-    font-size: 1em;
+    font-size: 0.80em;
     text-transform: capitalize; /* First letter of each word capital */
     letter-spacing: 0.05em; /* Add slight letter spacing */
     padding: 15px 12px; /* Increase padding for a more professional look */
@@ -645,6 +728,7 @@ textarea {
     background-color: var(--table-hover-bg);
     box-shadow: inset 0 0 0 1px rgba(var(--primary-color-rgb), 0.2); /* Subtle hover border/shadow */
 }
+
 
 /* NEW: Style for selected rows - More prominent blue */
 .quotation-lines-table tbody tr.selected-row,
@@ -838,18 +922,7 @@ div.dataTables_wrapper div.paginate_button.last,
     color: var(--text-color-dark) !important;
 }
 
-div.dataTables_wrapper div.dataTables_paginate a.paginate_button.first:hover,
-div.dataTables_wrapper div.dataTables_paginate span.paginate_button.first:hover,
-div.dataTables_wrapper div.dataTables_paginate a.paginate_button.last:hover,
-div.dataTables_wrapper div.dataTables_paginate span.paginate_button.last:hover,
-#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.first:hover,
-#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.first:hover,
-#quotation-pagination-fixed-bottom div.dataTables_paginate a.paginate_button.last:hover,
-#quotation-pagination-fixed-bottom div.dataTables_paginate span.paginate_button.last:hover {
-    background-color: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
-    color: white !important;
-}
+
 
 /* Add style for disabled pagination buttons */
 div.dataTables_wrapper div.dataTables_paginate a.paginate_button.disabled,
@@ -869,13 +942,6 @@ div.dataTables_wrapper div.dataTables_paginate span.paginate_button.disabled:hov
     opacity: 0.5 !important;
 }
 
-
-/* Clear floats for DataTables elements to work better with flexbox */
-/* These are already covered by the specific selectors above */
-/* .dataTables_wrapper .dataTables_info,
-.dataTables_wrapper .dataTables_paginate {
-    float: none !important;
-} */
 
 
 /* *******************************************************************
@@ -1425,9 +1491,9 @@ body.dark-mode .quotation-lines-table .filter-row input.column-filter {
 /* في ملف CSS الخاص بك */
 
 .custom-dropdown-list {
-    /* ... existing styles ... */
-    display: none; /* Controlled by JS */
-    /* Add grid or flex for alignment if headers are used too */
+
+    display: none;
+
 }
 
 /* For each item row */
@@ -1674,8 +1740,6 @@ body.dark-mode .quotation-lines-table .filter-row input.column-filter {
     pointer-events: none; /* منع أي تفاعل بالماوس */
 }
 
-/* إذا كنت تستخدم بنية form-group حول quoteCustomer و quoteProject */
-/* تأكد من أن الـ input فيها يأخذ 100% من عرض الـ form-group */
 .form-group input.form-control {
     width: 100%;
 }
@@ -1808,10 +1872,12 @@ body.dark-mode .quotation-lines-table .filter-row input.column-filter {
     text-align: right; /* يمكن تعديل المحاذاة حسب الحاجة */
 }
 
+
+
 /* Styling for selected rows in quotation lines table */
 .quotation-lines-table tbody tr.selected-row {
     background-color: var(--selection-color, #e0f2f7) !important; /* لون أزرق فاتح جميل */
-    /* يمكنك استخدام لون أزرق أغمق قليلاً إذا أردت */
+
     /* background-color: rgba(66, 135, 245, 0.2) !important; */
     border-left: 3px solid var(--primary-color, #007bff); /* خط أزرق سميك على اليسار للتمييز */
 }
@@ -1822,14 +1888,27 @@ body.dark-mode .quotation-lines-table tbody tr.selected-row {
     border-left-color: var(--primary-color, #007bff);
 }
 
-/* تأكد من تعريف هذه المتغيرات في ملف الأنماط الرئيسي، مثلاً: */
+
 :root {
     --selection-color: #e0f2f7; /* لون التحديد الفاتح */
     --dark-selection-color: rgba(66, 135, 245, 0.2); /* لون التحديد للوضع الداكن */
     --primary-color: #007bff; /* لونك الأزرق الأساسي */
 }
-/* في ملف CSS الخاص بك */
+.status-column {
+  /* لفرض العرض وتجاوز أي تنسيقات أخرى */
+  width: 20px !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
 
+  /* لضمان توسيط الأيقونة */
+  text-align: center !important;
+
+  /* لإزالة الهوامش الداخلية الزائدة */
+  padding: 0px 5px !important;
+
+  /* لتضمين الهوامش في العرض الكلي */
+  box-sizing: border-box !important;
+}
 /* قم بتغيير هذا اللون ليناسب تصميمك */
 /* هذا سيجعل خلفية الصف رمادية داكنة قليلاً */
 #priceListTable tbody tr.selected-row-price-only {
@@ -1843,16 +1922,10 @@ body.dark-mode #priceListTable tbody tr.selected-row-price-only {
     color: #ffffff; /* لجعل النص مرئياً بوضوح */
 }
 
-/* تأكد من أن هذه القاعدة تأتي بعد أي قواعد افتراضية لـ DataTables أو قواعد للصفوف الفردية/الزوجية. */
-/* قد تحتاج إلى ضبط الأسبقية إذا كانت لديك قواعد CSS أخرى تؤثر على لون خلفية الصفوف. *//* في ملف CSS الخاص بك (بعد الأنماط العامة للصفوف) */
-
-/* لون أزرق للصفوف المحددة بالـ Checkbox الرئيسي */
-/* يمكنك استخدام هذا كـ Variable في مكان ما: --main-selection-color: #e6f7ff; (أزرق فاتح جداً) */
 /* أو #ADD8E6 (LightBlue) أو #B0E0E6 (PowderBlue) */
 #priceListTable tbody tr.selected-row {
     background-color: #ADD8E6 !important; /* لون أزرق فاتح */
-    /* قم بتجاوز أي ألوان صفوف بديلة أو Hover Colors */
-    /* يمكنك استخدام لون أزرق أغمق قليلاً مثل #9ACFEA إذا أردت تمييزاً أقوى */
+
 }
 
 /* إذا كنت تستخدم الوضع الليلي (Dark Mode) */
@@ -1861,9 +1934,6 @@ body.dark-mode #priceListTable tbody tr.selected-row {
     color: #ffffff !important; /* لضمان وضوح النص */
 }
 
-/* تأكد من أن هذه القاعدة تأتي بعد .selected-row-price-only إذا كانت هناك أسبقية */
-/* بشكل عام، الفئة الأكثر تحديدًا أو التي تأتي لاحقًا في CSS هي التي تفوز. */
-/* باستخدام !important يضمن تطبيق اللون. *//* في ملف CSS الخاص بك */
 
 /* القاعدة للون الأزرق (التحديد العام) */
 #priceListTable tbody tr.selected-row {
@@ -1871,9 +1941,6 @@ body.dark-mode #priceListTable tbody tr.selected-row {
     /* تأكد من أن هذه القاعدة موجودة */
 }
 
-/* القاعدة للون الرمادي (تحديد "Price Only") */
-/* يجب أن تأتي هذه القاعدة بعد القاعدة الزرقاء في ملف CSS الخاص بك */
-/* أو أن يكون المحدد لها أكثر تحديدًا (وهو ما تحقق بوجود class إضافي) */
 #priceListTable tbody tr.selected-row-price-only {
     background-color: #d8d8d8 !important; /* لون رمادي فاتح / داكن قليلاً */
     /* تأكد من أن هذه القاعدة موجودة */
@@ -2002,24 +2069,26 @@ body.dark-mode #priceListTable tbody tr.selected-row-price-only {
 #quotationTable tbody tr.selected-row {
     background-color: #f1f7fe; /* خلفية باللون الأزرق الفاتح */
     border-left: 5px solid #007bff; /* خط أزرق على اليسار للتمييز */
-    /* أضف أنماطًا أخرى حسب الحاجة، مثل خط سميك أو ظل */
-} /* هذا الكود يجب أن يكون في ملف CSS أو في وسم <style> */
 
-/*
-   - #quotationTable: لتحديد أن هذا النمط ينطبق فقط على الجدول الخاص بك.
-   - tbody tr.selected-row: لتحديد أن النمط ينطبق على عناصر <tr>
-     التي داخل <tbody> ولها فئة 'selected-row'.
-   - !important: قد تحتاج إلى استخدامها لضمان أن هذا النمط
-     يتجاوز أي أنماط أخرى قد تفرضها DataTables أو مكتبات أخرى.
-*/
+}
+
+
 #quotationTable tbody tr.selected-row {
     background-color: #e6f7ff !important;
 }
 
-/*
-   - يمكنك أيضاً إضافة لون أغمق عند تمرير الماوس لتحسين تجربة المستخدم
-   - هذا يجعل الصف المحدد يظل بارزًا حتى عند تمرير الماوس فوقه.
-*/
+
 #quotationTable tbody tr.selected-row:hover {
     background-color: #a4d2f0 !important;
 }
+
+/*هنا اخفاء العداد الزائد */
+ input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+ 

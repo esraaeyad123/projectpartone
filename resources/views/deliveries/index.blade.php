@@ -13,10 +13,10 @@
                 <button title="Edit Invoice" onclick="openEditDeliveriesModal()" class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedConfirmation()" class="btn-icon"><i class="fas fa-trash"></i></button>
 
-                
+
                 <button title="Approve Delivery" onclick="approveDelivery()" class="btn-icon btn-approve" style="color: #28a745;">
-                    <i class="fas fa-check-circle"></i> 
- 
+                    <i class="fas fa-check-circle"></i>
+
 
                 <button title="Preview" onclick="previewDocument()" class="btn-icon"><i class="fas fa-eye"></i></button>
                 <button title="Send to Customer" onclick="sendToCustomer()" class="btn-icon"><i class="fas fa-envelope"></i></button>

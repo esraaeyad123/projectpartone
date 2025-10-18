@@ -724,3 +724,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+
+.modal {
+  display: none; /* افتراضيًا يكون مخفي */
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto; /* 👈 يسمح بالسكرول في الصفحة كاملة عند فتح المودال */
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  max-height: 90vh; /* 👈 يحدد أقصى ارتفاع للمودال */
+  overflow-y: auto; /* 👈 يسمح بسكرول داخل المودال نفسه */
+}
+
+</style>

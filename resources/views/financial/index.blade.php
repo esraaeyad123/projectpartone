@@ -3,7 +3,9 @@
 @section('content')
 @include('financial.create') <!-- المودال -->
 
-
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <main class="main-content">
     <section id="deliveries-section" class="section-content active">
 
@@ -26,8 +28,8 @@
 
             <div>
                 <button title="Convert to PDF" class="btn-icon" onclick="exportToPdfBtn()"><i class="fas fa-file-pdf"></i></button>
-                <button title="Export to Excel" class="btn-icon" onclick="exportDeliveriesExcelBtn()"><i class="fa-solid fa-table"></i></button>
-                <button title="Print" class="btn-icon" onclick="printDeliveriesTable()"><i class="fas fa-print"></i></button>
+                <button title="Export to Excel" class="btn-icon" onclick="exportInvoicesExcelBtn()"><i class="fa-solid fa-table"></i></button>
+                <button title="Print" class="btn-icon" onclick="printInvoicesTable()"><i class="fas fa-print"></i></button>
             </div>
         </div>
         <!-------------------------------------------End Buttons----------------------------------------------->
@@ -70,14 +72,20 @@
 </main>
 
 <!-- ================================== JS Libraries ================================== -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- ✅ مكتبة pdfMake لتوليد ملفات PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
 <!-- ================================== JS Libraries ================================== -->
 
 <script>
@@ -804,6 +812,173 @@ function sendToCustomer() {
         }
     });
 }
+
+
+window.exportToPdfBtn = function() {
+    const tableElement = document.getElementById('invoicesTable');
+    if (!tableElement) {
+        showAlert('⚠️ لم يتم العثور على جدول الفواتير.', 'warning');
+        return;
+    }
+
+    const invoicesTable = $(tableElement).DataTable();
+    const selectedCheckboxes = invoicesTable.$('input[type="checkbox"]:checked');
+    let rowsToProcess;
+    if (selectedCheckboxes.length > 0) {
+        rowsToProcess = selectedCheckboxes.parents('tr');
+    } else {
+        rowsToProcess = invoicesTable.rows({ 'search': 'applied' }).nodes();
+    }
+
+    let docDefinition = {
+        content: [
+            { text: '📄 قائمة الفواتير', style: 'header', alignment: 'center', margin: [0, 0, 0, 20] },
+            {
+                table: {
+                    headerRows: 1,
+                    widths: 'auto',
+                    body: []
+                }
+            }
+        ],
+        styles: {
+            header: { fontSize: 16, bold: true },
+            tableHeader: { bold: true, fillColor: '#eeeeee' }
+        },
+        defaultStyle: { fontSize: 9 }
+    };
+
+    // رؤوس الأعمدة
+    const header = [];
+    $(tableElement).find('thead th').each(function() {
+        if ($(this).find('input[type="checkbox"]').length === 0 && $(this).text().trim() !== '') {
+            header.push({ text: $(this).text().trim(), style: 'tableHeader' });
+        }
+    });
+    docDefinition.content[1].table.body.push(header);
+
+    // البيانات
+    $(rowsToProcess).each(function() {
+        const rowData = [];
+        $(this).find('td').each(function() {
+            if ($(this).find('input[type="checkbox"]').length === 0 && $(this).find('.icon-toolbar').length === 0) {
+                rowData.push($(this).text().trim());
+            }
+        });
+        docDefinition.content[1].table.body.push(rowData);
+    });
+
+    pdfMake.createPdf(docDefinition).download('invoices-data.pdf');
+    showAlert('تم تصدير الفواتير إلى PDF بنجاح ✅', 'success');
+};
+
+
+
+window.exportInvoicesExcelBtn = function() {
+    const tableElement = document.getElementById('invoicesTable');
+    if (!tableElement) {
+        showAlert('⚠️ لم يتم العثور على جدول الفواتير.', 'warning');
+        return;
+    }
+
+    const invoicesTable = $(tableElement).DataTable();
+    const selectedCheckboxes = invoicesTable.$('input[type="checkbox"]:checked');
+    let rowsToProcess;
+    if (selectedCheckboxes.length > 0) {
+        rowsToProcess = selectedCheckboxes.parents('tr');
+    } else {
+        rowsToProcess = invoicesTable.rows({ 'search': 'applied' }).nodes();
+    }
+
+    const data = [];
+    const header = [];
+    $(tableElement).find('thead th').each(function() {
+        if ($(this).find('input[type="checkbox"]').length === 0 && $(this).text().trim() !== '') {
+            header.push($(this).text().trim());
+        }
+    });
+    data.push(header);
+
+    $(rowsToProcess).each(function() {
+        const rowData = [];
+        $(this).find('td').each(function() {
+            if ($(this).find('input[type="checkbox"]').length === 0 && $(this).find('.icon-toolbar').length === 0) {
+                rowData.push($(this).text().trim());
+            }
+        });
+        data.push(rowData);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Invoices");
+    XLSX.writeFile(wb, "invoices-data.xlsx");
+
+    showAlert('تم تصدير الفواتير إلى Excel بنجاح ✅', 'success');
+};
+
+window.printInvoicesTable = function(tableId = 'invoicesTable') {
+    const tableElement = document.getElementById(tableId);
+    if (!tableElement) {
+        showAlert('⚠️ لم يتم العثور على جدول الفواتير.', 'warning');
+        return;
+    }
+
+    const invoicesTable = $(tableElement).DataTable();
+    const selectedCheckboxes = invoicesTable.$('input[type="checkbox"]:checked');
+    let rowsToProcess;
+    if (selectedCheckboxes.length > 0) {
+        rowsToProcess = selectedCheckboxes.parents('tr');
+    } else {
+        rowsToProcess = invoicesTable.rows({ 'search': 'applied' }).nodes();
+    }
+
+    let printContents = `
+        <html>
+        <head>
+            <title>طباعة الفواتير</title>
+            <style>
+                table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+                body { font-family: 'Arial', sans-serif; direction: rtl; }
+                h2 { text-align: center; margin-bottom: 15px; }
+            </style>
+        </head>
+        <body>
+            <h2>قائمة الفواتير 📋</h2>
+            <table>
+                <thead><tr>`;
+
+    $(tableElement).find('thead tr:first th').each(function() {
+        if ($(this).find('input[type="checkbox"]').length > 0 || $(this).text().trim() === '') return;
+        const columnTitle = $(this).clone().children().remove().end().text().trim();
+        printContents += '<th>' + columnTitle + '</th>';
+    });
+
+    printContents += '</tr></thead><tbody>';
+
+    $(rowsToProcess).each(function() {
+        printContents += '<tr>';
+        $(this).find('td').each(function() {
+            if ($(this).find('input[type="checkbox"]').length > 0 || $(this).find('.icon-toolbar').length > 0) return;
+            printContents += '<td>' + $(this).text().trim() + '</td>';
+        });
+        printContents += '</tr>';
+    });
+
+    printContents += `</tbody></table></body></html>`;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContents);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+    };
+
+    showAlert('تم إرسال أمر الطباعة بنجاح 🖨️', 'success');
+};
 
 
 

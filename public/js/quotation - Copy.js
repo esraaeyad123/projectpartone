@@ -133,42 +133,7 @@ const DOM = {
     generatePdfButton: null,
 };
 
-function showCustomAlert(message, isError = true) {
-    // Find existing alert box or create a new one
-    let alertBox = $('#customPrintAlert');
-    const backgroundColor = isError ? '#d9534f' : '#5cb85c'; // Red for error, Green for success
 
-    if (alertBox.length === 0) {
-        alertBox = $('<div>', {
-            id: 'customPrintAlert',
-            text: message,
-            css: {
-                position: 'fixed',
-                top: '20px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                backgroundColor: backgroundColor,
-                color: 'white',
-                padding: '15px 30px',
-                borderRadius: '8px',
-                zIndex: '10000',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-                fontSize: '16px',
-                opacity: '0',
-                transition: 'opacity 0.5s',
-                direction: 'rtl' // Arabic direction
-            }
-        }).appendTo('body');
-    } else {
-        alertBox.text(message).css('backgroundColor', backgroundColor);
-    }
-
-    // Show and hide logic
-    alertBox.css('opacity', '1');
-    setTimeout(() => {
-        alertBox.css('opacity', '0');
-    }, 3000);
-}
 
 
 // Helper Functions
@@ -783,7 +748,7 @@ function initializeProjectDropdown() {
     // ===============================
     // Render Contact Dropdown
     // ===============================
-    function renderContactDropdown(data) {
+    function renderContactDropdown2(data) {
         contactDropdown.innerHTML = '';
 
         const headerRow = document.createElement('div');
@@ -853,7 +818,49 @@ function initializeProjectDropdown() {
 
         contactDropdown.style.display = 'block';
     }
+function renderContactDropdown(data) {
+       contactDropdown.innerHTML = '';
 
+    const contacts = data.customer_contacts || [];
+    if (!contacts.length) {
+        const noResults = document.createElement('div');
+        noResults.classList.add('custom-dropdown-item', 'no-results');
+        noResults.textContent = "لا توجد جهات اتصال متاحة.";
+        contactDropdown.appendChild(noResults);
+    } else {
+        contacts.forEach(contact => {
+            const item = document.createElement('div');
+            item.classList.add('custom-dropdown-item');
+            item.innerHTML = `
+                <span>${contact.name}</span>
+                <span>${contact.title || '-'}</span>
+                <span>${contact.email || '-'}</span>
+                <span>${contact.mobile || contact.phone || '-'}</span>
+                <span>${contact.city || '-'}</span>
+            `;
+            item.addEventListener('click', () => {
+                contactInputField.value = contact.name;
+                contactInputField.dataset.id = contact.id;
+                contactDropdown.style.display = 'none';
+
+                if (quoteAttnToField) quoteAttnToField.value = contact.name;
+                if (quoteAttnPosField) quoteAttnPosField.value = contact.title || '';
+                if (quoteContactEmailField) quoteContactEmailField.value = contact.email || '';
+                if (quoteContactMobileField) quoteContactMobileField.value = contact.mobile || contact.phone || '';
+
+                if (quoteContactToField) {
+                    let toValue = '';
+                    if (contact.city) toValue += contact.city;
+                    if (contact.email) toValue += (toValue ? ' - ' : '') + contact.email;
+                    quoteContactToField.value = toValue;
+                }
+            });
+            contactDropdown.appendChild(item);
+        });
+    }
+
+    contactDropdown.style.display = 'block';
+}
 
     // ===============================
     // Load Contacts
@@ -1202,45 +1209,6 @@ function generateQuotationPdf() {
     }
 }
 
-async function openQuotationPDF() {
-    // 1. الحصول على البيانات من الباك إند
-    const quotationData = await getSingleSelectedQuotationData();
-    if (!quotationData) return;
-
-    // 2. التحقق من وجود بيانات الرأس
-    if (!quotationData.header) {
-        showCustomAlert("فشل في تحميل بيانات رأس عرض السعر المختار.", true);
-        return;
-    }
-
-    // 3. إذا أردنا عرض الرأس فقط، نتجاهل البنود
-    const headerOnlyData = {
-        header: quotationData.header,
-        lines: [] // مصفوفة البنود فارغة
-    };
-
-    // 4. تنسيق محتوى الكوتيشن في هيئة HTML
-    const reportHtml = formatQuotation(headerOnlyData);
-
-    // 5. تعبئة محتوى التقرير داخل المودال
-    const reportContentElement = document.getElementById('report-content');
-    if (!reportContentElement) {
-        console.error("لم يتم العثور على العنصر #report-content");
-        showCustomAlert("خطأ في الواجهة: لم يتم العثور على حاوية التقرير.", true);
-        return;
-    }
-    reportContentElement.innerHTML = reportHtml;
-
-    // 6. عرض المودال
-    const modalContainer = document.getElementById('modalpre-container');
-    if (modalContainer) modalContainer.style.display = 'flex';
-
-    showCustomAlert(
-        `تم فتح بيانات الرأس للتقرير رقم: ${headerOnlyData.header.proposal_number || 'غير محدد'} في وضع المعاينة.`,
-        false
-    );
-}
-
 
 /**
  * تبديل حالة تحديد جميع صفوف Quotation Table
@@ -1529,204 +1497,3 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault(); // يمنع إرسال GET
     });
 });
-
-
-function handleQuoteFileSelection() {
-    if (DOM.quoteQuoteFileInput && DOM.quoteQuoteFileInput.files.length > 0) {
-        const fileName = DOM.quoteQuoteFileInput.files[0].name;
-        if (DOM.quoteQuoteFileText) DOM.quoteQuoteFileText.value = fileName;
-        if (DOM.quoteFileStatus) DOM.quoteFileStatus.value = 'File Attached';
-        console.log("File selected:", fileName);
-    } else {
-        if (DOM.quoteQuoteFileText) DOM.quoteQuoteFileText.value = '';
-        if (DOM.quoteFileStatus) DOM.quoteFileStatus.value = 'No File Selected';
-        console.log("No file selected.");
-    }
-}
-
-function generateQuotationPdf() {
-    if (DOM.quoteFileStatus) {
-        DOM.quoteFileStatus.value = 'PDF Generated';
-        console.log("Simulating PDF generation. Status updated to 'PDF Generated'.");
-        showToast("PDF Generation Initiated (simulated).", "info");
-    } else {
-        console.error("File status element not found.");
-    }
-}
-
-function toggleSelectAllQuotationTable(masterCheckbox) {
-    // 1. تحقق من أن مرجع الجدول الرئيسي موجود
-    if (!quotationDataTable) return;
-
-    const isChecked = masterCheckbox.checked;
-
-    // 2. تحديد/إلغاء تحديد جميع التشيك بوكسات الفرعية للصفوف
-    // نستخدم .rows().nodes() للوصول إلى عناصر DOM لجميع الصفوف
-    $(quotationDataTable.rows().nodes())
-        .find('input.slaveCheckbox') // ابحث عن التشيك بوكس الفرعي
-        .prop('checked', isChecked) // طبق حالة التحديد
-        .closest('tr').toggleClass('selected-row', isChecked); // طبق تظليل الصف
-
-    // 3. النقطة الحاسمة: تحديث شريط الأدوات لتفعيل/تعطيل الأيقونات
-    updateToolbarState();
-}
-
-
-function deleteSelectedQuotation() {
-    if (!quotationDataTable) return showCustomAlert("خطأ: لم يتم تهيئة جدول عروض الأسعار.");
-
-    const selectedRows = quotationDataTable.rows(function(idx, data, node) {
-        return $(node).find('input.select-row-checkbox').prop('checked');
-    });
-    const selectedCount = selectedRows.count();
-    if (selectedCount === 0) return showCustomAlert("الرجاء اختيار صف واحد على الأقل.");
-
-    const ids = selectedRows.data().pluck('id').toArray();
-
-    showConfirmToast(`هل أنت متأكد من حذف ${selectedCount} عرض سعر؟`, () => {
-        fetch('/quotations/delete', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ ids })
-        })
-        .then(async res => {
-            const text = await res.text();
-            let data;
-            try { data = JSON.parse(text); } catch { data = { message: text }; }
-            if (!res.ok) throw new Error(data.message || 'حدث خطأ أثناء الحذف');
-
-            selectedRows.remove().draw(false);
-            showCustomAlert(data.message || `تم حذف ${selectedCount} عرض سعر بنجاح.`, false);
-        })
-        .catch(err => {
-            console.error("❌ Delete error:", err);
-            showCustomAlert("فشل حذف البيانات: " + err.message);
-        });
-    });
-}
-
-
-
-function getSelectedQuotationIds() {
-    const selectedIds = [];
-    if (typeof quotationDataTable === 'undefined' || quotationDataTable === null) {
-        console.error("quotationDataTable غير معرف. لا يمكن الحصول على IDs.");
-        return selectedIds;
-    }
-
-    quotationDataTable.rows().nodes().to$().find('input.select-row-checkbox:checked').each(function() {
-        const rowData = quotationDataTable.row($(this).closest('tr')).data();
-        if (rowData && rowData.id) {
-            selectedIds.push(rowData.id);
-        }
-    });
-    return selectedIds;
-}
-
-/**
- * دالة مساعدة للحصول على ID صف واحد فقط (لعملية التعديل).
- * @returns {string|null} - ID الصف المحدد أو null إذا لم يكن هناك صف واحد محدد.
- */
-function getSingleSelectedQuotationId() {
-    const selectedIds = getSelectedQuotationIds();
-    if (selectedIds.length === 1) {
-        return selectedIds[0];
-    } else if (selectedIds.length > 1) {
-        showToast("الرجاء تحديد عرض أسعار واحد فقط للتعديل.", "warning");
-    } else {
-        showToast("الرجاء تحديد عرض أسعار للتعديل.", "warning");
-    }
-    return null;
-}
-
-async function getSingleSelectedQuotationData() {
-    if (!quotationDataTable) {
-        showCustomAlert("خطأ: لم يتم تهيئة جدول عروض الأسعار.", true);
-        return null;
-    }
-
-    const selectedRows = quotationDataTable.rows(function(idx, data, node) {
-        return $(node).find('input.select-row-checkbox').prop('checked');
-    });
-
-    if (selectedRows.count() !== 1) {
-        showCustomAlert("الرجاء اختيار صف واحد فقط.", true);
-        return null;
-    }
-
-    const rowData = selectedRows.data()[0];
-    try {
-        const res = await fetch(`/quotations/${rowData.id}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        const data = await res.json();
-        return data; // يتوقع أن يكون { header: {...}, lines: [...] }
-    } catch (err) {
-        console.error("❌ Failed to fetch quotation data:", err);
-        showCustomAlert("فشل في تحميل بيانات عرض السعر من الخادم: " + err.message, true);
-        return null;
-    }
-}
-
-
-function showConfirmToast(message, onConfirm) {
-    const toastContainer = document.getElementById('toastContainer') || (() => {
-        const div = document.createElement('div');
-        div.id = 'toastContainer';
-        div.style.position = 'fixed';
-        div.style.top = '20px';
-        div.style.right = '20px';
-        div.style.zIndex = '10000';
-        div.style.display = 'flex';
-        div.style.flexDirection = 'column';
-        div.style.gap = '10px';
-        document.body.appendChild(div);
-        return div;
-    })();
-
-    const toast = document.createElement('div');
-    toast.style.background = '#ffc107'; // لون تحذيري
-    toast.style.color = '#343a40';
-    toast.style.padding = '12px 20px';
-    toast.style.borderRadius = '8px';
-    toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-    toast.style.minWidth = '300px';
-    toast.style.display = 'flex';
-    toast.style.justifyContent = 'space-between';
-    toast.style.alignItems = 'center';
-
-    // نص الرسالة
-    const msg = document.createElement('span');
-    msg.textContent = message;
-    toast.appendChild(msg);
-
-    // زر التأكيد
-    const btn = document.createElement('button');
-    btn.textContent = 'تأكيد';
-    btn.style.background = '#dc2626';
-    btn.style.color = '#fff';
-    btn.style.border = 'none';
-    btn.style.padding = '6px 12px';
-    btn.style.marginLeft = '10px';
-    btn.style.borderRadius = '5px';
-    btn.style.cursor = 'pointer';
-
-    btn.onclick = () => {
-        onConfirm(); // تنفيذ عملية الحذف
-        toast.remove(); // إزالة التوست بعد الضغط
-    };
-
-    toast.appendChild(btn);
-    toastContainer.prepend(toast);
-}
-
-
-

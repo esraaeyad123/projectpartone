@@ -28,6 +28,9 @@ use App\Http\Controllers\Confirmation\ConfirmationLineController;
 use App\Http\Controllers\Confirmation\ConfirmationFileController;
 use App\Http\Controllers\Deliveries\DeliveryController;
 use App\Http\Controllers\Financial\FinancialController;
+use App\Http\Controllers\Sample\SampleController;
+use App\Http\Controllers\Testing\TestingController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -83,12 +86,14 @@ Route::post('/projects/files/download-multiple', [ProjectFileController::class, 
 Route::get('/quotation', [QuotationHeaderController::class, 'index'])->name('quotation.index');
 Route::get('/quotation/projects', [QuotationHeaderController::class, 'getProjects']);
 Route::get('/quotation/contacts', [QuotationHeaderController::class, 'getContacts']);
-Route::post('/quotation/save-header', [QuotationHeaderController::class, 'saveHeader']);
+Route::post('/quotation/save-header', [QuotationHeaderController::class, 'store']);
+
 Route::post('/quotations/delete', [QuotationHeaderController::class, 'deleteSelected'])->name('quotations.delete');
-Route::get('/quotations/list', [QuotationHeaderController::class, 'list']);
+Route::get('/quotation/list', [QuotationHeaderController::class, 'list']);
 Route::get('/quotations/{id}', [QuotationHeaderController::class, 'show']);
 Route::put('/quotations/{id}', [QuotationHeaderController::class, 'update']);
 Route::post('/quotations/{id}/generate-pdf', [QuotationHeaderController::class, 'generatePdf'])->name('quotations.generatePdf');
+Route::get('/quotation/employees', [QuotationHeaderController::class, 'getEmployees']);
 
 // Quotation Lines
 Route::get('/quotations/lines/data', [QuotationLineController::class, 'getLines']);
@@ -219,3 +224,22 @@ Route::post('/financial/{invoice}/approve', [FinancialController::class, 'approv
 
 Route::post('/financial/{invoice}/send-to-customer', [FinancialController::class, 'sendToCustomer'])
     ->name('financial.sendToCustomer');
+
+
+Route::resource('testing', TestingController::class);
+
+Route::prefix('samples')->group(function () {
+
+    // صفحة العينة
+    Route::get('/', [SampleController::class, 'index'])->name('samples.index');
+
+    // جلب جميع الـ dropdowns (Labs, Sample Types, Test Methods, Test Locations)
+    Route::get('/dropdowns', [SampleController::class, 'getDropdowns'])->name('samples.dropdowns');
+
+    // جلب Projects (Project Code)
+    Route::get('/projects', [SampleController::class, 'getProjects'])->name('samples.projects');
+
+    // حفظ العينة وCrushing Tests
+    Route::post('/store', [SampleController::class, 'store'])->name('samples.store');
+});
+Route::post('/samples/store', [SampleController::class, 'store'])->name('samples.store');

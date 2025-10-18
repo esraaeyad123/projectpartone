@@ -24,6 +24,12 @@
     <link rel="stylesheet" href="{{ asset('css/project-files.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customer-files.css') }}">
     <link rel="stylesheet" href="{{ asset('css/report-details.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/testing.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/registration.css') }}" />
+
+
+
+
 
 
 
@@ -54,6 +60,10 @@
      <script src="{{ asset('js/report-details.js') }}" type="text/javascript"></script>
      <script src="{{ asset('js/customer_types.js') }}"></script>
      <script src="{{ asset('js/main.js') }}"></script>
+      <script src="{{ asset('js/testing.js') }}"></script>
+    <script src="{{ asset('js/registration.js') }}"></script>
+
+
 
 
 
