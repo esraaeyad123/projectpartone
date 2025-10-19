@@ -94,12 +94,16 @@ Route::get('/quotations/{id}', [QuotationHeaderController::class, 'show']);
 Route::put('/quotations/{id}', [QuotationHeaderController::class, 'update']);
 Route::post('/quotations/{id}/generate-pdf', [QuotationHeaderController::class, 'generatePdf'])->name('quotations.generatePdf');
 Route::get('/quotation/employees', [QuotationHeaderController::class, 'getEmployees']);
+// web.php
+Route::get('/quotations/{id}/edit', [QuotationHeaderController::class, 'edit']);
 
 // Quotation Lines
 Route::get('/quotations/lines/data', [QuotationLineController::class, 'getLines']);
 Route::post('/quotations/lines/store', [QuotationLineController::class, 'storeLine'])->name('quotations.lines.store');
 Route::post('/quotation-lines/bulk-add', [QuotationLineController::class, 'bulkAdd']);
 Route::get('/quotation-lines/{quotationId}', [QuotationLineController::class, 'getByQuotation']);
+Route::put('/quotations/{quotation}/revise', [QuotationHeaderController::class, 'revise'])
+     ->name('quotations.revise');
 
 Route::get('/price-lists', [PriceListController::class, 'index']);
 Route::post('/price-lists', [PriceListController::class, 'store']);

@@ -1581,7 +1581,8 @@ body.dark-mode {
             <table id="quotationTable" class="quotation-table" data-ignore-lang>
                 <thead>
                     <tr>
-                       <th><input type="checkbox" id="quote-masterCheckbox" title="Select All/Deselect All"></th>
+                       <th>
+                        <input type="checkbox" id="quote-masterCheckbox" title="Select All/Deselect All"></th>
 
                             <th><i class="fas fa-circle" style="color: grey;" title="جديد / قيد الإنشاء"></i></th>
             <th><i class="fas fa-list-alt" style="color: blue;" title="مكتمل / مرسل"></i></th>
@@ -1685,6 +1686,14 @@ body.dark-mode {
 
             <div class="modal-body-content">
                 <div id="headerTab" class="tab-content active">
+                    <input type="hidden" id="selectedQuotationId" name="selectedQuotationId" value="">
+<input type="hidden" id="quoteCustomerId" name="customer_id">
+<input type="hidden" id="quoteProjectId" name="project_id">
+<input type="hidden" id="quoteContactId" name="contact_id">
+
+
+
+
                     <div class="left-form-section">
                         <fieldset class="form-section">
                             <legend>Quote Info</legend>
@@ -1746,6 +1755,7 @@ body.dark-mode {
 
     <label for="quoteProject">Project Name</label>
     <input type="text" class="form-control" id="quoteProject" readonly>
+
 
 
                                 <label for="quoteProjectDetails">Project Details:</label>
@@ -1961,21 +1971,14 @@ body.dark-mode {
                 <button type="button" id="closeHeaderTabBtn" class="btn btn-secondary">Close</button>
                 <div class="footer-spacer"></div> <!-- Spacer to push save buttons to right -->
                 <!-- ✅ زر الحفظ -->
-<button type="button" id="saveHeaderTabBtn" class="btn btn-primary" onclick="handleSaveHeader(false)">
-    Save Header
-</button>
+<button type="button" class="btn btn-primary" onclick="handleCreateHeader(false)">Save Header</button>
+<button type="button" class="btn btn-success" onclick="handleCreateHeader(true)">Save Header & Close</button>
+<button type="button" class="btn btn-warning" onclick="handleUpdateHeader()">Update Quotation</button>
 
-<button type="button" id="saveAndCloseHeaderTabBtn" class="btn btn-success" onclick="handleSaveHeader(true)">
-    Save Header & Close
-</button>
-
-
-  <button type="button" id="saveEditedQuotationBtn" class="btn btn-success" onclick="saveEditedQuotation()">Save Edits</button>
 
 
                    </div>
 
-                   </form>
    </div>
 
    <style>
@@ -2043,6 +2046,7 @@ body.dark-mode {
                 </div>
 
 
+                   </form>
                 <!-- START: Updated Quote Lines Tab Content -->
                 <div id="linesTab" class="tab-content lines-tab-layout">
                     <div class="lines-main-content">

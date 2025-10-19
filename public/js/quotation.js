@@ -133,6 +133,9 @@ const DOM = {
     generatePdfButton: null,
 };
 
+
+
+
 function showCustomAlert(message, isError = true) {
     // Find existing alert box or create a new one
     let alertBox = $('#customPrintAlert');
@@ -302,10 +305,10 @@ function showToast(message, type = 'info', duration = 3000) {
 }
 
 function openQuotationModal() {
-    if (DOM.quotationModal) {
-        DOM.quotationModal.style.display = "block";
-        openTab(null, 'headerTab'); // Open Header tab by default
-        resetQuotationForm(); // Clear form fields when opening for a new entry
+if (DOM.quotationModal) {
+ DOM.quotationModal.style.display = "block";
+ openTab(null, 'headerTab'); // Open Header tab by default
+ resetQuotationForm(); // Clear form fields when opening for a new entry
 
  const saveEditsBtn = document.getElementById('saveEditedQuotationBtn');
         const saveHeaderBtn = document.getElementById('saveHeaderTabBtn');
@@ -509,11 +512,12 @@ function openTab(evt, tabId) {
 
 async function saveQuotationHeader(isEdit = false, quotationId = null) {
     try {
-        // 🧩 1. تجهيز البيانات للإرسال (Payload)
+        // 1️⃣ تجهيز البيانات من الحقول
         const payload = {
-            customer_id: parseInt(DOM.quoteCustomer?.dataset.id) || null,
-            project_id: parseInt(DOM.quoteProject?.dataset.id) || null,
-            contact_id: parseInt(DOM.quoteContactPerson?.dataset.id) || null,
+            customer_id: parseInt(DOM.quoteCustomer?.dataset.id) || parseInt(document.getElementById('quoteCustomerId')?.value) || null,
+            project_id: parseInt(DOM.quoteProject?.dataset.id) || parseInt(document.getElementById('quoteProjectId')?.value) || null,
+            contact_id: parseInt(DOM.quoteContactPerson?.dataset.id) || parseInt(document.getElementById('quoteContactId')?.value) || null,
+             // باقي الحقول...
             quote_category: DOM.quoteCategory?.value.trim() || '',
             quote_no: DOM.quoteNo?.value.trim() || '',
             rev: DOM.quoteRev?.value.trim() || '',
@@ -534,34 +538,37 @@ async function saveQuotationHeader(isEdit = false, quotationId = null) {
             declined: DOM.quoteDeclined?.checked ? 1 : 0,
             declined_message: DOM.quoteDeclinedMessage?.value.trim() || '',
             project_details: DOM.quoteProjectDetails?.value.trim() || '',
-            total_lines: parseFloat(DOM.financialTotalLines?.value) || 0,
-            discount_amount: parseFloat(DOM.financialDiscountAmount?.value) || 0,
-            tax_amount: parseFloat(DOM.financialTaxAmount?.value) || 0,
-            grand_total: parseFloat(DOM.financialGrandTotal?.value) || 0,
             use_alt_form: DOM.quoteUseAltForm?.checked ? 1 : 0,
             overall_status: DOM.quoteOverallStatus?.value.trim() || '',
-            last_confirmation: DOM.quoteLastConfirmation?.value || null,
-            last_confirmed: DOM.quoteLastConfirmed?.value || null,
+
             contact_from: DOM.quoteContactFrom?.value.trim() || '',
-            attn_to: DOM.quoteAttnTo?.value.trim() || '',
-            attn_pos: DOM.quoteAttnPos?.value.trim() || '',
-            contact_email: DOM.quoteContactEmail?.value.trim() || '',
-            contact_mobile: DOM.quoteContactMobile?.value.trim() || '',
+             total_lines: parseFloat(DOM.financialTotalLines?.value) || 0,
+    discount_amount: parseFloat(DOM.financialDiscountAmount?.value) || 0,
+    tax_amount: parseFloat(DOM.financialTaxAmount?.value) || 0,
+    grand_total: parseFloat(DOM.financialGrandTotal?.value) || 0,
+    overall_status: DOM.quoteOverallStatus?.value.trim() || '',
+    last_confirmation: DOM.quoteLastConfirmation?.value || null,
+    last_confirmed: DOM.quoteLastConfirmed?.value || null,
         };
 
-        // 🧠 2. إعداد الرابط وطريقة الإرسال
+        // 2️⃣ إعداد CSRF token
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
         if (!csrfToken) throw new Error("CSRF token not found");
 
-        const url = isEdit && quotationId
-            ? `/quotations/${quotationId}`  // تحديث
-            : '/quotation/save-header';     // إنشاء جديد
+        // 3️⃣ تحديد الرابط وطريقة الطلب
+        let url, method;
+        if (isEdit) {
+            if (!quotationId) throw new Error("Quotation ID is required for update.");
+            url = `/quotations/${quotationId}`;
+            method = 'PUT';
+        } else {
+            url = '/quotation/save-header';
+            method = 'POST';
+        }
 
-        const method = isEdit ? 'PUT' : 'POST';
-
-        // 🛰️ 3. تنفيذ الطلب
+        // 4️⃣ إرسال الطلب للسيرفر
         const response = await fetch(url, {
-            method: method,
+            method,
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
@@ -570,23 +577,32 @@ async function saveQuotationHeader(isEdit = false, quotationId = null) {
             body: JSON.stringify(payload)
         });
 
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`HTTP ${response.status}: ${text}`);
+        // 5️⃣ تحليل الاستجابة
+        const text = await response.text();
+        let data;
+        try { data = JSON.parse(text); }
+        catch { throw new Error("Invalid JSON response: " + text); }
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || `HTTP ${response.status}`);
         }
 
-        const data = await response.json();
+        // 6️⃣ في حال النجاح
+        const actionText = isEdit ? "updated" : "created";
+        showToast(`✅ Quotation ${actionText} successfully!`, "success");
 
-        // ✅ 4. تحليل نتيجة الرد من السيرفر
-        if (data.success) {
-            console.log("✅ Quotation header saved successfully!", data);
-            showToast(data.message || "Saved successfully!", "success");
-            return data; // ← ترجع البيانات إلى الدالة اللي استدعت الحفظ
-        } else {
-            console.error("❌ Save failed:", data);
-            showToast(data.message || "Save failed!", "error");
-            return { success: false };
+        // تحديث ID في المودال بعد الإضافة
+        if (data.quotation_id && !isEdit) {
+            document.getElementById('selectedQuotationId').value = data.quotation_id;
         }
+
+        // تحديث الجدول إذا موجود
+        if (typeof quotationDataTable !== "undefined" && quotationDataTable !== null) {
+            quotationDataTable.ajax.reload(null, false);
+        }
+
+        return data;
+
     } catch (error) {
         console.error("❌ Error saving quotation header:", error);
         showToast("Error: " + error.message, "error");
@@ -1071,13 +1087,6 @@ function initializeCategoryDropdown() {
         { type: "AAM-GT", value: "proposal_geotechnical", text: "Proposal for Geotechnical" },
         { type: "AAM-MT", value: "proposal_material_testing", text: "Proposal for Material Testing" }
     ];
-    // --- نهاية التعديل الجديد ---
-
-    /**
-     * تقوم بعرض خيارات الفئات داخل القائمة المنسدلة،
-     * وتُظهرها في عمودين: 'النوع' (Type) و 'اسم الفئة' (Category Name).
-     * @param {Array} optionsToRender - مصفوفة من كائنات الفئة {type, value, text}.
-     */
     function renderCategoryDropdown(optionsToRender) {
         // 1. مسح أي محتوى موجود حالياً في القائمة المنسدلة لتجنب التكرار عند إعادة العرض.
         categoryDropdownList.innerHTML = '';
@@ -1127,6 +1136,7 @@ function initializeCategoryDropdown() {
                 // إخفاء القائمة المنسدلة بعد الاختيار.
                 categoryDropdownList.style.display = 'none';
                 // استدعاء الدالة لتوليد رقم الاقتباس بناءً على القيمة المختارة.
+                generateQuotationNumber(option.value);
 
                 // إذا كان لديك دالة لتحديد الحقول المطلوبة، قم بإلغاء التعليق عليها واستخدامها:
                 // markRequiredField(categoryInputField, false);
@@ -1175,22 +1185,12 @@ function initializeCategoryDropdown() {
 }
 
 
+
 // =====================================================================
 // Functions for File Handling and PDF Generation
 // =====================================================================
 
-function handleQuoteFileSelection() {
-    if (DOM.quoteQuoteFileInput && DOM.quoteQuoteFileInput.files.length > 0) {
-        const fileName = DOM.quoteQuoteFileInput.files[0].name;
-        if (DOM.quoteQuoteFileText) DOM.quoteQuoteFileText.value = fileName;
-        if (DOM.quoteFileStatus) DOM.quoteFileStatus.value = 'File Attached';
-        console.log("File selected:", fileName);
-    } else {
-        if (DOM.quoteQuoteFileText) DOM.quoteQuoteFileText.value = '';
-        if (DOM.quoteFileStatus) DOM.quoteFileStatus.value = 'No File Selected';
-        console.log("No file selected.");
-    }
-}
+
 
 function generateQuotationPdf() {
     if (DOM.quoteFileStatus) {
@@ -1299,7 +1299,7 @@ function initializeQuotationDataTable() {
                 title: '<input type="checkbox" onclick="toggleSelectAllQuotations(this)" />',
                 orderable: false,
                 searchable: false,
-                render: data => `<input type="checkbox" class="select-row-checkbox" data-id="${data}"/>`
+                render: data => `<input type="checkbox" class="slaveCheckbox" data-id="${data}"/>`
             },
             // 2. حالات أيقونات
             { data: 'isNew', orderable: false, searchable: false, width: '40px', render: d => d ? '<i class="fas fa-circle" style="color: grey;" title="جديد"></i>' : '' },
@@ -1385,14 +1385,29 @@ $('#quotationTable tbody').on('click', '.btn-edit', function() {
     const rowData = quotationDataTable.row($(this).closest('tr')).data();
     editQuotationModal(rowData.id);
 });
+$('#quotationTable').on('change', 'input.slaveCheckbox', function() {
+    const checkedBoxes = $('input.slaveCheckbox:checked');
+
+    if (checkedBoxes.length === 1) {
+        // خذ ID من data-id
+        const selectedId = checkedBoxes.first().data('id');
+        $('#selectedQuotationId').val(selectedId);
+        console.log("✅ تم اختيار عرض السعر ID:", selectedId);
+    } else {
+        // لو ما فيه صف أو أكثر من صف محدد، نفرغ القيمة
+        $('#selectedQuotationId').val('');
+        console.log("❌ لم يتم تحديد صف واحد فقط.");
+    }
+});
 
 $('#quotationTable tbody').on('click', '.btn-delete', function() {
     const rowData = quotationDataTable.row($(this).closest('tr')).data();
     deleteSelectedQuotation(rowData.id);
 });
 
+
 function toggleSelectAllQuotations(masterCheckbox) {
-    const checkboxes = document.querySelectorAll('.select-row-checkbox');
+    const checkboxes = document.querySelectorAll('.slaveCheckbox');
     checkboxes.forEach(cb => {
         cb.checked = masterCheckbox.checked;
         $(cb).closest('tr').toggleClass('selected-row', masterCheckbox.checked);
@@ -1400,127 +1415,28 @@ function toggleSelectAllQuotations(masterCheckbox) {
 }
 
 function updateSelectAllCheckbox() {
-    const checkboxes = document.querySelectorAll('.select-row-checkbox');
+    const checkboxes = document.querySelectorAll('.slaveCheckbox');
     const master = document.querySelector('#quotationTable thead input[type="checkbox"]');
     const allChecked = Array.from(checkboxes).every(cb => cb.checked);
     master.checked = allChecked;
 }
 
 
-function saveQuotationHeader() {
-    return new Promise((resolve, reject) => {
-        try {
-            const quotationId = DOM.quotationModal?.dataset.quotationId || null;
-            const isEdit = !!quotationId;
 
-            const payload = {
-                customer_id: parseInt(DOM.quoteCustomer.dataset.id) || null,
-                project_id: parseInt(DOM.quoteProject.dataset.id) || null,
-                contact_id: parseInt(DOM.quoteContactPerson.dataset.id) || null,
-                quote_category: DOM.quoteCategory.value.trim(),
-                contact_from: DOM.quoteContactFrom.value.trim(),
-                quote_no: DOM.quoteNo.value.trim(),
-                rev: DOM.quoteRev.value.trim(),
-                quote_date: DOM.quoteDate.value || null,
-                legacy_no: DOM.quoteLegacyNo.value.trim(),
-                legacy_date: DOM.quoteLegacyDate.value || null,
-                subject: DOM.quoteSubject.value.trim(),
-                currency: DOM.quoteCurrency.value || '',
-                discount: parseFloat(DOM.quoteDiscount.value) || 0,
-                vat: parseFloat(DOM.quoteVAT.value) || 0,
-                validity_days: parseInt(DOM.quoteValidity.value) || 0,
-                payment_terms: DOM.quotePaymentTermsInput.value.trim(),
-                method: DOM.quoteMethod.value.trim(),
-                remarks: DOM.quoteRemarks.value.trim(),
-                quote_file: DOM.quoteQuoteFile.value.trim(),
-                file_status: DOM.quoteFileStatus.value.trim(),
-                declined: DOM.quoteDeclined.checked ? 1 : 0,
-                declined_message: DOM.quoteDeclinedMessage.value.trim() || '',
-                project_details: DOM.quoteProjectDetails.value.trim() || '',
-                total_lines: parseFloat(DOM.financialTotalLines.value) || 0,
-                discount_amount: parseFloat(DOM.financialDiscountAmount.value) || 0,
-                tax_amount: parseFloat(DOM.financialTaxAmount.value) || 0,
-                grand_total: parseFloat(DOM.financialGrandTotal.value) || 0,
-                use_alt_form: DOM.quoteUseAltForm?.checked ? 1 : 0,
-                overall_status: DOM.quoteOverallStatus?.value.trim() || '',
-                last_confirmation: DOM.quoteLastConfirmation?.value || null,
-                last_confirmed: DOM.quoteLastConfirmed?.value || null,
-                inquiry: DOM.quoteInquiry.value.trim()
-            };
 
-            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
-            const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
-            if (!csrfToken) return reject(new Error("CSRF token not found"));
-
-            const url = isEdit ? `/quotations/${quotationId}` : '/quotation/save-header';
-            const method = isEdit ? 'PUT' : 'POST';
-
-            fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(async res => {
-                const text = await res.text();
-                let data;
-                try { data = JSON.parse(text); }
-                catch (err) { throw new Error("Invalid JSON response from server:\n" + text); }
-
-                if (!res.ok || !data.success) {
-                    const msg = data.message || `HTTP error! Status: ${res.status}`;
-                    showToast("❌ Failed to save quotation: " + msg, "error");
-                    return reject(new Error(msg));
-                }
-
-                // 🔹 تحديث currentQuotationId مباشرة بعد الحفظ
-                currentQuotationId = data.quotation_id;
-
-                // 🔹 تحديث dataset للـ modal
-                if (DOM.quotationModal) {
-                    DOM.quotationModal.dataset.quotationId = data.quotation_id;
-                    DOM.quotationModal.dataset.mode = 'edit';
-                }
-
-                showToast(isEdit ? "✅ Quotation updated successfully!" : "✅ Quotation created successfully!", "success");
-
-                // 🔹 تحديث جدول DataTable بعد الحفظ
-                if (typeof quotationDataTable !== 'undefined' && quotationDataTable !== null) {
-                    quotationDataTable.ajax.reload(null, false);
-                }
-
-                resolve(data);
-            })
-            .catch(err => {
-                console.error("❌ Error saving quotation:", err);
-                showToast("❌ Error saving quotation: " + err.message, "error");
-                reject(err);
-            });
-
-        } catch (err) {
-            console.error("❌ Unexpected error in saveQuotationHeader:", err);
-            showToast("❌ Unexpected error: " + err.message, "error");
-            reject(err);
-        }
+// إضافة جديدة
+function handleCreateHeader(closeAfterSave = false) {
+    saveQuotationHeader(false, null).then(data => {
+        if (data.success && closeAfterSave) closeQuotationModal();
     });
 }
 
-
-function handleSaveHeader(closeAfterSave = false) {
-    saveQuotationHeader(false)
-        .then(data => {
-            if (closeAfterSave && typeof closeQuotationModal === 'function') {
-                closeQuotationModal();
-            }
-        })
-        .catch(err => {
-            console.error("Save failed:", err);
-            showToast("Error: " + err.message, "error");
-        });
+// تعديل موجود
+function handleUpdateHeader() {
+    const selectedQuotationId = document.getElementById('selectedQuotationId')?.value;
+    saveQuotationHeader(true, selectedQuotationId);
 }
+
 
 // JS: منع الفورم من إرسال GET
 document.addEventListener("DOMContentLoaded", function() {
@@ -1529,7 +1445,6 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault(); // يمنع إرسال GET
     });
 });
-
 
 function handleQuoteFileSelection() {
     if (DOM.quoteQuoteFileInput && DOM.quoteQuoteFileInput.files.length > 0) {
@@ -1554,29 +1469,14 @@ function generateQuotationPdf() {
     }
 }
 
-function toggleSelectAllQuotationTable(masterCheckbox) {
-    // 1. تحقق من أن مرجع الجدول الرئيسي موجود
-    if (!quotationDataTable) return;
 
-    const isChecked = masterCheckbox.checked;
-
-    // 2. تحديد/إلغاء تحديد جميع التشيك بوكسات الفرعية للصفوف
-    // نستخدم .rows().nodes() للوصول إلى عناصر DOM لجميع الصفوف
-    $(quotationDataTable.rows().nodes())
-        .find('input.slaveCheckbox') // ابحث عن التشيك بوكس الفرعي
-        .prop('checked', isChecked) // طبق حالة التحديد
-        .closest('tr').toggleClass('selected-row', isChecked); // طبق تظليل الصف
-
-    // 3. النقطة الحاسمة: تحديث شريط الأدوات لتفعيل/تعطيل الأيقونات
-    updateToolbarState();
-}
 
 
 function deleteSelectedQuotation() {
     if (!quotationDataTable) return showCustomAlert("خطأ: لم يتم تهيئة جدول عروض الأسعار.");
 
     const selectedRows = quotationDataTable.rows(function(idx, data, node) {
-        return $(node).find('input.select-row-checkbox').prop('checked');
+        return $(node).find('input.slaveCheckbox').prop('checked');
     });
     const selectedCount = selectedRows.count();
     if (selectedCount === 0) return showCustomAlert("الرجاء اختيار صف واحد على الأقل.");
@@ -1611,21 +1511,7 @@ function deleteSelectedQuotation() {
 
 
 
-function getSelectedQuotationIds() {
-    const selectedIds = [];
-    if (typeof quotationDataTable === 'undefined' || quotationDataTable === null) {
-        console.error("quotationDataTable غير معرف. لا يمكن الحصول على IDs.");
-        return selectedIds;
-    }
 
-    quotationDataTable.rows().nodes().to$().find('input.select-row-checkbox:checked').each(function() {
-        const rowData = quotationDataTable.row($(this).closest('tr')).data();
-        if (rowData && rowData.id) {
-            selectedIds.push(rowData.id);
-        }
-    });
-    return selectedIds;
-}
 
 /**
  * دالة مساعدة للحصول على ID صف واحد فقط (لعملية التعديل).
@@ -1650,7 +1536,7 @@ async function getSingleSelectedQuotationData() {
     }
 
     const selectedRows = quotationDataTable.rows(function(idx, data, node) {
-        return $(node).find('input.select-row-checkbox').prop('checked');
+        return $(node).find('input.slaveCheckbox').prop('checked'); // تأكد من الكلاس الصحيح
     });
 
     if (selectedRows.count() !== 1) {
@@ -1659,16 +1545,19 @@ async function getSingleSelectedQuotationData() {
     }
 
     const rowData = selectedRows.data()[0];
+    const quotationId = rowData.id;
+
     try {
-        const res = await fetch(`/quotations/${rowData.id}`, {
+        const res = await fetch(`/quotations/${quotationId}/edit`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
             }
         });
+
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const data = await res.json();
-        return data; // يتوقع أن يكون { header: {...}, lines: [...] }
+        return data; // { header: {...}, lines: [...] } أو حسب صياغة الـ controller
     } catch (err) {
         console.error("❌ Failed to fetch quotation data:", err);
         showCustomAlert("فشل في تحميل بيانات عرض السعر من الخادم: " + err.message, true);
@@ -1730,3 +1619,265 @@ function showConfirmToast(message, onConfirm) {
 
 
 
+function saveEditedQuotation() {
+    // 1. الحصول على الـ quotationId من hidden أو checkbox
+    let quotationId = $('#selectedQuotationId').val();
+    if (!quotationId) {
+        const checked = $('input.slaveCheckbox:checked');
+        if (checked.length === 1) {
+            quotationId = checked.data('id') || checked.attr('data-id');
+        }
+    }
+
+    if (!quotationId) {
+        showCustomAlert("خطأ: لم يتم تحديد صف عرض السعر.", true);
+        return;
+    }
+
+    // 2. تجميع البيانات
+    const updatedData = {
+        customer_id: $('#quoteCustomerId').val(),
+        project_id: $('#quoteProjectId').val(),
+        contact_id: $('#quoteContactId').val(),   // ID فقط
+        quote_category: $('#quoteCategory').val(),
+        quote_no: $('#quoteNo').val(),
+        rev: $('#quoteRev').val(),
+        quote_date: $('#quoteDate').val(),
+        legacy_no: $('#quoteLegacyNo').val(),
+        legacy_date: $('#quoteLegacyDate').val(),
+        subject: $('#quoteSubject').val(),
+        currency: $('#quoteCurrency').val(),
+        discount: parseFloat($('#quoteDiscount').val()) || 0,
+        vat: parseFloat($('#quoteVAT').val()) || 0,
+        validity_days: $('#quoteValidity').val(),
+        payment_terms: $('#quotePaymentTermsInput').val(),
+        method: $('#quoteMethod').val(),
+        remarks: $('#quoteRemarks').val(),
+        inquiry: $('#quoteInquiry').val(),
+        contact_from: $('#quoteContactFrom').val(),
+        project_details: $('#quoteProjectDetails').val(),
+        use_alt_form: $('#quoteUseAltForm').prop('checked') ? 1 : 0,
+        declined: $('#quoteDeclined').prop('checked') ? 1 : 0,
+        declined_message: $('#quoteDeclinedMessage').val(),
+        quote_file: $('#quoteQuoteFile').val(),
+        file_status: $('#quoteFileStatus').val()
+    };
+
+    // 3. إرسال AJAX
+    $.ajax({
+        url: `/quotations/${quotationId}`,
+        type: 'PUT',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // ✅ بديل عن data._token
+        },
+        data: updatedData,
+        success: function (response) {
+            if (response.success) {
+                // 4. تحديث صف الـ DataTable محلياً
+                const rowNode = quotationDataTable.rows().nodes().to$().find(`input.slaveCheckbox[data-id='${quotationId}']`).closest('tr');
+                const row = quotationDataTable.row(rowNode);
+                const updatedRowData = { ...row.data(), ...updatedData };
+                row.data(updatedRowData).draw(false);
+
+                // 5. إخفاء المودال وعرض رسالة نجاح
+                $('#quotationModal').hide();
+                showCustomAlert("✅ تم حفظ وتحديث عرض السعر بنجاح.", false);
+            } else {
+                showCustomAlert("❌ حدث خطأ أثناء حفظ التعديلات.", true);
+            }
+        },
+        error: function (xhr) {
+            console.error("Error updating quotation:", xhr.responseText);
+            showCustomAlert("❌ لم يتم حفظ التعديلات، تحقق من الحقول المطلوبة.", true);
+        }
+    });
+}
+
+
+
+async function editQuotationModal() {
+    // ✅ 1. تأكد من وجود الجدول
+    if (typeof quotationDataTable === 'undefined' || quotationDataTable === null) {
+        showCustomAlert("⚠️ لم يتم تهيئة جدول عروض الأسعار.", true);
+        return;
+    }
+
+    // ✅ 2. تحديد الصف المختار بالتشيك بوكس
+    const selectedRows = quotationDataTable.rows(function(idx, data, node) {
+        return $(node).find('input.slaveCheckbox').prop('checked');
+    });
+
+    const selectedCount = selectedRows.count();
+
+    if (selectedCount !== 1) {
+        showCustomAlert("الرجاء اختيار صف واحد فقط للتعديل.", true);
+        return;
+    }
+
+ let quotationId = $('#selectedQuotationId').val();
+
+    // 2) إذا ما فيه hidden، جرّب من التشيك بوكس المحدد
+    if (!quotationId) {
+        const checked = $('input.slaveCheckbox:checked');
+        if (checked.length === 1) {
+            quotationId = checked.data('id') || checked.attr('data-id');
+        }
+    }
+    if (!quotationId) {
+        showCustomAlert("⚠️ لم يتم العثور على معرف عرض السعر المحدد.", true);
+        return;
+    }
+
+    console.log("🔍 جاري جلب بيانات عرض السعر من السيرفر:", quotationId);
+
+    try {
+        // ✅ 4. جلب البيانات من السيرفر
+        const response = await fetch(`/quotations/${quotationId}/edit`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+
+        if (!response.ok) throw new Error("حدث خطأ أثناء جلب البيانات من السيرفر");
+
+        const data = await response.json();
+        console.log("✅ تم جلب بيانات عرض السعر:", data);
+
+        // ✅ 5. تعبئة النموذج بالقيم الصحيحة حسب أسماء الحقول في migration
+        $('#quotationForm')[0].reset();
+        $('#modalTitle').text(`تعديل عرض السعر #${data.quote_no || 'N/A'}`);
+
+        $('#selectedQuotationId').val(data.id || '');
+        $('#quoteCategory').val(data.quote_category || '');
+        $('#quoteNo').val(data.quote_no || '');
+        $('#quoteRev').val(data.rev || '');
+        $('#quoteDate').val(data.quote_date || '');
+        $('#quoteLegacyNo').val(data.legacy_no || '');
+        $('#quoteLegacyDate').val(data.legacy_date || '');
+        $('#quoteSubject').val(data.subject || '');
+        $('#quoteCustomer').val(data.customer_name || ''); // ← يفضل أن تُرجع من الباك إند via join
+        $('#quoteProjectCodeInput').val(data.project_code || ''); // ← يفضل أن تُرجع من الباك إند via join
+        $('#quoteProject').val(data.project_name || '');
+        $('#quoteProjectDetails').val(data.project_details || '');
+        $('#quoteContactFrom').val(data.contact_from || '');
+        $('#quoteInquiry').val(data.inquiry || '');
+        $('#quoteContactPerson').val(data.contact_name || ''); // ← من join مع contacts
+        $('#quoteContactTo').val(data.contact_email || '');
+        $('#quoteAttnTo').val(data.attn_to || '');
+        $('#quoteAttnPos').val(data.attn_pos || '');
+        $('#quoteContactEmail').val(data.contact_email || '');
+        $('#quoteContactMobile').val(data.contact_mobile || '');
+        $('#quoteDiscount').val(data.discount || 0);
+        $('#quoteVAT').val(data.vat || 0);
+        $('#quoteValidity').val(data.validity_days || '');
+        $('#quoteCurrency').val(data.currency || '');
+        $('#quotePaymentTermsInput').val(data.payment_terms || '');
+        $('#quoteMethod').val(data.method || '');
+        $('#quoteRemarks').val(data.remarks || '');
+        $('#quoteQuoteFile').val(data.quote_file || '');
+        $('#quoteFileStatus').val(data.file_status || 'PDF Not Created');
+        $('#quoteDeclined').prop('checked', !!data.declined);
+        $('#quoteDeclinedMessage').val(data.declined_message || '');
+        $('#quoteUseAltForm').prop('checked', !!data.use_alt_form);
+           $('#quoteCustomerId').val(data.customer_id || '');
+           $('#quoteProjectId').val(data.project_id || '');
+        $('#quoteContactId').val(data.contact_id || '');
+        $('#quoteAttnTo').val(data.attn_to || '');
+$('#quoteAttnPos').val(data.attn_pos || '');
+
+$('#financialTotalLines').val(data.total_lines || 0);
+$('#financialDiscountAmount').val(data.discount_amount || 0);
+$('#financialTaxAmount').val(data.tax_amount || 0);
+$('#financialGrandTotal').val(data.grand_total || 0);
+$('#quoteOverallStatus').val(data.overall_status || '');
+$('#quoteLastConfirmation').val(data.last_confirmation || '');
+$('#quoteLastConfirmed').val(data.last_confirmed || '');
+
+        // ✅ 6. تبديل الأزرار
+        if (DOM.saveEditedQuotationBtn)
+            DOM.saveEditedQuotationBtn.style.setProperty('display', 'inline-block', 'important');
+        if (DOM.saveHeaderTabBtn)
+            DOM.saveHeaderTabBtn.style.setProperty('display', 'none', 'important');
+        if (DOM.saveAndCloseHeaderTabBtn)
+            DOM.saveAndCloseHeaderTabBtn.style.setProperty('display', 'none', 'important');
+
+        // ✅ 7. عرض المودال
+        $('#quotationModal').css('display', 'flex');
+        openTab(null, 'headerTab');
+
+    } catch (error) {
+        console.error("❌ خطأ أثناء تحميل البيانات:", error);
+        showCustomAlert("حدث خطأ أثناء تحميل بيانات عرض السعر من السيرفر.", true);
+    }
+}
+
+
+async function reviseQuotation() {
+    const selectedData = await getSingleSelectedQuotationData();
+    if (!selectedData) return;
+
+    const quotationId = selectedData.id;
+
+    try {
+        const response = await fetch(`/quotations/${quotationId}/revise`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({})
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
+
+        // تحديث الجدول
+        const rowNode = quotationDataTable.rows().nodes().to$().find(`input.slaveCheckbox[data-id='${quotationId}']`).closest('tr');
+        const row = quotationDataTable.row(rowNode);
+        row.data({ ...row.data(), rev: data.new_rev }).draw(false);
+
+        showCustomAlert(`✅ تم تحديث مراجعة عرض السعر إلى ${data.new_rev}`, false);
+    } catch (err) {
+        console.error(err);
+        showCustomAlert("❌ فشل في تحديث مراجعة عرض السعر: " + err.message, true);
+    }
+}
+
+
+
+// ⚙️ دالة توليد رقم عرض السعر بناءً على الفئة المختارة
+function generateQuotationNumber(selectedCategoryValue) {
+    const quoteNoInput = document.getElementById('quoteNo');
+
+    // تحقق أن الحقل موجود فعلاً
+    if (!quoteNoInput) {
+        console.error("❌ لم يتم العثور على حقل Quote No. في الصفحة (id='quoteNo').");
+        return;
+    }
+
+    // منطق التوليد البسيط — يمكنك تعديله حسب النظام الفعلي
+    let prefix = '';
+
+    switch (selectedCategoryValue) {
+        case 'proposal_geotechnical':
+            prefix = 'AAM-GT';
+            break;
+        case 'proposal_material_testing':
+            prefix = 'AAM-MT';
+            break;
+        default:
+            prefix = 'AAM-XX'; // قيمة افتراضية
+    }
+
+    // مثال بسيط لتوليد رقم متسلسل مؤقت (يمكن لاحقًا جلب الرقم الحقيقي من السيرفر)
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 أرقام عشوائية
+    const generatedQuoteNo = `${prefix}-${randomSuffix}`;
+
+    // تعبئة الحقل بالقيمة الجديدة
+    quoteNoInput.value = generatedQuoteNo;
+
+    console.log(`📄 تم توليد رقم عرض السعر: ${generatedQuoteNo}`);
+}

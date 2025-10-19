@@ -331,10 +331,6 @@ public function store(Request $request)
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -346,42 +342,36 @@ public function update(Request $request, $id)
     $quotation = QuotationHeader::findOrFail($id);
 
     $validated = $request->validate([
-        'customer_id'    => 'required|integer|exists:customers,id',
-        'project_id'     => 'required|integer|exists:projects,id',
-        'contact_id'     => 'required|integer|exists:contacts,id',
-        'quote_category' => 'required|string|max:255',
-        'quote_no'       => 'required|string|max:255',
-        'rev'            => 'nullable|string|max:50',
-        'quote_date'     => 'nullable|date',
-        'legacy_no'      => 'nullable|string|max:255',
-        'legacy_date'    => 'nullable|date',
-        'subject'        => 'nullable|string|max:255',
-        'currency'       => 'nullable|string|max:10',
-        'discount'       => 'nullable|numeric',
-        'vat'            => 'nullable|numeric',
-        'validity_days'  => 'nullable|integer',
-        'payment_terms'  => 'nullable|string|max:255',
-        'method'         => 'nullable|string|max:255',
-        'remarks'        => 'nullable|string',
-        'quote_file'     => 'nullable|string|max:255',
-        'file_status'    => 'nullable|string|max:50',
-        'declined'       => 'nullable|boolean',
-        'declined_message'=> 'nullable|string',
-        'total_lines'    => 'nullable|numeric',
-        'discount_amount'=> 'nullable|numeric',
-        'tax_amount'     => 'nullable|numeric',
-        'grand_total'    => 'nullable|numeric',
-        'inquiry'          => 'nullable|string|max:255',
-        'contact_from'     => 'nullable|string|max:255',
-        'attn_to'          => 'nullable|string|max:255',
-        'attn_pos'         => 'nullable|string|max:255',
-        'contact_email'    => 'nullable|string|max:255',
-        'contact_mobile'   => 'nullable|string|max:255',
-        'use_alt_form'     => 'nullable|boolean',
-        'overall_status'   => 'nullable|string|max:255',
-        'last_confirmation'=> 'nullable|date',
-        'last_confirmed'   => 'nullable|date',
-       'project_details'  => 'nullable|string',
+       'customer_id'        => 'required|exists:customers,id',
+    'project_id'         => 'required|exists:projects,id',
+    'contact_id'         => 'nullable|exists:contacts,id',
+    'quote_category'     => 'nullable|string|max:255',
+    'quote_no'           => 'required|string|max:255',
+    'rev'                => 'nullable|string|max:50',
+    'quote_date'         => 'nullable|date',
+    'legacy_no'          => 'nullable|string|max:255',
+    'legacy_date'        => 'nullable|date',
+    'subject'            => 'nullable|string|max:255',
+    'currency'           => 'nullable|string|max:10',
+    'discount'           => 'nullable|numeric',
+    'vat'                => 'nullable|numeric',
+    'validity_days'      => 'nullable|integer',
+    'payment_terms'      => 'nullable|string|max:255',
+    'method'             => 'nullable|string|max:255',
+    'remarks'            => 'nullable|string',
+    'inquiry'            => 'nullable|string|max:255',
+    'contact_from'       => 'nullable|string|max:255',
+    'use_alt_form'       => 'nullable|boolean',
+    'overall_status'     => 'nullable|string|max:255',
+    'last_confirmation'  => 'nullable|date',
+    'last_confirmed'     => 'nullable|date',
+    'project_details'    => 'nullable|string',
+
+    // ✅ إضافات Right Sidebar
+    'total_lines'        => 'nullable|numeric',
+    'discount_amount'    => 'nullable|numeric',
+    'tax_amount'         => 'nullable|numeric',
+    'grand_total'        => 'nullable|numeric',
     ]);
 
     $quotation->update($validated);
@@ -440,6 +430,73 @@ public function getEmployees()
 
 
 
+public function edit($id)
+{
+    // 🔹 جلب عرض السعر مع العلاقات الثلاث
+    $quotation = QuotationHeader::with(['customer', 'project', 'contact'])->findOrFail($id);
+
+    return response()->json([
+       'id' => $quotation->id,
+    'quote_no' => $quotation->quote_no,
+    'quote_category' => $quotation->quote_category,
+    'rev' => $quotation->rev,
+    'quote_date' => $quotation->quote_date,
+    'legacy_no' => $quotation->legacy_no,
+    'legacy_date' => $quotation->legacy_date,
+    'subject' => $quotation->subject,
+    'currency' => $quotation->currency,
+    'discount' => $quotation->discount,
+    'vat' => $quotation->vat,
+    'validity_days' => $quotation->validity_days,
+    'payment_terms' => $quotation->payment_terms,
+    'method' => $quotation->method,
+    'remarks' => $quotation->remarks,
+    'quote_file' => $quotation->quote_file,
+    'file_status' => $quotation->file_status,
+    'declined' => $quotation->declined,
+    'declined_message' => $quotation->declined_message,
+    'use_alt_form' => $quotation->use_alt_form,
+    'inquiry' => $quotation->inquiry,
+    'project_details' => $quotation->project_details,
+    'contact_from' => $quotation->contact_from,
+    'attn_to' => $quotation->contact?->name,
+    'attn_pos' => $quotation->contact?->position,
+    'contact_email' => $quotation->contact?->email,
+    'contact_mobile' => $quotation->contact?->mobile,
+
+    // Financials
+    'total_lines' => $quotation->total_lines,
+    'discount_amount' => $quotation->discount_amount,
+    'tax_amount' => $quotation->tax_amount,
+    'grand_total' => $quotation->grand_total,
+
+    // Quote Status
+    'overall_status' => $quotation->overall_status,
+    'last_confirmation' => $quotation->last_confirmation,
+    'last_confirmed' => $quotation->last_confirmed,
+
+    // Relationships
+    'customer_name' => $quotation->customer?->customer_name,
+    'customer_id' => $quotation->customer?->id,
+    'project_name' => $quotation->project?->name,
+    'project_code' => $quotation->project?->code,
+    'project_id' => $quotation->project?->id,
+    'contact_name' => $quotation->contact?->name,
+    'contact_id' => $quotation->contact?->id,
+
+    ]);
+}
+
+public function revise(QuotationHeader $quotation)
+{
+    // مثال: زيادة رقم المراجعة
+    $currentRev = intval($quotation->rev ?? 0);
+    $newRev = $currentRev + 1;
+    $quotation->rev = $newRev;
+    $quotation->save();
+
+    return response()->json(['success' => true, 'new_rev' => $newRev]);
+}
 
 
 
