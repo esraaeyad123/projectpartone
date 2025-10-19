@@ -1530,37 +1530,15 @@ function getSingleSelectedQuotationId() {
 }
 
 async function getSingleSelectedQuotationData() {
-    if (!quotationDataTable) {
-        showCustomAlert("خطأ: لم يتم تهيئة جدول عروض الأسعار.", true);
-        return null;
-    }
-
-    const selectedRows = quotationDataTable.rows(function(idx, data, node) {
-        return $(node).find('input.slaveCheckbox').prop('checked'); // تأكد من الكلاس الصحيح
-    });
-
-    if (selectedRows.count() !== 1) {
-        showCustomAlert("الرجاء اختيار صف واحد فقط.", true);
-        return null;
-    }
-
-    const rowData = selectedRows.data()[0];
-    const quotationId = rowData.id;
+    const id = document.getElementById('selectedQuotationId')?.value;
+    if (!id) return null;
 
     try {
-        const res = await fetch(`/quotations/${quotationId}/edit`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        const data = await res.json();
-        return data; // { header: {...}, lines: [...] } أو حسب صياغة الـ controller
+        const res = await fetch(`/quotations/${id}`);
+        if (!res.ok) throw new Error("Failed to fetch quotation data");
+        return await res.json();
     } catch (err) {
-        console.error("❌ Failed to fetch quotation data:", err);
-        showCustomAlert("فشل في تحميل بيانات عرض السعر من الخادم: " + err.message, true);
+        console.error(err);
         return null;
     }
 }
