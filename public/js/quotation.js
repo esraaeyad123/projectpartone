@@ -651,39 +651,17 @@ function renderEmployeeDropdown(data) {
     dropdown.style.display = 'block';
 }
 
-
-
-function getPriceListData() {
-    return [
-        { id: '102218', name: 'Monitoring of fresh concrete', method: 'ASTM C39', unit: 'NO.', price: 22.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102220', name: 'Sampling of fresh concrete', method: 'ASTM C172', unit: 'NO.', price: 22.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102455', name: 'اختبار الخبوط', method: 'ASTM C143', unit: 'NO.', price: 100.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102459', name: 'اختبار مقاومة البري', method: 'ASTM C944', unit: 'NO.', price: 185.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102460', name: 'اختبار مقاومة الصدم', method: 'ASTM C1138', unit: 'Each', price: 200.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102462', name: 'الإحالة باستخدام كبريتات الصوديوم والمغنيسيوم', method: 'ASTM C88', unit: 'Each', price: 200.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102467', name: 'الاختصاص', method: 'N/A', unit: 'NO.', price: 80.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102461', name: 'النموذج العيني', method: 'N/A', unit: 'NO.', price: 130.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102469', name: 'التسربات العضوية', method: 'N/A', unit: 'NO.', price: 180.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102468', name: 'المعادن الرماد', method: 'N/A', unit: 'Each', price: 200.00, priceOnly: false, quantity: 1, active: true },
-        { id: '102466', name: 'الوزن النوعي', method: 'N/A', unit: 'NO.', price: 75.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-001', name: 'Concrete Compressive Strength', method: 'ASTM C39', unit: 'NO.', price: 150.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-002', name: 'Cement Fineness Test', method: 'ASTM C204', unit: 'NO.', price: 10.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-003', name: 'Soil Proctor Test', method: 'ASTM D698', unit: 'Each', price: 25.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-004', name: 'Asphalt Content Test', method: 'ASTM D2172', unit: 'NO.', price: 28.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-005', name: 'Aggregate Sieve Analysis', method: 'ASTM C136', unit: 'NO.', price: 10.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-006', name: 'Water Absorption Test', method: 'ASTM C127', unit: 'NO.', price: 200.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-007', name: 'Density of Soil', method: 'ASTM D2937', unit: 'NO.', price: 10.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-008', name: 'Concrete Mix Design', method: 'ACI 211.1', unit: 'Each', price: 120.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-009', name: 'Rebar Tensile Test', method: 'ASTM A370', unit: 'NO.', price: 10.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-010', name: 'Block Compressive Strength', method: 'ASTM C140', unit: 'NO.', price: 100.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-011', name: 'Chemical Analysis of Water', method: 'APHA 4500', unit: 'NO.', price: 300.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-012', name: 'Bitumen ***** Test', method: 'ASTM D5', unit: 'Each', price: 35.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-013', name: 'Field Density Test (Sand Cone)', method: 'ASTM D1556', unit: 'NO.', price: 40.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-014', name: 'Pile Load Test', method: 'ASTM D1143', unit: 'NO.', price: 1500.00, priceOnly: false, quantity: 1, active: true },
-        { id: 'LIMS-015', name: 'Soil Classification', method: 'ASTM D2487', unit: 'Each', price: 75.00, priceOnly: false, quantity: 1, active: true }
-    ];
+async function getPriceListData() {
+    try {
+        const response = await fetch('/price-list');
+        if (!response.ok) throw new Error('فشل جلب البيانات من السيرفر');
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (err) {
+        console.error('Failed to load price list:', err);
+        return [];
+    }
 }
-
 
 // -----------------------------
 // INITIALIZE PROJECT DROPDOWN
@@ -1858,4 +1836,1383 @@ function generateQuotationNumber(selectedCategoryValue) {
     quoteNoInput.value = generatedQuoteNo;
 
     console.log(`📄 تم توليد رقم عرض السعر: ${generatedQuoteNo}`);
+}
+
+function updateMasterCheckboxState(api) {
+
+    const visibleRows = api.rows({ page: 'current', search: 'applied' });
+    const totalVisibleRows = visibleRows.nodes().length;
+    const checkedVisibleRows = visibleRows.nodes().find('.slaveCheckbox:checked').length;
+    const masterCheckbox = $('#quote-masterCheckbox');
+
+    if (totalVisibleRows === 0) {
+        masterCheckbox.prop('checked', false).prop('indeterminate', false);
+    } else if (checkedVisibleRows === 0) {
+        masterCheckbox.prop('checked', false).prop('indeterminate', false);
+    } else if (checkedVisibleRows === totalVisibleRows) {
+        masterCheckbox.prop('checked', true).prop('indeterminate', false);
+    } else {
+
+        masterCheckbox.prop('checked', false).prop('indeterminate', true);
+    }
+}
+
+
+function getMultipleSelectedQuotationIds() {
+    const selectedIds = [];
+    if (!quotationDataTable) return selectedIds;
+
+    quotationDataTable.rows(function(idx, data, node) {
+        return $(node).find('input.slaveCheckbox').prop('checked');
+    }).data().each(function(rowData) {
+        if (rowData.quoteNo) {
+            selectedIds.push(rowData.quoteNo);
+        }
+    });
+    return selectedIds;
+}
+
+
+async function fetchQuotationLinesById(quoteId) {
+
+
+    // لغرض التجربة، نُعيد بيانات وهمية
+    if (quoteId === '123') {
+        return [
+            { description: "خدمة رئيسية", qty: 1, price: 5000, total: 5000 },
+            { description: "رسوم إضافية", qty: 1, price: 500, total: 500 }
+        ];
+    }
+    return []; // إرجاع مصفوفة فارغة في حال عدم وجود بيانات
+}
+// --- 1. Printing Function ---
+function printSelectedRows() {
+    // 1. Define clean, professional English column headers for the printout.
+    // Total 33 headers: 5 Status columns + 28 remaining data columns.
+    const englishHeaders = [
+        'Status 1', 'Status 2', 'Status 3', 'Status 4', 'Status 5',
+        'Category', 'Quote No.', 'Rev.', 'Quote Date', 'Project Code',
+        'Legacy No', 'Legacy Date', 'Customer', 'Project Name',
+        'Project Details', 'Subject', 'From', 'Inquiry', 'Contact',
+        'To', 'Attn. To', 'Attn. Pos', 'Discount', 'VAT', 'Validity',
+        'Currency', 'Payment Terms', 'Method', 'Remarks', 'Quote File',
+        'File Status', 'Declined', 'Declined Msg'
+    ];
+
+    if (typeof quotationDataTable === 'undefined' || quotationDataTable === null) {
+        console.error("Error: The quotation data table is not initialized.");
+        return;
+    }
+
+    // 2. Get the nodes (HTML elements) of the selected rows only
+    const selectedNodes = quotationDataTable.rows(function(idx, data, node) {
+        const $node = $(node);
+        if ($node.hasClass('dataTables_empty') || $node.hasClass('group')) {
+             return false;
+        }
+        return $node.find('input.slaveCheckbox').prop('checked');
+    }).nodes().toArray();
+
+    if (selectedNodes.length === 0) {
+        showCustomAlert("الرجاء اختيار صف واحد على الأقل.");
+        return;
+    }
+
+    // 3. Collect HTML of the selected rows with cleanup
+    const selectedRowsHtml = selectedNodes.map(node => {
+        const $row = $(node).clone();
+
+        // --- Cleanup Step: Remove unnecessary elements/classes from the row ---
+
+        // 1. Remove ONLY the Checkbox cell (td:eq(0)).
+        $row.find('td:eq(0)').remove();
+
+        // 2. Remove the very LAST cell (td:last) which appears without a header.
+        $row.find('td:last').remove();
+
+        // 3. Remove DataTables internal classes and attributes from the row
+        $row.removeClass('odd even selected');
+        $row.removeAttr('role');
+
+        // 4. Remove unnecessary classes/styles from cells (td) within the row
+        $row.find('td').each(function() {
+            $(this).removeClass('sorting_1 text-right dataTables_empty');
+            $(this).removeAttr('tabindex');
+        });
+
+        return $row[0].outerHTML; // Return the cleaned HTML string
+    }).filter(html => html.length > 0)
+      .join('');
+
+    // 4. Build the new clean HTML header row
+    const cleanHeaderHtml = `
+        <thead>
+            <tr>
+                ${englishHeaders.map(title => `<th class="px-3 py-2 text-left">${title}</th>`).join('')}
+            </tr>
+        </thead>
+    `;
+
+    // 5. Build the temporary printable HTML table
+    const printableTableHtml = `
+        <div style="direction: ltr;">
+            <h1>Selected Quotations Printout</h1>
+            <table id="printableQuotationTable">
+                ${cleanHeaderHtml}
+                <tbody>
+                    ${selectedRowsHtml}
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    // 6. Use an invisible <iframe> for in-page printing
+    const iframe = $('<iframe>', {
+        id: 'print-iframe',
+        css: { 'display': 'none', 'position': 'absolute', 'top': '-9999px' }
+    }).appendTo('body')[0];
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+    iframeDoc.write('<html><head><title>Selected Quotations Report</title>');
+
+    // CSS for A4 compatibility and table layout
+    iframeDoc.write(`
+        <style>
+            @media print {
+                body { font-family: 'Arial', sans-serif; direction: ltr; margin: 0; padding: 20px; }
+                h1 { text-align: center; margin-bottom: 20px; font-size: 16pt; color: #1a4279; text-transform: uppercase; }
+                #printableQuotationTable { width: 100%; border-collapse: collapse; table-layout: fixed; page-break-inside: auto; }
+                #printableQuotationTable tr { page-break-inside: avoid; page-break-after: auto; }
+                #printableQuotationTable th,
+                #printableQuotationTable td { border: 1px solid #c0c0c0; padding: 5px; text-align: left; word-wrap: break-word; font-size: 7pt; }
+                #printableQuotationTable th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; color-adjust: exact; font-weight: bold; color: #333; text-transform: capitalize; }
+                tfoot, .dataTables_info, .dataTables_paginate, .dataTables_wrapper > div:last-child { display: none !important; }
+            }
+        </style>
+    `);
+
+    iframeDoc.write('</head><body>');
+    iframeDoc.write(printableTableHtml);
+    iframeDoc.write('</body></html>');
+
+    iframeDoc.close();
+
+    // M-5: Add final JavaScript cleanup inside the iframe before printing
+    iframe.contentWindow.eval(`
+        (function() {
+            try {
+                var tableContainer = document.getElementById('printableQuotationTable').parentNode;
+                if (tableContainer) {
+                    var lastChildren = tableContainer.querySelectorAll('.dataTables_info, .dataTables_paginate, .dataTables_length, .dataTables_filter, .dataTables_processing');
+                    lastChildren.forEach(function(el) { el.remove(); });
+                }
+            } catch (e) {
+                console.error("Print cleanup failed in iframe:", e);
+            }
+        })();
+    `);
+
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+
+    // Clean up: Remove the temporary iframe after a short delay
+    setTimeout(() => {
+        $(iframe).remove();
+    }, 1000);
+}
+
+
+
+
+
+
+function addQuoteLine() {
+    console.log("Add Empty Line button clicked.");
+    // Example: Add a new empty row to quotationLinesDataTable
+    if (quotationLinesDataTable) {
+        quotationLinesDataTable.row.add({
+            id: '', description: '', accounted: '', category: '', type: '', method: ''
+        }).draw(false);
+        showToast("New empty line added!", "info");
+    }
+}
+
+
+
+
+function copyQuoteLine() {
+    const selectedRows = quotationLinesDataTable.rows(':has(input[type="checkbox"]:checked)').data();
+
+    if (selectedRows.length > 0) {
+        // خذ أول صف محدد فقط (يمكن لاحقًا نوسع لعدة صفوف)
+        const rowData = { ...selectedRows[0] }; // نسخة من بيانات الصف الأول
+
+        // خزّنها في متغير عام
+        window.copiedQuoteLineData = rowData;
+
+        showToast("✅ تم نسخ البند! يمكنك الآن لصقه.", "info");
+        console.log("📋 Copied Line Data:", window.copiedQuoteLineData);
+    } else {
+        showToast("⚠️ الرجاء تحديد بند واحد على الأقل للنسخ.", "warning");
+    }
+}
+
+
+async function pasteQuoteLine() {
+    const quotationId = $('#selectedQuotationId').val();
+    const copiedData = window.copiedQuoteLineData;
+
+    if (!quotationId) {
+        showToast("⚠️ يجب حفظ عرض السعر أولاً قبل لصق البنود.", "warning");
+        return;
+    }
+
+    if (!copiedData) {
+        showToast("⚠️ لا يوجد بند منسوخ بعد. الرجاء نسخ بند أولاً.", "warning");
+        return;
+    }
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        // تجهيز بيانات البند في مصفوفة lines كما يتطلب الباك إند
+        const newLine = {
+            price_list_id: copiedData.price_list_id || null,
+            description: copiedData.description || '',
+            category: copiedData.category || '',
+            type: copiedData.type || '',
+            method: copiedData.method || '',
+            quantity: copiedData.quantity || 1,
+            price: copiedData.price || 0,
+            total: (copiedData.price || 0) * (copiedData.quantity || 1)
+        };
+
+        const res = await fetch('/quotations/lines/store', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                quotation_id: quotationId,
+                lines: [newLine]  // 🔹 هنا نرسل مصفوفة تحتوي على بند واحد
+            }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) throw new Error(data.message || 'فشل في لصق البند.');
+
+        showToast("✅ تم لصق البند بنجاح.", "success");
+        console.log("📋 Pasted new line:", data.data);
+
+        // إعادة تحميل جدول البنود
+        if (quotationLinesDataTable) quotationLinesDataTable.ajax.reload(null, false);
+
+    } catch (error) {
+        console.error("❌ خطأ أثناء لصق البند:", error);
+        showToast("⚠️ حدث خطأ أثناء لصق البند: " + error.message, "error");
+    }
+}
+
+function refreshQuoteLinesTable() {
+    if (quotationLinesDataTable) {
+        quotationLinesDataTable.ajax.reload(null, false); // 🔄 يعيد تحميل البيانات من السيرفر بدون إعادة ضبط الصفحة
+        showToast("✅ Quote Lines reloaded from server.", "success");
+    } else {
+        alert("⚠️ Quotation Lines table not initialized.");
+    }
+}
+
+
+function clearLinesFilters() {
+    if (quotationLinesDataTable) {
+        // مسح قيمة حقول الإدخال بصرياً
+        $('#quotationLinesTable thead tr.filter-row input').val('');
+
+        // مسح فلاتر DataTables برمجياً وإعادة الرسم
+        quotationLinesDataTable.columns().search('').draw();
+
+        alert("Filters cleared for Quote Lines table.");
+    } else {
+        alert("Quotation Lines table not initialized.");
+        console.error("quotationLinesDataTable is null or undefined.");
+    }
+}
+
+function exportQuoteLinesToExcel() {
+    if (quotationLinesDataTable) {
+        console.log("Starting export for quotationLinesTable...");
+
+        // 1. استخراج البيانات المرئية/المفلترة فقط
+        // استخدام rows({ search: 'applied' }) يضمن أنك تحصل على الصفوف التي تظهر حاليًا بعد أي تصفية أو بحث.
+        const dataRows = quotationLinesDataTable.rows({ search: 'applied' }).data();
+        const numRows = dataRows.length;
+
+        if (numRows === 0) {
+            alert("No data to export in Quote Lines table.");
+            console.warn("No rows found in quotationLinesTable with applied filters for export.");
+            return;
+        }
+
+        // 2. استخراج رؤوس الأعمدة المرئية وتصفيتها
+        // DataTables.columns().header() يعطي عناصر الـ <th>
+        const headers = quotationLinesDataTable.columns().header().toArray().map(th => th.textContent.trim());
+
+        // قم بتصفية الرؤوس لاستبعاد العمود الفارغ، عمود الإجراءات، وأي رأس لـ checkbox
+        // يمكنك إضافة المزيد من الشروط هنا إذا كانت هناك رؤوس أعمدة أخرى لا تريد تصديرها
+        const filteredHeaders = headers.filter(header =>
+            header !== '' &&          // استبعاد الرؤوس الفارغة (عادة لـ checkboxes أو أعمدة مخصصة)
+            header.toLowerCase() !== 'actions' && // استبعاد عمود الإجراءات (غير حساس لحالة الأحرف)
+            header.toLowerCase() !== 'select'     // استبعاد رأس عمود التحديد/checkbox إذا كان موجودًا
+        );
+
+        console.log("Original Headers:", headers);
+        console.log("Filtered Headers for Excel:", filteredHeaders);
+
+        // 3. معالجة وتنظيف بيانات الصفوف
+        const cleanedData = [];
+        dataRows.each(function(rowData, dataIndex) {
+            const tempRow = [];
+            // Iterating through all columns that are *visible* or *defined* in DataTables,
+            // then filtering them based on the text content for the headers.
+            // This approach is more robust for dynamic columns or hidden columns.
+
+            // Get the indices of the columns we want to export
+            // We use columns().indexes() to get the actual DataTables column index,
+            // then check if its header text is in our filteredHeaders.
+            quotationLinesDataTable.columns().every(function(colIdx) {
+                const headerText = this.header().textContent.trim();
+
+                if (filteredHeaders.includes(headerText)) {
+                    let cellContent = rowData[colIdx];
+
+                    // Check if cellContent is an HTML string and extract text
+                    if (typeof cellContent === 'string' && $(cellContent).length > 0) {
+                        // Create a temporary div to parse HTML and get text content
+                        const tempDiv = $('<div>').html(cellContent);
+                        cellContent = tempDiv.text().trim();
+                    }
+                    // Handle cases where DataTables might store objects or other types
+                    else if (typeof cellContent === 'object' && cellContent !== null) {
+                        cellContent = String(cellContent); // Convert object to string representation
+                    }
+                    // If the cell content is empty or only whitespace, convert it to an empty string
+                    if (cellContent === undefined || cellContent === null || (typeof cellContent === 'string' && cellContent.trim() === '')) {
+                         cellContent = '';
+                    }
+
+                    tempRow.push(cellContent);
+                }
+            });
+            cleanedData.push(tempRow);
+        });
+
+        console.log("Cleaned Data for Excel:", cleanedData);
+
+        // 4. بناء ورقة العمل والملف Excel
+        if (typeof XLSX === 'undefined') {
+            console.error("XLSX library (SheetJS) is not loaded. Make sure the script is included.");
+            alert("Export failed: XLSX library not found. Please contact support.");
+            return;
+        }
+
+        const worksheet = XLSX.utils.aoa_to_sheet([filteredHeaders, ...cleanedData]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Quotation Lines Data"); // اسم الورقة في Excel
+        XLSX.writeFile(workbook, "QuotationLines_Export.xlsx"); // اسم ملف Excel
+
+        alert("Quotation Lines exported to Excel successfully!");
+    } else {
+        alert("Quotation Lines table not initialized for export.");
+        console.error("quotationLinesDataTable is null or undefined. Ensure it's initialized.");
+    }
+}
+
+function printQuoteLinesTable() {
+   if (quotationLinesDataTable) {
+        console.log("Preparing quotationLinesTable for printing - ALL COLUMNS AND ROWS...");
+
+        // فهارس الأعمدة التي نريد طباعتها (باستثناء Checkbox و Actions)
+        // هذا يتطابق مع ترتيب الأعمدة في HTML
+        const columnsToPrintIndexes = [1, 2, 3, 4, 5, 6]; // Service/Test Id to Method
+
+        // 1. استخراج رؤوس الأعمدة المراد طباعتها فقط
+        const filteredHeaders = columnsToPrintIndexes.map(idx => {
+            const headerElement = quotationLinesDataTable.column(idx).header();
+            // تحقق مما إذا كان العنصر موجودًا قبل الوصول إلى textContent
+            return headerElement ? headerElement.textContent.trim() : '';
+        }).filter(header => header !== ''); // فلتر لأي رؤوس فارغة قد تنتج عن خطأ
+
+        console.log("Original Headers (all - for debugging):", quotationLinesDataTable.columns().header().toArray().map(th => th.textContent.trim()));
+        console.log("Filtered Headers for print (by index):", filteredHeaders);
+
+        if (filteredHeaders.length === 0) {
+            alert("لا توجد أعمدة صالحة للطباعة (ربما خطأ في فهارس الأعمدة أو رؤوسها فارغة).");
+            console.warn("Print aborted: No valid headers found after filtering by index.");
+            return;
+        }
+
+        // 2. استخراج جميع الصفوف المرئية/المفلترة من DataTables
+        const dataRows = quotationLinesDataTable.rows({ search: 'applied' }).data();
+        const numRows = dataRows.length;
+
+        console.log("Number of data rows (after filters):", numRows);
+        // console.log("Raw data from DataTables (first 5 rows for inspection):", dataRows.toArray().slice(0, 5)); // إلغاء التعليق إذا احتجت لمزيد من التفاصيل
+
+        if (numRows === 0) {
+            alert("لا توجد بيانات للطباعة في جدول سطور عروض الأسعار (بعد الفلاتر).");
+            console.warn("Print aborted: No rows found in quotationLinesTable with applied filters.");
+            return;
+        }
+
+        // 3. معالجة وتنظيف بيانات الصفوف لضمان استخراج النص من HTML
+        const cleanedData = [];
+        dataRows.each(function(rowData, dataIndex) {
+            const tempRow = [];
+            // المرور فقط على الأعمدة المحددة للطباعة
+            columnsToPrintIndexes.forEach(colIdx => {
+                let cellContent = rowData[colIdx]; // هذا هو محتوى الخلية الخام من DataTables
+
+                // إذا كان المحتوى سلسلة HTML، استخرج النص منها
+                if (typeof cellContent === 'string' && $(cellContent).length > 0) {
+                    const tempDiv = $('<div>').html(cellContent);
+                    cellContent = tempDiv.text().trim();
+                }
+                // إذا كان المحتوى كائنًا (مثل كائن زر أو أي شيء آخر)، قم بتحويله إلى سلسلة
+                else if (typeof cellContent === 'object' && cellContent !== null) {
+                    cellContent = String(cellContent);
+                }
+                // إذا كان المحتوى فارغًا أو مسافات بيضاء فقط، اجعله سلسلة فارغة
+                if (cellContent === undefined || cellContent === null || (typeof cellContent === 'string' && cellContent.trim() === '')) {
+                     cellContent = '';
+                }
+
+                tempRow.push(cellContent);
+            });
+            cleanedData.push(tempRow);
+        });
+
+        console.log("Cleaned Data for print (first 5 processed rows):", cleanedData.slice(0, 5));
+
+        // 4. بناء جدول HTML للطباعة
+        let tableHtml = '<h2>تقرير عروض الأسعار</h2>'; // عنوان للتقرير
+        tableHtml += '<table border="1" style="width:100%; border-collapse: collapse;">'; // جدول بحدود بسيطة
+
+        // رؤوس الجدول
+        tableHtml += '<thead><tr>';
+        filteredHeaders.forEach(header => {
+            tableHtml += `<th style="padding: 8px; text-align: left; background-color: #f2f2f2; border: 1px solid #ddd;">${header}</th>`;
+        });
+        tableHtml += '</tr></thead>';
+
+        // جسم الجدول
+        tableHtml += '<tbody>';
+        cleanedData.forEach(row => {
+            tableHtml += '<tr>';
+            row.forEach(cell => {
+                tableHtml += `<td style="padding: 8px; border: 1px solid #ddd;">${cell}</td>`;
+            });
+            tableHtml += '</tr>';
+        });
+        tableHtml += '</tbody>';
+        tableHtml += '</table>';
+
+        console.log("Generated table HTML (check this in console, copy-paste to .html file to verify):", tableHtml);
+
+        // 5. فتح نافذة جديدة للطباعة وعرض الجدول
+        const printWindow = window.open('', '', 'height=600,width=800');
+        printWindow.document.write('<html><head><title>طباعة عروض الأسعار</title>');
+        // تضمين CSS لتنسيق الطباعة
+        printWindow.document.write('<style>');
+        printWindow.document.write(`
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h2 { text-align: center; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            /* قواعد CSS للطباعة فقط */
+            @media print {
+                /* إخفاء عناصر غير مرغوب فيها عند الطباعة */
+                body * { visibility: hidden; }
+                .printable-area, .printable-area * { visibility: visible; }
+                .printable-area { position: absolute; left: 0; top: 0; }
+                /* ضبط عرض الأعمدة إذا لزم الأمر */
+                table { table-layout: fixed; } /* قد يساعد في التحكم في عرض الأعمدة */
+            }
+        `);
+        printWindow.document.write('</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<div class="printable-area">'); // منطقة قابلة للطباعة
+        printWindow.document.write(tableHtml);
+        printWindow.document.write('</div>');
+        printWindow.document.write('</body></html>');
+        printWindow.document.close(); // مهم لإغلاق مستند النافذة الجديدة
+        printWindow.focus(); // نقل التركيز إلى نافذة الطباعة
+
+        // تأخير الطباعة قليلاً للسماح للمحتوى بالتحميل الكامل
+        setTimeout(() => {
+            printWindow.print(); // فتح مربع حوار الطباعة
+            // printWindow.close(); // يمكنك إزالة التعليق على هذا السطر إذا أردت إغلاق النافذة تلقائيًا بعد الطباعة
+        }, 500); // تأخير 500 مللي ثانية (نصف ثانية)
+
+        console.log("Print process initiated for quotationLinesTable.");
+
+    } else {
+        alert("Quotation Lines table not initialized for printing.");
+        console.error("quotationLinesDataTable is null or undefined for print. Ensure it's initialized.");
+    }
+}
+
+function openPriceListModal() {
+    if (!DOM.priceListModal) return;
+    DOM.priceListModal.style.display = "flex";
+
+    // انتظر قليلًا قبل تهيئة الجدول لضمان ظهور المودال
+    setTimeout(async () => {
+        await initializePriceListDataTable();
+        if (priceListDataTable) {
+            priceListDataTable.columns.adjust().draw();
+            console.log("✅ DataTables columns adjusted after modal opened.");
+        }
+    }, 300);
+}
+
+
+
+/**
+ * Closes the Price List modal.
+ */
+function closePriceListModal() {
+    if (DOM.priceListModal) {
+        DOM.priceListModal.style.display = "none";
+        // Clear search input and reset filters when closing
+        if (DOM.priceListSearchInput) {
+            DOM.priceListSearchInput.value = '';
+        }
+        if (priceListDataTable) {
+            priceListDataTable.search('').columns().search('').draw();
+            // Uncheck master checkbox (it's now part of the DataTables header)
+            // We need to find the checkbox within the DataTables header dynamically
+            const masterCheckboxElement = $('#priceListTable thead .select-all-price-list-items')[0];
+            if (masterCheckboxElement) {
+                masterCheckboxElement.checked = false;
+            }
+            // Remove selected-row class from all rows when closing the modal
+            priceListDataTable.$('tbody tr').removeClass('selected-row');
+        }
+        // Hide the reset button when closing the modal
+        if (DOM.priceListResetButtonContainer) {
+            DOM.priceListResetButtonContainer.style.display = 'none';
+        }
+    }
+}
+
+// =======================================
+// Global variable
+// =======================================
+
+// =======================================
+// Initialize Price List DataTable
+// =======================================
+async function initializePriceListDataTable() {
+    if (!DOM.priceListTable) {
+        console.error("DOM.priceListTable element not found. DataTables cannot be initialized.");
+        return;
+    }
+
+    try {
+        const data = await getPriceListData();
+
+        if ($.fn.DataTable.isDataTable(DOM.priceListTable)) {
+            priceListDataTable.clear().rows.add(data).draw();
+            $('#priceListTable thead .select-all-price-list-items')[0].checked = false;
+            priceListDataTable.$('tbody tr').removeClass('selected-row selected-row-price-only');
+            if (DOM.priceListResetButtonContainer) DOM.priceListResetButtonContainer.style.display = 'none';
+            return;
+        }
+
+        // إنشاء DataTable جديد
+        priceListDataTable = $(DOM.priceListTable).DataTable({
+            data: data,
+            columns: [
+                {
+                    data: null,
+                    orderable: false,
+                    title: '<input type="checkbox" class="select-all-price-list-items" onclick="toggleSelectAllPriceListItems(this)" />',
+                    render: rowData => `<input type="checkbox" ${rowData.priceOnly ? 'checked' : ''}>`,
+                    width: "30px"
+                },
+                { data: 'price_list_id', title: 'ID', width: "80px" },
+                { data: 'name', title: 'Name', width: "250px" },
+                { data: 'method', title: 'Method', width: "100px" },
+                { data: 'unit', title: 'Unit', width: "80px" },
+                {
+                    data: 'price',
+                    title: 'Price',
+                    render: data => `<input type="number" class="price-input" value="${parseFloat(data).toFixed(2)}" step="0.01" style="width:80px;">`,
+                    width: "100px"
+                },
+                {
+                    data: 'priceOnly',
+                    title: 'Price Only',
+                    render: data => `<input type="checkbox" class="price-only-checkbox" ${data ? 'checked' : ''}>`,
+                    width: "80px"
+                },
+                {
+                    data: 'quantity',
+                    title: 'Quantity',
+                    render: data => `<input type="number" class="quantity-input" value="${data}" min="0" step="1" style="width:60px;">`,
+                    width: "80px"
+                },
+                {
+                    data: 'active',
+                    title: 'Active',
+                    render: data => `<input type="checkbox" class="active-checkbox" ${data ? 'checked' : ''}>`,
+                    width: "60px"
+                }
+            ],
+            scrollX: true,
+            scrollY: "400px",
+            autoWidth: false,
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            dom: '<"top"lf>rt<"bottom"ip>',
+            responsive: false,
+            pagingType: "full_numbers",
+            scrollCollapse: true,
+            fixedColumns: { leftColumns: 1 },
+            language: {
+                emptyTable: "No data available in table",
+                zeroRecords: "No matching records found"
+            },
+            initComplete: function() {
+                const tbody = $('#priceListTable tbody');
+
+                // Delegated event listeners
+                tbody.on('change', '.price-input', function() {
+                    const row = priceListDataTable.row($(this).closest('tr'));
+                    const data = row.data();
+                    data.price = parseFloat($(this).val());
+                    row.data(data).draw(false);
+                });
+
+                tbody.on('change', '.quantity-input', function() {
+                    const row = priceListDataTable.row($(this).closest('tr'));
+                    const data = row.data();
+                    data.quantity = parseInt($(this).val());
+                    row.data(data).draw(false);
+                });
+
+                tbody.on('change', '.price-only-checkbox', function() {
+                    const rowNode = $(this).closest('tr');
+                    const row = priceListDataTable.row(rowNode);
+                    const data = row.data();
+                    data.priceOnly = this.checked;
+                    row.data(data).draw(false);
+
+                    const mainCheckbox = rowNode.find('input[type="checkbox"]:first')[0];
+                    if (mainCheckbox) {
+                        mainCheckbox.checked = this.checked;
+                        rowNode.toggleClass('selected-row-price-only', this.checked);
+                        rowNode.toggleClass('selected-row', this.checked);
+                    }
+                });
+
+                tbody.on('change', '.active-checkbox', function() {
+                    const row = priceListDataTable.row($(this).closest('tr'));
+                    const data = row.data();
+                    data.active = this.checked;
+                    row.data(data).draw(false);
+                });
+
+                tbody.on('change', 'input[type="checkbox"]:first-child', function() {
+                    const rowNode = $(this).closest('tr');
+                    rowNode.toggleClass('selected-row', this.checked);
+                    if (this.checked) rowNode.removeClass('selected-row-price-only');
+                });
+
+                if (DOM.priceListSearchInput) {
+                    DOM.priceListSearchInput.addEventListener('keyup', togglePriceListResetButton);
+                }
+            },
+            drawCallback: function() {
+                if (!priceListDataTable) return;
+                priceListDataTable.columns.adjust();
+                togglePriceListResetButton();
+
+                priceListDataTable.rows().every(function() {
+                    const rowData = this.data();
+                    const rowNode = this.node();
+                    const mainCheckbox = $(rowNode).find('input[type="checkbox"]:first')[0];
+
+                    if (rowData.priceOnly) {
+                        $(rowNode).addClass('selected-row-price-only selected-row');
+                        if (mainCheckbox) mainCheckbox.checked = true;
+                    } else {
+                        $(rowNode).removeClass('selected-row-price-only');
+                        if (mainCheckbox && !mainCheckbox.checked) $(rowNode).removeClass('selected-row');
+                    }
+                });
+            }
+        });
+
+        console.log("✅ DataTables initialized for 'priceListTable'.");
+    } catch (err) {
+        console.error("❌ Failed to initialize DataTable:", err);
+    }
+}
+
+// =======================================
+// Add selected items to quotation lines
+// =======================================
+async function addSelectedItemsToQuoteLines(withGroups = false) {
+    const quotationId = document.getElementById('selectedQuotationId')?.value;
+    if (!quotationId) {
+        alert("⚠️ يجب حفظ عرض السعر أولاً قبل إضافة البنود!");
+        return;
+    }
+
+    if (!priceListDataTable) {
+        alert("⚠️ جدول الأسعار غير مُهيأ.");
+        return;
+    }
+
+    const selectedItems = [];
+    priceListDataTable.rows().every(function() {
+        const rowNode = this.node();
+        const checkbox = $(rowNode).find('input[type="checkbox"]:first')[0];
+        if (checkbox && checkbox.checked) {
+            const data = this.data();
+            selectedItems.push({
+                price_list_id: data.price_list_id,
+                description: data.name || '',
+                category: data.unit || '',
+                type: data.priceOnly ? 'سعر فقط' : 'عادي',
+                method: data.method || '',
+                quantity: parseInt($(rowNode).find('.quantity-input').val() || data.quantity || 1),
+                price: parseFloat($(rowNode).find('.price-input').val() || data.price || 0),
+            });
+        }
+    });
+
+    if (selectedItems.length === 0) {
+        alert("⚠️ الرجاء تحديد عنصر واحد على الأقل من قائمة الأسعار.");
+        return;
+    }
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const response = await fetch('/quotation-lines/bulk-add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ quotation_id: quotationId, lines: selectedItems }),
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'فشل في إضافة البنود.');
+        }
+
+        // إعادة تحميل البيانات من السيرفر مباشرة
+        if (quotationLinesDataTable) {
+            quotationLinesDataTable.ajax.reload(null, false);
+        }
+
+        closePriceListModal();
+        showToast(`✅ تمت إضافة ${selectedItems.length} بند(بنود) بنجاح إلى عرض السعر.`, "success");
+        console.log("✅ البنود المضافة:", data.lines);
+    } catch (error) {
+        console.error("❌ خطأ أثناء حفظ البنود:", error);
+        showToast("⚠️ حدث خطأ أثناء حفظ البنود: " + error.message, "error");
+    }
+}
+
+
+
+
+/**
+ * Resets filters and reloads data for the price list table.
+ */
+function resetPriceListFilters() {
+    if (priceListDataTable) {
+        DOM.priceListSearchInput.value = ''; // Clear search input
+        priceListDataTable.search('').columns().search('').draw(); // Clear all filters and redraw
+        priceListDataTable.clear().rows.add(getPriceListData()).draw(); // Reload original data
+        // Uncheck master checkbox on reset
+        const masterCheckboxElement = $('#priceListTable thead .select-all-price-list-items')[0];
+        if (masterCheckboxElement) {
+            masterCheckboxElement.checked = false;
+        }
+        // Remove selected-row class from all rows on reset
+        priceListDataTable.$('tbody tr').removeClass('selected-row');
+        // Hide the reset button when reloading data
+        if (DOM.priceListResetButtonContainer) {
+            DOM.priceListResetButtonContainer.style.display = 'none';
+        }
+        alert("Price List filters reset and data refreshed.");
+    } else {
+        alert("Price List table not initialized.");
+    }
+}
+
+/**
+ * Toggles the visibility of the "Reset Search" button in the Price List modal.
+ * Shows the button if search input is not empty and no rows are found.
+ */
+function togglePriceListResetButton() {
+    if (priceListDataTable && DOM.priceListSearchInput && DOM.priceListResetButtonContainer) {
+        const searchTerm = DOM.priceListSearchInput.value.trim();
+        const rowCount = priceListDataTable.rows({ search: 'applied' }).count();
+
+        if (searchTerm !== '' && rowCount === 0) {
+            DOM.priceListResetButtonContainer.style.display = 'block';
+        } else {
+            DOM.priceListResetButtonContainer.style.display = 'none';
+        }
+    }
+}
+
+
+/**
+ * Toggles the selection of all checkboxes in the Price List table based on 'priceOnly' property.
+ * It also applies a visual highlight (grey) to these rows, overriding any blue selection.
+ */
+function toggleSelectPriceListOnly() {
+    // تأكد من تهيئة priceListDataTable
+    if (!priceListDataTable) {
+        console.warn("Price List DataTable is not initialized.");
+        return;
+    }
+
+    let allPriceOnlySelected = true; // نفترض أن الكل محدد في البداية
+    let rowsToToggle = [];
+
+    // نمر على جميع الصفوف (بما في ذلك الصفوف المخفية بالتصفية أو الترقيم)
+    priceListDataTable.rows({ search: 'none', order: 'none', page: 'all' }).every(function() {
+        const rowData = this.data();
+        const rowNode = this.node();
+        const rowCheckbox = $(rowNode).find('input[type="checkbox"]:first');
+
+        if (rowData.priceOnly) {
+            // قم بتخزين الصفوف التي تحتوي على priceOnly
+            rowsToToggle.push({ rowNode: rowNode, rowCheckbox: rowCheckbox[0] });
+            // تحقق مما إذا كانت جميع الصفوف priceOnly محددة حاليًا
+            if (!rowCheckbox[0].checked) {
+                allPriceOnlySelected = false;
+            }
+        }
+    });
+
+    // إذا كانت جميع الصفوف التي تحتوي على priceOnly محددة بالفعل، فقم بإلغاء تحديدها كلها.
+    // وإلا، قم بتحديد كل الصفوف التي تحتوي على priceOnly.
+    const newState = !allPriceOnlySelected;
+
+    rowsToToggle.forEach(item => {
+        item.rowCheckbox.checked = newState;
+
+        // **** هنا هو الجزء الحاسم لضمان اختفاء الأزرق وظهور الرمادي ****
+        if (newState) {
+            // إذا كنا نقوم بتحديد "Price Only" (newState = true)
+            $(item.rowNode).removeClass('selected-row');
+            $(item.rowNode).addClass('selected-row-price-only');
+        } else {
+            // إذا كنا نقوم بإلغاء تحديد "Price Only" (newState = false)
+            $(item.rowNode).removeClass('selected-row-price-only');
+
+        }
+    });
+
+
+
+    console.log(`Rows with Price Only toggled to: ${newState}`);
+}
+
+/**
+ * Sets the "Price Only" checkbox for all selected items in the Price List.
+ */
+async function setPriceOnlyForSelected() {
+    if (!priceListDataTable) {
+        showToast("⚠️ جدول الأسعار غير مهيأ بعد!", "error");
+        console.error("priceListDataTable is not initialized.");
+        return;
+    }
+
+    // نحصل على IDs البنود المحددة
+    const selectedIds = [];
+    priceListDataTable.rows().every(function () {
+        const rowNode = this.node();
+        const checkbox = $(rowNode).find('input[type="checkbox"]:first')[0];
+        if (checkbox && checkbox.checked) {
+            const data = this.data();
+            if (data.price_list_id) selectedIds.push(data.price_list_id);
+        }
+    });
+
+    if (selectedIds.length === 0) {
+        showToast("⚠️ الرجاء تحديد عنصر واحد على الأقل لتعيينه كـ 'Price Only'.", "warning");
+        $('#priceListTable').addClass('shake');
+        setTimeout(() => $('#priceListTable').removeClass('shake'), 500);
+        return;
+    }
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const response = await fetch('/price-list/set-price-only', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ ids: selectedIds }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) throw new Error(data.message || 'حدث خطأ أثناء التحديث.');
+
+        // تحديث الجدول بعد النجاح
+        priceListDataTable.ajax.reload(null, false);
+
+        showToast(`✅ ${data.message}`, "success");
+    } catch (error) {
+        console.error("❌ خطأ أثناء تعيين Price Only:", error);
+        showToast("⚠️ حدث خطأ أثناء تعيين Price Only: " + error.message, "error");
+    }
+}
+
+
+
+
+let currentEditingRow = null; // اجعل هذا المتغير عاماً في أعلى ملفك
+
+/**
+ * Adds selected items from the Price List modal to the main Quotation Lines table.
+ * @param {boolean} withGroups - True if items should be inserted with groups (dummy functionality for now).
+ */
+// دالة لإضافة العناصر المحددة من جدول قائمة الأسعار إلى جدول سطور عرض الأسعار
+
+// تعريف عالمي للدالة
+
+
+
+// =====================================================================
+// Document Ready and Initialization
+// =====================================================================
+$(document).ready(function() {
+
+  // تهيئة مستمعات الأحداث لأزرار Header Tab
+    if (DOM.closeHeaderTabBtn) {
+        DOM.closeHeaderTabBtn.addEventListener('click', closeQuotationModal);
+        console.log("Event listener added to closeHeaderTabBtn"); // لأغراض التشخيص
+    } else {
+        console.warn("DOM.closeHeaderTabBtn not found!");
+    }
+
+    if (DOM.saveHeaderTabBtn) {
+        DOM.saveHeaderTabBtn.addEventListener('click', saveQuotationHeader);
+        console.log("Event listener added to saveHeaderTabBtn"); // لأغراض التشخيص
+    } else {
+        console.warn("DOM.saveHeaderTabBtn not found!");
+    }
+
+    if (DOM.saveAndCloseHeaderTabBtn) {
+        DOM.saveAndCloseHeaderTabBtn.addEventListener('click', saveAndCloseQuotationHeader);
+        console.log("Event listener added to saveAndCloseHeaderTabBtn"); // لأغراض التشخيص
+    } else {
+        console.warn("DOM.saveAndCloseHeaderTabBtn not found!");
+    }
+
+  // ربط زر الإغلاق "Close"
+    $('#closeLinesTabBtn').on('click', function() {
+        closeQuotationModal();
+        console.log("Close Lines tab button clicked.");
+    });
+
+    // ربط زر "Save Lines"
+    $('#saveLinesTabBtn').on('click', function() {
+        saveQuoteLines();
+        console.log("Save Lines tab button clicked.");
+    });
+
+    // ربط زر "Save Lines & Close"
+    $('#saveAndCloseLinesTabBtn').on('click', function() {
+        saveAndCloseQuoteLines();
+        console.log("Save Lines & Close tab button clicked.");
+    });
+
+
+    initializeQuotationDataTable();
+
+    initializeEmployeeDropdown();
+    initializePaymentTermsDropdown();
+    initializeProjectCodeDropdown();
+    initializeCategoryDropdown();
+
+    initializeDynamicDOMElements();
+    initializeContactPersonDropdown();
+
+
+
+
+
+
+
+    // تعيين التاريخ الافتراضي
+    if (DOM.quoteDate && !DOM.quoteDate.value) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        DOM.quoteDate.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Price List DataTable will be initialized when its modal is opened
+
+    // NEW: Add a global resize listener to adjust DataTables columns
+    window.addEventListener('resize', function() {
+        // Only adjust if the priceListModal is currently displayed
+        if (DOM.priceListModal && DOM.priceListModal.style.display === 'flex' && priceListDataTable) {
+            priceListDataTable.columns.adjust().draw();
+            console.log("Price List table columns adjusted on window resize.");
+        }
+        // Also adjust the quotationLinesTable if its tab is active
+        const linesTab = document.getElementById('linesTab');
+        if (linesTab && linesTab.classList.contains('active') && quotationLinesDataTable) {
+            quotationLinesDataTable.columns.adjust().draw();
+            console.log("Quotation Lines table columns adjusted on window resize.");
+        }
+    });
+});
+
+// تعريف متغير عام للـ DataTable (خارج أي دالة)
+
+window.initializeQuotationLinesDataTable = function(quotationId) {
+    // قراءة الـ ID من الحقل (لو حابب تتجاهل المعطى وتمتلكه من DOM)
+    quotationId = $('#selectedQuotationId').val() || quotationId;
+
+    if (!quotationId) {
+        console.error("❌ Quotation ID is undefined! احفظ Quotation أولاً.");
+        return;
+    }
+
+    const tableSelector = '#quotationLinesTable';
+
+    // إذا الجدول مهيأ مسبقًا → فقط reload بالـ ID الجديد
+    if ($.fn.DataTable.isDataTable(tableSelector)) {
+        quotationLinesDataTable = $(tableSelector).DataTable();
+        quotationLinesDataTable.ajax.url(`/quotation-lines?quotation_id=${quotationId}`).load();
+        console.log(`🔄 DataTable reloaded for Quotation ID: ${quotationId}`);
+        return;
+    }
+
+    // إنشاء DataTable جديد مع وضع data-id في زر الحذف
+    quotationLinesDataTable = $(tableSelector).DataTable({
+        ajax: { url: `/quotation-lines?quotation_id=${quotationId}`, dataSrc: '' },
+        columns: [
+            { data: null, orderable: false, render: () => `<input type="checkbox">` },
+            { data: 'price_list_id', title: 'Service/Test Id' },
+            { data: 'description', title: 'Line Description' },
+            { data: 'accounted', render: d => d ? "Yes" : "No" },
+            { data: 'category' },
+            { data: 'type' },
+            { data: 'method' },
+            {
+                data: null,
+                orderable: false,
+                render: (data, type, row) => {
+                    // row.id يجب أن يكون موجوداً في JSON القادم من السيرفر
+                    return `<button class="btn btn-sm btn-danger delete-line-btn" data-id="${row.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>`;
+                }
+            }
+        ],
+        scrollX: true,
+        scrollY: "400px",
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        responsive: false
+    });
+
+    console.log("✅ QuotationLines DataTable initialized successfully.");
+};
+
+// حذف عنصر واحد (عبر زر الحذف في صف)
+$(document).on('click', '.delete-line-btn', async function (e) {
+    e.preventDefault();
+
+    const lineId = $(this).data('id');
+    if (!lineId) {
+        alert("⚠️ لم يتم العثور على معرف البند.");
+        return;
+    }
+
+    if (!confirm("هل أنت متأكد أنك تريد حذف هذا البند؟")) return;
+
+    try {
+        const csrfToken = document.querySelector('meta[name=\"csrf-token\"]').content;
+
+        const res = await fetch('/quotation-lines/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ ids: [lineId] })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) throw new Error(data.message || 'فشل في حذف البند');
+
+        showToast("✅ تم حذف البند بنجاح!", "success");
+
+        // أعِد تحميل الجدول (من السيرفر) بدون إعادة الصفحة
+        if (quotationLinesDataTable) quotationLinesDataTable.ajax.reload(null, false);
+
+    } catch (err) {
+        console.error("Error deleting line:", err);
+        showToast("⚠️ حدث خطأ أثناء حذف البند: " + err.message, "error");
+    }
+});
+
+
+async function saveQuoteLines() {
+    const quotationId = document.getElementById('selectedQuotationId')?.value;
+    if (!quotationId) {
+        alert("⚠️ لا يمكن حفظ البنود قبل حفظ عرض السعر نفسه!");
+        return;
+    }
+
+    if (!quotationLinesDataTable) {
+        alert("⚠️ جدول البنود غير مُهيأ!");
+        return;
+    }
+
+    // قراءة البيانات من DataTable
+    const updatedLines = [];
+    quotationLinesDataTable.rows().every(function () {
+        const rowNode = this.node();
+        const data = this.data();
+
+        // مثال على قراءة الأعمدة من الجدول
+        const line = {
+            id: data.id || null, // إذا كان موجود
+            quotation_id: quotationId,
+            price_list_id: data.price_list_id,
+            description: $(rowNode).find('.desc-input').val() || data.description,
+            category: data.category,
+            type: data.type,
+            method: data.method,
+            accounted: data.accounted ? 1 : 0,
+            quantity: parseInt($(rowNode).find('.qty-input').val() || 1),
+            price: parseFloat($(rowNode).find('.price-input').val() || 0)
+        };
+        updatedLines.push(line);
+    });
+
+    if (updatedLines.length === 0) {
+        alert("⚠️ لا توجد بنود لحفظها!");
+        return;
+    }
+
+    console.log("💾 Saving Quotation Lines...", updatedLines);
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const response = await fetch('/quotation-lines/bulk-update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                quotation_id: quotationId,
+                lines: updatedLines
+            }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || 'فشل في حفظ البنود');
+        }
+
+        showToast("✅ تم حفظ البنود بنجاح!", "success");
+        console.log("✅ Quote Lines saved successfully:", result);
+
+        // تحديث الجدول من السيرفر بعد الحفظ
+        quotationLinesDataTable.ajax.reload(null, false);
+
+    } catch (error) {
+        console.error("❌ خطأ أثناء حفظ البنود:", error);
+        showToast("⚠️ حدث خطأ أثناء الحفظ: " + error.message, "error");
+    }
+}
+
+
+
+async function saveAndCloseQuoteLines() {
+    await saveQuoteLines(); // نحفظ البنود أولاً
+    closeQuotationModal();  // نغلق نافذة عرض السعر
+    showToast("✅ تم حفظ البنود وإغلاق النافذة بنجاح!", "success");
+    console.log("✅ Quote Lines saved and modal closed.");
+}
+
+
+
+function submitForApproval() {
+    const selectedRows = quotationDataTable.rows(function(idx, data, node) {
+        return $(node).find('input.slaveCheckbox').prop('checked');
+    });
+
+    const selectedCount = selectedRows.count();
+    if (selectedCount === 0) {
+        return showCustomAlert("⚠️ الرجاء اختيار صف واحد على الأقل.", true);
+    }
+
+    const ids = selectedRows.data().pluck('id').toArray();
+
+    // استخدام toast للتأكيد بدل confirm()
+    showConfirmToast(
+        `هل أنت متأكد من إرسال ${selectedCount} اقتباس/اقتباسات للموافقة؟`,
+        async () => {
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                const response = await fetch('/quotations/send-for-approval', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ quotation_ids: ids }),
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || "فشل في إرسال الاقتباسات للموافقة.");
+                }
+
+                showCustomAlert(`✅ تم إرسال ${selectedCount} اقتباس/اقتباسات للموافقة بنجاح.`, false);
+
+                // إعادة تحميل الجدول بعد الإرسال
+                quotationDataTable.ajax.reload(null, false);
+
+            } catch (error) {
+                console.error("❌ خطأ أثناء الإرسال:", error);
+                showCustomAlert(`⚠️ خطأ أثناء الإرسال: ${error.message}`, true);
+            }
+        }
+    );
+}
+
+
+
+function sendQuotationToCustomer() {
+    if (!quotationDataTable) {
+        showCustomAlert("⚠️ جدول الاقتباسات غير مهيأ.", true);
+        return;
+    }
+
+    // نجيب الصفوف المحددة
+    const selectedRows = quotationDataTable.rows(function(idx, data, node) {
+        return $(node).find('input.slaveCheckbox').prop('checked');
+    });
+
+    const selectedCount = selectedRows.count();
+    if (selectedCount === 0) {
+        return showCustomAlert("الرجاء اختيار صف واحد على الأقل.", true);
+    }
+
+    const ids = selectedRows.data().pluck('id').toArray();
+
+    // استخدام showConfirmToast بدل confirm()
+    showConfirmToast(
+        `هل أنت متأكد من إرسال ${selectedCount} اقتباس/اقتباسات للعميل؟`,
+        () => {
+            // عند الضغط على "تأكيد"
+            fetch('/send-quotations-to-customer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ quotation_ids: ids })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showCustomAlert(`✅ تم إرسال ${selectedCount} اقتباس/اقتباسات بنجاح.`, false);
+                } else {
+                    showCustomAlert(`⚠️ فشل الإرسال: ${data.message || 'حدث خطأ.'}`, true);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showCustomAlert("⚠️ حدث خطأ أثناء إرسال الاقتباسات.", true);
+            });
+        }
+    );
+}
+
+
+function confirmQuotation() {
+    const selectedRows = quotationDataTable.rows(function(idx, data, node) {
+        return $(node).find('input.slaveCheckbox').prop('checked');
+    });
+
+    const selectedCount = selectedRows.count();
+    if (selectedCount === 0) {
+        return showCustomAlert("⚠️ الرجاء اختيار صف واحد على الأقل.", true);
+    }
+
+    const ids = selectedRows.data().pluck('id').toArray();
+
+    // عرض toast للتأكيد
+    showConfirmToast(
+        `هل أنت متأكد من تأكيد ${selectedCount} اقتباس/اقتباسات؟`,
+        async () => {
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                const response = await fetch('/quotations/confirm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ quotation_ids: ids }),
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || "فشل في تأكيد الاقتباسات.");
+                }
+
+                showCustomAlert(`✅ تم تأكيد ${selectedCount} اقتباس/اقتباسات بنجاح.`, false);
+
+                // إعادة تحميل الجدول بعد التأكيد
+                quotationDataTable.ajax.reload(null, false);
+
+            } catch (error) {
+                console.error("❌ خطأ أثناء التأكيد:", error);
+                showCustomAlert(`⚠️ خطأ أثناء التأكيد: ${error.message}`, true);
+            }
+        }
+    );
 }

@@ -30,6 +30,8 @@ use App\Http\Controllers\Deliveries\DeliveryController;
 use App\Http\Controllers\Financial\FinancialController;
 use App\Http\Controllers\Sample\SampleController;
 use App\Http\Controllers\Testing\TestingController;
+use App\Models\PriceList;
+
 
 
 /*
@@ -94,20 +96,33 @@ Route::get('/quotations/{id}', [QuotationHeaderController::class, 'show']);
 Route::put('/quotations/{id}', [QuotationHeaderController::class, 'update']);
 Route::post('/quotations/{id}/generate-pdf', [QuotationHeaderController::class, 'generatePdf'])->name('quotations.generatePdf');
 Route::get('/quotation/employees', [QuotationHeaderController::class, 'getEmployees']);
+Route::post('/send-quotations-to-customer', [QuotationHeaderController::class, 'sendToCustomer'])
+    ->name('quotations.sendToCustomer');
+Route::post('/quotations/send-for-approval', [QuotationHeaderController::class, 'sendForApproval'])
+    ->name('quotations.sendForApproval');
+Route::post('/quotations/confirm', [QuotationHeaderController::class, 'confirm'])
+    ->name('quotations.confirm');
+
 // web.php
 Route::get('/quotations/{id}/edit', [QuotationHeaderController::class, 'edit']);
 
+
 // Quotation Lines
+Route::get('/quotation-lines', [QuotationLineController::class, 'index']);
 Route::get('/quotations/lines/data', [QuotationLineController::class, 'getLines']);
 Route::post('/quotations/lines/store', [QuotationLineController::class, 'storeLine'])->name('quotations.lines.store');
-Route::post('/quotation-lines/bulk-add', [QuotationLineController::class, 'bulkAdd']);
 Route::get('/quotation-lines/{quotationId}', [QuotationLineController::class, 'getByQuotation']);
+Route::post('/quotation-lines/bulk-add', [QuotationLineController::class, 'bulkAdd'])->name('quotation.lines.bulkAdd');
+Route::post('/quotation-lines/bulk-update', [QuotationLineController::class, 'bulkUpdate']);
+Route::post('/quotation-lines/delete', [QuotationLineController::class, 'delete']);
+
 Route::put('/quotations/{quotation}/revise', [QuotationHeaderController::class, 'revise'])
      ->name('quotations.revise');
 
 Route::get('/price-lists', [PriceListController::class, 'index']);
 Route::post('/price-lists', [PriceListController::class, 'store']);
 Route::post('/price-lists/selected', [PriceListController::class, 'getSelected']);
+Route::post('/price-list/set-price-only', [PriceListController::class, 'setPriceOnly']);
 Route::post('/quotations/{quotation}/lines/store', [QuotationLineController::class, 'storeLine']);
 
 
@@ -247,3 +262,23 @@ Route::prefix('samples')->group(function () {
     Route::post('/store', [SampleController::class, 'store'])->name('samples.store');
 });
 Route::post('/samples/store', [SampleController::class, 'store'])->name('samples.store');
+
+
+Route::get('/price-list', function() {
+    $items = PriceList::all();
+
+    $jsData = $items->map(function($item) {
+        return [
+            'price_list_id' => $item->id,   // المفتاح الصحيح
+            'name'          => $item->name,
+            'method'        => $item->method,
+            'unit'          => $item->unit,
+            'price'         => $item->price,
+            'priceOnly'     => $item->price_only,
+            'quantity'      => $item->quantity,
+            'active'        => $item->active,
+        ];
+    });
+
+    return response()->json($jsData);
+});

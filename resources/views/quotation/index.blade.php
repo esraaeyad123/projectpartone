@@ -1885,6 +1885,8 @@ body.dark-mode {
     line-height: 1;
     padding: 0;
 }
+
+
     </style>
 
     <script>
@@ -2161,49 +2163,64 @@ body.dark-mode {
     </div>
 
     <!-- NEW: Price List Modal Structure -->
-    <div id="priceListModal" class="modal" style="display: none;">
-        <div class="modal-content large-modal price-list-modal-grid">
-            <span class="close" onclick="closePriceListModal()">&times;</span>
-            <div class="modal-header-title">
-                <h2>Add Multiple Items from Price List</h2>
-            </div>
-            <div class="modal-body-content price-list-body">
-                <!-- Top Toolbar -->
-                <div class="price-list-top-toolbar">
-                    <input type="text" id="priceListSearchInput" placeholder="Enter text to search..." autocomplete="off">
-                    <button class="btn btn-primary btn-search-price-list" onclick="filterPriceList()"><i class="fas fa-search"></i> Find</button>
-                    <!-- NEW: Placeholder for Reset Button -->
-                    <div id="priceListResetButtonContainer" style="display: none;">
-                        <button class="btn btn-secondary btn-reset-search" onclick="resetPriceListFilters()"><i class="fas fa-undo"></i> Reset Search</button>
-                    </div>
-                </div>
-                <div class="table-container price-list-table-container">
-                    <table id="priceListTable" class="display" style="width:100%">
-                        <thead>
-                            <!-- DataTables will generate headers here based on the 'columns' configuration in JS -->
-                        </thead>
-                        <tbody>
-                            <!-- Price list items will be populated here by DataTables -->
-                        </tbody>
-                    </table>
+  <div id="priceListModal" class="modal" style="display: none;">
+    <div class="modal-content price-list-modal small-modal">
+        <span class="close" onclick="closePriceListModal()">&times;</span>
+        <div class="modal-header-title">
+            <h2>Add Multiple Items from Price List</h2>
+        </div>
+
+        <div class="modal-body-content price-list-body">
+            <!-- 🔍 Top Toolbar -->
+            <div class="price-list-top-toolbar">
+                <input type="text" id="priceListSearchInput" placeholder="Enter text to search..." autocomplete="off">
+                <button class="btn btn-primary btn-search-price-list" onclick="filterPriceList()">
+                    <i class="fas fa-search"></i> Find
+                </button>
+
+                <div id="priceListResetButtonContainer" style="display: none;">
+                    <button class="btn btn-secondary btn-reset-search" onclick="resetPriceListFilters()">
+                        <i class="fas fa-undo"></i> Reset Search
+                    </button>
                 </div>
             </div>
-            <!-- Bottom Toolbar (Footer) - Reordered and adjusted for image match -->
-            <div class="modal-footer price-list-footer">
-                <div class="btn-group-left">
-                    <button type="button" class="btn btn-secondary btn-reset-price-list" onclick="resetPriceListFilters()"><i class="fas fa-arrows-rotate"></i> Reset/Refresh</button>
-                </div>
-                <div class="btn-group-center">
-                    <button type="button" class="btn btn-info btn-set-price-only" onclick="setPriceOnlyForSelected()"><i class="fas fa-money-bill-alt"></i> Set Selected as Price Only</button>
-                </div>
-                <div class="btn-group-right">
-                    <button type="button" class="btn btn-cancel btn-close-price-list" onclick="closePriceListModal()"><i class="fas fa-times-circle"></i> Close</button>
-                    <button type="button" class="btn btn-primary btn-insert-no-groups" onclick="addSelectedItemsToQuoteLines()"><i class="fas fa-plus-circle"></i> Insert without Groups</button>
-                    <button type="button" class="btn btn-primary btn-insert-with-groups" onclick="addSelectedItemsToQuoteLines(true)"><i class="fas fa-object-group"></i> Insert with Groups</button>
-                </div>
+
+            <!-- 📋 Table -->
+            <div class="table-container price-list-table-container">
+                <table id="priceListTable" class="display compact" style="width:100%">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ⚙️ Footer -->
+        <div class="modal-footer price-list-footer">
+            <div class="btn-group-left">
+                <button type="button" class="btn btn-secondary btn-reset-price-list" onclick="resetPriceListFilters()">
+                    <i class="fas fa-arrows-rotate"></i> Reset/Refresh
+                </button>
+            </div>
+            <div class="btn-group-center">
+                <button type="button" class="btn btn-info btn-set-price-only" onclick="setPriceOnlyForSelected()">
+                    <i class="fas fa-money-bill-alt"></i> Set Selected as Price Only
+                </button>
+            </div>
+            <div class="btn-group-right">
+                <button type="button" class="btn btn-cancel btn-close-price-list" onclick="closePriceListModal()">
+                    <i class="fas fa-times-circle"></i> Close
+                </button>
+                <button type="button" class="btn btn-primary btn-insert-no-groups" onclick="addSelectedItemsToQuoteLines()">
+                    <i class="fas fa-plus-circle"></i> Insert without Groups
+                </button>
+                <button type="button" class="btn btn-primary btn-insert-with-groups" onclick="addSelectedItemsToQuoteLines(true)">
+                    <i class="fas fa-object-group"></i> Insert with Groups
+                </button>
             </div>
         </div>
     </div>
+</div>
+
 <div id="editQuoteLineModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span class="close-button" onclick="closeEditQuoteLineModal()">&times;</span>
@@ -2264,3 +2281,4 @@ body.dark-mode {
 
 
 @endsection
+

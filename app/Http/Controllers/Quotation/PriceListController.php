@@ -67,5 +67,22 @@ public function getSelected(Request $request)
     return response()->json(['data' => $items]);
 }
 
+public function setPriceOnly(Request $request)
+{
+    $validated = $request->validate([
+        'ids' => 'required|array|min:1',
+        'ids.*' => 'exists:price_lists,id',
+    ]);
+
+    \App\Models\PriceList::whereIn('id', $validated['ids'])
+        ->update(['price_only' => true]);
+
+    return response()->json([
+        'success' => true,
+        'message' => count($validated['ids']) . ' عنصر تم تعيينه كـ Price Only بنجاح.',
+    ]);
+}
+
+
 
 }

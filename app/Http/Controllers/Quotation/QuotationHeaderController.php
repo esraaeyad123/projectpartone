@@ -10,6 +10,8 @@ use App\Models\Project;
 use App\Models\ProjectContact;
 use App\Models\Employee;
 use App\Models\QuotationCounter;
+use Illuminate\Support\Facades\Mail; // If you want to send emails
+
 
 
 
@@ -498,6 +500,89 @@ public function revise(QuotationHeader $quotation)
     return response()->json(['success' => true, 'new_rev' => $newRev]);
 }
 
+public function sendToCustomer(Request $request)
+    {
+        $validated = $request->validate([
+            'quotation_ids' => 'required|array|min:1',
+            'quotation_ids.*' => 'exists:quotation_headers,id',
+        ]);
+
+        $quotationIds = $validated['quotation_ids'];
+        $sentCount = 0;
+
+        foreach ($quotationIds as $id) {
+            $quotation = QuotationHeader::find($id);
+
+            if (!$quotation) continue;
+
+            // هنا ضع عملية الإرسال (مثلاً إرسال إيميل أو تسجيل في النظام)
+           // Mail::to($quotation->customer_email)->send(new QuotationMail($quotation));
+
+            // مؤقتًا فقط نرفع العدد
+            $sentCount++;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "$sentCount اقتباس/اقتباسات تم إرسالها بنجاح."
+        ]);
+    }
+
+
+public function sendForApproval(Request $request)
+{
+    $validated = $request->validate([
+        'quotation_ids' => 'required|array|min:1',
+        'quotation_ids.*' => 'exists:quotation_headers,id',
+    ]);
+
+    $quotationIds = $validated['quotation_ids'];
+    $processedCount = 0;
+
+    foreach ($quotationIds as $id) {
+        $quotation = QuotationHeader::find($id);
+        if (!$quotation) continue;
+
+        // هنا ضع أي عملية تحتاجها لإرسال الاقتباس للموافقة
+        // مثل تغيير حالة: $quotation->status = 'pending_approval';
+        $quotation->overall_status = 'pending_approval';
+        $quotation->save();
+
+        $processedCount++;
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => "$processedCount اقتباس/اقتباسات تم إرسالها للموافقة."
+    ]);
+}
+
+public function confirm(Request $request)
+{
+    $validated = $request->validate([
+        'quotation_ids' => 'required|array|min:1',
+        'quotation_ids.*' => 'exists:quotation_headers,id',
+    ]);
+
+    $quotationIds = $validated['quotation_ids'];
+    $confirmedCount = 0;
+
+    foreach ($quotationIds as $id) {
+        $quotation = QuotationHeader::find($id);
+        if (!$quotation) continue;
+
+        // تحديث حالة الاقتباس إلى "confirmed"
+        $quotation->overall_status = 'confirmed';
+        $quotation->save();
+
+        $confirmedCount++;
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => "$confirmedCount اقتباس/اقتباسات تم تأكيدها."
+    ]);
+}
 
 
 

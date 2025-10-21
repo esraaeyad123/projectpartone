@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Project\ProjectController;
 use App\Http\Controllers\Project\ProjectContactController;
+use App\Models\PriceList;
 
 
 /*
@@ -30,3 +31,6 @@ Route::put('/projects/{projectId}/contacts/{contactId}', [ProjectContactControll
 Route::get('/api/projects', function () {
     return App\Models\Project::select('id', 'name')->get();
 });
+
+
+

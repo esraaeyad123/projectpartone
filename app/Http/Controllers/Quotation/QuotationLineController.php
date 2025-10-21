@@ -5,118 +5,159 @@ namespace App\Http\Controllers\Quotation;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\QuotationLine;
-use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Validator;
 
 class QuotationLineController extends Controller
 {
 
+     public function index(Request $request)
+    {
+         $quotationId = $request->query('quotation_id');
 
-      public function getByQuotation($quotationId)
+    if (!$quotationId) {
+        return response()->json(['error' => 'quotation_id is required'], 400);
+    }
+
+    $lines = QuotationLine::where('quotation_id', $quotationId)->get();
+
+    return response()->json($lines); // تأكد أنها مصفوفة من الكائنات
+    }
+    /**
+     * 🔹 إرجاع جميع البنود لجميع العروض (لأغراض الإدارة)
+     */
+    public function getLines()
+    {
+        $lines = QuotationLine::all();
+        return response()->json(['data' => $lines]);
+    }
+
+    /**
+     * 🔹 إرجاع البنود الخاصة بعرض سعر معين
+     */
+    public function getByQuotation($quotationId)
     {
         $lines = QuotationLine::where('quotation_id', $quotationId)->get();
         return response()->json(['data' => $lines]);
     }
 
-    // حفظ عناصر جديدة
-    public function store(Request $request)
+    /**
+     * 🔹 حفظ بند/بنود جديدة (باستخدام storeLine)
+     */
+    public function storeLine(Request $request)
     {
-        $request->validate([
-            'lines' => 'required|array',
-            'lines.*.quotation_id' => 'required|exists:quotation_headers,id',
+        $validated = $request->validate([
+            'quotation_id'   => 'required|exists:quotation_headers,id',
+            'lines'          => 'required|array|min:1',
             'lines.*.price_list_id' => 'nullable|exists:price_lists,id',
-            'lines.*.description' => 'nullable|string',
-            'lines.*.category' => 'nullable|string',
-            'lines.*.type' => 'nullable|string',
-            'lines.*.method' => 'nullable|string',
-            'lines.*.quantity' => 'required|integer|min:1',
-            'lines.*.price' => 'required|numeric|min:0',
-            'lines.*.total' => 'required|numeric|min:0',
+            'lines.*.description'   => 'nullable|string|max:255',
+            'lines.*.category'      => 'nullable|string|max:100',
+            'lines.*.type'          => 'nullable|string|max:100',
+            'lines.*.method'        => 'nullable|string|max:100',
+            'lines.*.quantity'      => 'required|numeric|min:1',
+            'lines.*.price'         => 'required|numeric|min:0',
+            'lines.*.total'         => 'nullable|numeric|min:0',
         ]);
 
+        $quotationId = $validated['quotation_id'];
         $savedLines = [];
-        foreach ($request->lines as $lineData) {
+
+        foreach ($validated['lines'] as $lineData) {
+            $lineData['quotation_id'] = $quotationId;
+            $lineData['total'] = $lineData['total'] ?? ($lineData['price'] * $lineData['quantity']);
             $savedLines[] = QuotationLine::create($lineData);
         }
 
         return response()->json([
             'success' => true,
-            'message' => count($savedLines) . " عنصر(عناصر) تمت إضافتها بنجاح!",
+            'message' => count($savedLines) . " بند(بنود) تمت إضافتها بنجاح!",
             'data' => $savedLines
         ]);
     }
 
-    public function getLines()
-    {
-
-        $lines = QuotationLine::all();
-
-        return response()->json($lines);
-
-
-    }
-
-    public function listLines($quotationId)
+    /**
+     * 🔹 إضافة مجموعة من البنود دفعة واحدة (Bulk Add)
+     */
+   public function bulkAdd(Request $request)
 {
-    $lines = QuotationLine::where('quotation_id', $quotationId)->get();
-    return response()->json($lines);
-}
-public function storeLine(Request $request, $quotationId)
-{
-    $lines = [];
-    foreach ($request->lines as $lineData) {
-      $validated = $request->validate::make($lineData, [
-            'description' => 'nullable|string|max:255',
-            'category'    => 'nullable|string|max:100',
-            'type'        => 'nullable|string|max:100',
-            'method'      => 'nullable|string|max:100',
-            'price'       => 'nullable|numeric|min:0',
-            'quantity'    => 'nullable|numeric|min:1',
-            'price_list_id' => 'required|integer'
-        ])->validated();
+    $validated = $request->validate([
+        'quotation_id' => 'required|exists:quotation_headers,id',
+        'lines' => 'required|array|min:1',
+        'lines.*.price_list_id' => 'nullable|exists:price_lists,id',
+        'lines.*.description' => 'nullable|string|max:255',
+        'lines.*.category' => 'nullable|string|max:100',
+        'lines.*.type' => 'nullable|string|max:100',
+        'lines.*.method' => 'nullable|string|max:100',
+        'lines.*.quantity' => 'required|numeric|min:1',
+        'lines.*.price' => 'required|numeric|min:0',
+    ]);
 
-        $line = QuotationLine::create([
-            'quotation_id' => $quotationId,
-            'price_list_id' => $validated['price_list_id'],
-            'description'  => $validated['description'] ?? '',
-            'category'     => $validated['category'] ?? null,
-            'type'         => $validated['type'] ?? null,
-            'method'       => $validated['method'] ?? null,
-            'price'        => $validated['price'] ?? 0,
-            'quantity'     => $validated['quantity'] ?? 1,
-            'total'        => ($validated['price'] ?? 0) * ($validated['quantity'] ?? 1),
-        ]);
+    $quotationId = $validated['quotation_id'];
+    $lines = $validated['lines'];
 
-        $lines[] = $line;
+    $created = [];
+
+    foreach ($lines as $lineData) {
+        $line = new \App\Models\QuotationLine();
+        $line->quotation_id = $quotationId;
+        $line->price_list_id = $lineData['price_list_id'] ?? null;
+        $line->description = $lineData['description'] ?? '';
+        $line->category = $lineData['category'] ?? null;
+        $line->type = $lineData['type'] ?? null;
+        $line->method = $lineData['method'] ?? null;
+        $line->quantity = $lineData['quantity'];
+        $line->price = $lineData['price'];
+        $line->total = $line->price * $line->quantity;
+        $line->save();
+
+        $created[] = $line;
     }
 
     return response()->json([
         'success' => true,
-        'lines' => $lines
+        'message' => count($created) . ' بند(بنود) تمت إضافتها بنجاح!',
+        'lines' => $created
     ]);
 }
 
 
-
-
-
-
-public function updateLine(Request $request, $lineId)
+public function bulkUpdate(Request $request)
 {
-    $line = QuotationLine::findOrFail($lineId);
-    $line->update($request->all());
+    $quotationId = $request->quotation_id;
+    $lines = $request->lines;
 
-    return response()->json([
-        'success' => true,
-        'line' => $line
-    ]);
+    foreach ($lines as $lineData) {
+        $line = QuotationLine::updateOrCreate(
+            ['id' => $lineData['id'] ?? null],
+            [
+                'quotation_id' => $quotationId,
+                'price_list_id' => $lineData['price_list_id'],
+                'description' => $lineData['description'],
+                'category' => $lineData['category'],
+                'type' => $lineData['type'],
+                'method' => $lineData['method'],
+                'accounted' => $lineData['accounted'] ?? 0,
+                'quantity' => $lineData['quantity'] ?? 1,
+                'price' => $lineData['price'] ?? 0,
+            ]
+        );
+    }
+
+    return response()->json(['success' => true, 'message' => 'Quote lines updated successfully']);
 }
 
-public function deleteLine($lineId)
-{
-    $line = QuotationLine::findOrFail($lineId);
-    $line->delete();
 
-    return response()->json(['success' => true, 'message' => 'Line deleted']);
+public function delete(Request $request)
+{
+    $ids = $request->ids;
+
+    if (!$ids || !is_array($ids)) {
+        return response()->json(['success' => false, 'message' => 'No IDs provided.'], 400);
+    }
+
+    QuotationLine::whereIn('id', $ids)->delete();
+
+    return response()->json(['success' => true, 'message' => 'Quotation lines deleted successfully.']);
 }
+
+
 }
