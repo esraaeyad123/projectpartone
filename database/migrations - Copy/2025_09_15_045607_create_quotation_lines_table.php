@@ -29,6 +29,7 @@ return new class extends Migration
     $table->string('method')->nullable();
     $table->integer('quantity')->default(1);
     $table->decimal('price', 10, 2)->default(0);
+    $table->boolean('price_only')->default(false);
     $table->decimal('total', 10, 2)->default(0);
 
             $table->timestamps();

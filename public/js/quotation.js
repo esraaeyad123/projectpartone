@@ -2742,51 +2742,43 @@ function toggleSelectPriceListOnly() {
 async function setPriceOnlyForSelected() {
     if (!priceListDataTable) {
         showToast("⚠️ جدول الأسعار غير مهيأ بعد!", "error");
-        console.error("priceListDataTable is not initialized.");
         return;
     }
 
-    // نحصل على IDs البنود المحددة
     const selectedIds = [];
-    priceListDataTable.rows().every(function () {
+    priceListDataTable.rows().every(function() {
         const rowNode = this.node();
         const checkbox = $(rowNode).find('input[type="checkbox"]:first')[0];
         if (checkbox && checkbox.checked) {
             const data = this.data();
-            if (data.price_list_id) selectedIds.push(data.price_list_id);
+            selectedIds.push(data.price_list_id);
         }
     });
 
     if (selectedIds.length === 0) {
         showToast("⚠️ الرجاء تحديد عنصر واحد على الأقل لتعيينه كـ 'Price Only'.", "warning");
-        $('#priceListTable').addClass('shake');
-        setTimeout(() => $('#priceListTable').removeClass('shake'), 500);
         return;
     }
 
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        const response = await fetch('/price-list/set-price-only', {
+        const response = await fetch('/price-lists/set-price-only', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json',
             },
             body: JSON.stringify({ ids: selectedIds }),
         });
 
-        const data = await response.json();
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message);
 
-        if (!response.ok || !data.success) throw new Error(data.message || 'حدث خطأ أثناء التحديث.');
-
-        // تحديث الجدول بعد النجاح
-        priceListDataTable.ajax.reload(null, false);
-
-        showToast(`✅ ${data.message}`, "success");
+        showToast(`✅ ${result.message}`, "success");
+        priceListDataTable.ajax.reload(null, false); // تحديث الجدول
     } catch (error) {
-        console.error("❌ خطأ أثناء تعيين Price Only:", error);
-        showToast("⚠️ حدث خطأ أثناء تعيين Price Only: " + error.message, "error");
+        console.error(error);
+        showToast("❌ خطأ أثناء تعيين Price Only: " + error.message, "error");
     }
 }
 

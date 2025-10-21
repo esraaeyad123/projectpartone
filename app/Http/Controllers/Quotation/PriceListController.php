@@ -79,9 +79,10 @@ public function setPriceOnly(Request $request)
 
     return response()->json([
         'success' => true,
-        'message' => count($validated['ids']) . ' عنصر تم تعيينه كـ Price Only بنجاح.',
+        'message' => count($validated['ids']) . ' بند(بنود) تم تعيينها كـ Price Only.'
     ]);
 }
+
 
 
 

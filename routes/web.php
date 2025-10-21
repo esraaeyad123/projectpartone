@@ -122,7 +122,10 @@ Route::put('/quotations/{quotation}/revise', [QuotationHeaderController::class, 
 Route::get('/price-lists', [PriceListController::class, 'index']);
 Route::post('/price-lists', [PriceListController::class, 'store']);
 Route::post('/price-lists/selected', [PriceListController::class, 'getSelected']);
-Route::post('/price-list/set-price-only', [PriceListController::class, 'setPriceOnly']);
+// Price List routes
+Route::post('/price-lists/set-price-only', [PriceListController::class, 'setPriceOnly'])->name('priceLists.setPriceOnly');
+
+// Quotation Line bulk add
 Route::post('/quotations/{quotation}/lines/store', [QuotationLineController::class, 'storeLine']);
 
 

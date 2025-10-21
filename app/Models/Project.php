@@ -18,7 +18,8 @@ class Project extends Model
     'owner_id',
     'consultant_id',
     'contractor_id',
-    'project_details'
+    'project_details',
+
     ];
 
   public function customer() {

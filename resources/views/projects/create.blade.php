@@ -38,6 +38,12 @@
                             <input type="date" id="registrationDate" value="{{ date('Y-m-d') }}">
                         </div>
                     </div>
+                      <div class="form-row">
+                        <div class="form-group">
+                            <label for="project_details">Project Details</label>
+                            <input type="text" id="project_details" >
+                        </div>
+                    </div>
                 </fieldset>
 
                 <fieldset class="form-section-fieldset">
@@ -269,6 +275,10 @@
                             <input type="date" id="editRegistrationDate" value="{{ date('Y-m-d') }}">
                         </div>
                     </div>
+                    <div class="form-group">
+                            <label for="project_details">Project Details</label>
+                            <input type="text" id="editprojectDetails"  name="projectDetails">
+                        </div>
                 </fieldset>
 <fieldset class="form-section-fieldset">
     <legend>Project Location</legend>

@@ -516,8 +516,8 @@ public function sendToCustomer(Request $request)
             if (!$quotation) continue;
 
             // هنا ضع عملية الإرسال (مثلاً إرسال إيميل أو تسجيل في النظام)
-           // Mail::to($quotation->customer_email)->send(new QuotationMail($quotation));
-
+          // Mail::to($quotation->customer_email)->send(new QuotationMail($quotation));
+//url
             // مؤقتًا فقط نرفع العدد
             $sentCount++;
         }

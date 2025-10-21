@@ -45,7 +45,9 @@ class ProjectController extends Controller
         'owner_id' => 'nullable|exists:customers,id',
         'consultant_id' => 'nullable|exists:customers,id',
         'contractor_id' => 'nullable|exists:customers,id',
-        'projectArabicLocation' => 'nullable|string|max:255',
+        'project_details' => 'nullable|string|max:255',
+         'region' => 'nullable|string|max:255',
+
     ]);
 
     $project = Project::create($validated);
@@ -67,7 +69,8 @@ public function update(Request $request, Project $project)
         'owner_id' => 'nullable|exists:customers,id',
         'consultant_id' => 'nullable|exists:customers,id',
         'contractor_id' => 'nullable|exists:customers,id',
-        'projectArabicLocation' => 'nullable|string|max:255',
+            'project_details' => 'nullable|string|max:255',
+         'region' => 'nullable|string|max:255',
     ]);
 
     $project->update($validated);

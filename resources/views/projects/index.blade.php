@@ -360,7 +360,8 @@
         owner_id: ownerId,
         consultant_id: consultantId,
         contractor_id: contractorId,
-        projectArabicLocation: $('#projectArabicLocation').val() || null,
+        project_details: $('#project_details').val() || null,
+        region: $('#projectArabicLocation').val() || null,
         _token: $('meta[name="csrf-token"]').attr('content')
     };
 
@@ -406,10 +407,13 @@
             // تعبئة حقول النموذج ببيانات المشروع
             $('#editProjectId').val(project.id);
             $('#editProjectName').val(project.name);
+
             $('#editProjectArabicName').val(project.arabic_name || '');
             $('#editRegistrationDate').val(project.registration_date || '');
+             $('#editProjectArabicLocation').val(project.region || '');
              populateEditProjectParties(project);
-            $('#editProjectArabicLocation').val(project.projectArabicLocation || '');
+            $('#editprojectDetails').val(project.project_details || '');
+
 
             // استدعاء الدالة الصحيحة لتعبئة جدول جهات الاتصال
             // هنا يتم تمرير مصفوفة جهات الاتصال الخاصة بالمشروع
@@ -453,7 +457,8 @@
             owner: $('#editOwner').val(),
             consultant: $('#editConsultant').val(),
             contractor: $('#editContractor').val(),
-            projectArabicLocation: $('#editProjectArabicLocation').val(),
+            region: $('#editProjectArabicLocation').val(),
+            project_details: $('#editprojectDetails').val(),
             _token: $('meta[name="csrf-token"]').attr('content')
         };
 
