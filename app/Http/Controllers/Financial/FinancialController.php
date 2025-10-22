@@ -35,36 +35,61 @@ class FinancialController extends Controller
     /**
      * 🆕 إنشاء فاتورة جديدة
      */
-public function store(Request $request)
+ public function store(Request $request)
 {
     $data = $request->validate([
-        'invoice_date' => 'required|date',
-        'department' => 'nullable|string',
-        'prof_date' => 'nullable|date',
-        'account_date' => 'nullable|date',
-        'due_date' => 'nullable|date',
-        'project_id' => 'required|exists:projects,id',
-        'customer_id' => 'required|exists:customers,id',
-        'payment_terms' => 'nullable|string',
-        'payment_method' => 'nullable|string',
-        'vat_profile' => 'nullable|string',
-        'discount_pct' => 'nullable|numeric',
-        'sales_tax_pct' => 'nullable|numeric',
-        'retention_pct' => 'nullable|numeric',
-        'currency' => 'nullable|string',
-        'status' => 'nullable|string',
+        // 🧾 Invoice Information
+        'invoice_no'       => 'nullable|string',
+        'invoice_date'     => 'required|date',
+        'department'       => 'nullable|string',
+        'prof_date'        => 'nullable|date',
+        'account_date'     => 'nullable|date',
+        'due_date'         => 'nullable|date',
+        'project_id'       => 'required|exists:projects,id',
+        'project_code'     => 'nullable|string',
+        'project_name'     => 'nullable|string',
+        'project_details'  => 'nullable|string',
+        'contract_no'      => 'nullable|string',
+
+        // 👥 Customer Information
+        'customer_id'      => 'required|exists:customers,id',
+        'customer_name'    => 'nullable|string',
+        'account_no'       => 'nullable|string',
+        'trn_no'           => 'nullable|string',
+        'location'         => 'nullable|string',
+
+        // 📞 Contact Information
+        'account_manager'  => 'nullable|string',
+        'contact_person'   => 'nullable|string',
+        'contact_mobile'   => 'nullable|string',
+        'attn_to'          => 'nullable|string',
+        'attn_pos'         => 'nullable|string',
+        'address_email'    => 'nullable|string',
+
+        // 💰 Terms & Other Controls
+        'payment_terms'    => 'nullable|string',
+        'payment_method'   => 'nullable|string',
+        'vat_profile'      => 'nullable|string',
+        'discount_pct'     => 'nullable|numeric',
+        'sales_tax_pct'    => 'nullable|numeric',
+        'retention_pct'    => 'nullable|numeric',
+        'currency'         => 'nullable|string',
+
+        // 🔖 Misc
+        'status'           => 'nullable|string',
     ]);
 
     try {
         $invoice = Invoice::create($data);
 
         return response()->json([
-            'message' => 'Invoice created successfully ✅',
+            'message' => '✅ تم إنشاء الفاتورة بنجاح.',
             'invoice' => $invoice->load(['customer', 'project'])
         ], 201);
+
     } catch (\Exception $e) {
         return response()->json([
-            'message' => 'Failed to create invoice: ' . $e->getMessage()
+            'message' => '⚠️ فشل إنشاء الفاتورة: ' . $e->getMessage()
         ], 500);
     }
 }
@@ -136,7 +161,7 @@ public function store(Request $request)
     }
 
 
-   
+
     // ===============================
     // 3️⃣ الحصول على بنود فاتورة
     // ===============================
