@@ -35,39 +35,54 @@ class FinancialController extends Controller
     /**
      * 🆕 إنشاء فاتورة جديدة
      */
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'invoice_date' => 'required|date',
-            'department' => 'nullable|string',
-            'prof_date' => 'nullable|date',
-            'account_date' => 'nullable|date',
-            'due_date' => 'nullable|date',
-            'project_id' => 'required|exists:projects,id',
-            'customer_id' => 'required|exists:customers,id',
-            'payment_terms' => 'nullable|string',
-            'payment_method' => 'nullable|string',
-            'vat_profile' => 'nullable|string',
-            'discount_pct' => 'nullable|numeric',
-            'sales_tax_pct' => 'nullable|numeric',
-            'retention_pct' => 'nullable|numeric',
-            'currency' => 'nullable|string',
-            'status' => 'nullable|string',
-        ]);
+public function store(Request $request)
+{
+    $data = $request->validate([
+        'invoice_date' => 'required|date',
+        'department' => 'nullable|string',
+        'prof_date' => 'nullable|date',
+        'account_date' => 'nullable|date',
+        'due_date' => 'nullable|date',
+        'project_id' => 'required|exists:projects,id',
+        'customer_id' => 'required|exists:customers,id',
+        'payment_terms' => 'nullable|string',
+        'payment_method' => 'nullable|string',
+        'vat_profile' => 'nullable|string',
+        'discount_pct' => 'nullable|numeric',
+        'sales_tax_pct' => 'nullable|numeric',
+        'retention_pct' => 'nullable|numeric',
+        'currency' => 'nullable|string',
+        'status' => 'nullable|string',
+    ]);
 
-        $invoice = Invoice::create($request->all());
+    try {
+        $invoice = Invoice::create($data);
 
         return response()->json([
             'message' => 'Invoice created successfully ✅',
             'invoice' => $invoice->load(['customer', 'project'])
         ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Failed to create invoice: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * ✏️ تعديل فاتورة
      */
 
+    public function show($id)
+    {
+        $invoice = Invoice::with('customer', 'project')->find($id);
 
+        if (!$invoice) {
+            return response()->json(['message' => 'Invoice not found'], 404);
+        }
+
+        return response()->json($invoice);
+    }
             public function update(Request $request, $invoiceId)
 {
     $invoice = Invoice::find($invoiceId);
@@ -121,17 +136,7 @@ class FinancialController extends Controller
     }
 
 
-    public function show($id)
-    {
-        $invoice = Invoice::with('customer', 'project')->find($id);
-
-        if (!$invoice) {
-            return response()->json(['message' => 'Invoice not found'], 404);
-        }
-
-        return response()->json($invoice);
-    }
-
+   
     // ===============================
     // 3️⃣ الحصول على بنود فاتورة
     // ===============================

@@ -1,151 +1,89 @@
 @extends('layouts.app')
 @section('title', __('Financial Transactions'))
 @section('content')
-@include('financial.create') <!-- المودال -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <main class="main-content">
     <section id="deliveries-section" class="section-content active">
 
-        <!-------------------------------------------Start Buttons-------------------------------------------->
+        <!-- Buttons -->
         <div class="icon-toolbar">
             <div>
                 <button title="Add Invoice" onclick="openConfModal()" class="btn-icon"><i class="fas fa-file"></i></button>
                 <button title="Edit Invoice" onclick="openEditInvModal()" class="btn-icon"><i class="fas fa-pen"></i></button>
                 <button title="Delete" onclick="deleteSelectedConfirmation()" class="btn-icon"><i class="fas fa-trash"></i></button>
-
-                <button title="Approve Invoice" onclick="approveInvoice()" class="btn-icon btn-approve" style="color: #28a745;">
-                    <i class="fas fa-check-circle"></i>
-                </button>
-
+                <button title="Approve Invoice" onclick="approveInvoice()" class="btn-icon btn-approve" style="color: #28a745;"><i class="fas fa-check-circle"></i></button>
                 <button title="Preview" onclick="previewDocument()" class="btn-icon"><i class="fas fa-eye"></i></button>
                 <button title="Send to Customer" onclick="sendToCustomer()" class="btn-icon"><i class="fas fa-envelope"></i></button>
             </div>
-
             <div class="icon-separator"></div>
-
             <div>
                 <button title="Convert to PDF" class="btn-icon" onclick="exportToPdfBtn()"><i class="fas fa-file-pdf"></i></button>
                 <button title="Export to Excel" class="btn-icon" onclick="exportInvoicesExcelBtn()"><i class="fa-solid fa-table"></i></button>
                 <button title="Print" class="btn-icon" onclick="printInvoicesTable()"><i class="fas fa-print"></i></button>
             </div>
         </div>
-        <!-------------------------------------------End Buttons----------------------------------------------->
-        <!-------------------------------------------Start confirmationTable----------------------------------------------->
+
+        <!-- Invoices table -->
         <div class="table-responsive-container">
             <table id="invoicesTable" class="table table-bordered table-striped display responsive nowrap" style="width:100%">
                 <thead>
                     <tr>
                         <th><input type="checkbox" id="selectAllInvoices"></th>
-
                         <th>Invoice #<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Invoice Date<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-from"></th>
-
                         <th>Status<br><input type="text" class="column-filter" placeholder="Search..."></th>
-
                         <th>Net Amount<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>VAT Amount<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Total Due<br><input type="text" class="column-filter" placeholder="Search..."></th>
-
                         <th>Due Date<br><input type="text" class="column-filter date-range-filter" data-filter-type="date-to"></th>
-
                         <th>Customer Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>TRN<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Project Code<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Project Name<br><input type="text" class="column-filter" placeholder="Search..."></th>
-
                         <th>Account Manager<br><input type="text" class="column-filter" placeholder="Search..."></th>
                         <th>Department<br><input type="text" class="column-filter" placeholder="Search..."></th>
-
                         <th>Items Count<br><input type="text" class="column-filter" placeholder="Search..."></th>
-
                     </tr>
                 </thead>
-                <tbody>
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
-        <!-------------------------------------------End confirmationTable------------------------------------------------->
+
     </section>
 </main>
 
-<!-- ================================== JS Libraries ================================== -->
- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+<!-- Modals -->
+@include('financial.create')
+
+<!-- JS libs -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<!-- ✅ مكتبة pdfMake لتوليد ملفات PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
-<!-- ================================== JS Libraries ================================== -->
 
 <script>
+// ====== Global helpers ======
+function getCsrf() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
 
-
-//====================================== Start Script =======================================
-    function showAlert(message, type) {
-        Swal.fire({
-            title: type === 'success' ? 'Success!' : (type === 'error' ? 'Error!' : 'Warning!'),
-            text: message,
-            icon: type,
-            confirmButtonText: 'OK'
-        });
-    }
-    function showConfirm(message, callback, title = 'Confirm', confirmButtonText = 'Yes', cancelButtonText = 'No') {
-        Swal.fire({
-            title: title,
-            text: message,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: confirmButtonText,
-            cancelButtonText: cancelButtonText
-        }).then((result) => {
-            if (result.isConfirmed) {
-                callback();
-            }
-        });
-    }
-
-    /**
-     * * تستدعي هذه الدالة عند الضغط على زر "Send to Customer".
-     * تعرض رسالة تحذيرية بأن الخدمة غير متوفرة حالياً.
-     * */
-    function sendToCustomer5() {
-
-        Swal.fire({
-                title: "تنبيه",
-                text: "خدمة الإرسال إلى العميل غير متوفرة حالياً",
-                icon: "info",
-                confirmButtonText: "حسناً"
-            });
-    }
-//-------------------------------------------------------------------------------------------
+// ====== Invoices DataTable & load ======
+let invoicesTable;
 
 $(document).ready(function() {
-
-    // ===============================
-    // 1️⃣ تهيئة جدول Invoices
-    // ===============================
-    window.invoicesTable = $('#invoicesTable').DataTable({
+    invoicesTable = $('#invoicesTable').DataTable({
         responsive: true,
         scrollX: true,
         autoWidth: false,
-        columnDefs: [
-            { orderable: false, targets: [0] } // عمود الشيكبوكس لا يقبل الفرز
-        ],
+        columnDefs: [{ orderable: false, targets: [0] }],
         columns: [
-            { data: 'checkbox', orderable: false, searchable: false }, // ✅ خانة التحديد
+            { data: 'checkbox', orderable: false, searchable: false },
             { data: 'invoice_no' },
             { data: 'invoice_date' },
             { data: 'status' },
@@ -163,37 +101,40 @@ $(document).ready(function() {
         ]
     });
 
-    // ===============================
-    // 2️⃣ تحميل بيانات الفواتير من السيرفر
-    // ===============================
-    loadInvoices();
+    // column filters (header inputs)
+    invoicesTable.columns().every(function() {
+        var column = this;
+        $('input', this.header()).on('keyup change', function() {
+            if (column.search() !== this.value) {
+                column.search(this.value).draw();
+            }
+        });
+    });
 
-    // ===============================
-    // 3️⃣ تحديد الكل / إلغاء الكل
-    // ===============================
+    // select all logic (only visible rows)
     $('#selectAllInvoices').on('change', function() {
-        let rows = invoicesTable.rows({ 'search': 'applied' }).nodes();
-        $('input.invoice-checkbox', rows).prop('checked', this.checked);
+        const checked = $(this).is(':checked');
+        invoicesTable.rows({ search: 'applied' }).nodes().to$().find('input.invoice-checkbox').prop('checked', checked);
     });
 
     $('#invoicesTable tbody').on('change', 'input.invoice-checkbox', function() {
-        let allChecked = $('.invoice-checkbox').length === $('.invoice-checkbox:checked').length;
-        $('#selectAllInvoices').prop('checked', allChecked);
+        const rows = invoicesTable.rows({ search: 'applied' }).nodes().to$();
+        const total = rows.find('input.invoice-checkbox').length;
+        const checked = rows.find('input.invoice-checkbox:checked').length;
+        $('#selectAllInvoices').prop('checked', total === checked);
     });
+
+    // load data
+    loadInvoices();
 });
 
-
-// ===============================
-// 4️⃣ دالة تحميل بيانات الفواتير (AJAX)
-// ===============================
 function loadInvoices() {
     $.ajax({
-        url: '/financial', // تأكد أن يرجع JSON
+        url: '{{ route("financial.index") }}',
         type: 'GET',
         dataType: 'json',
         success: function(invoices) {
             invoicesTable.clear();
-
             invoices.forEach(inv => {
                 invoicesTable.row.add({
                     checkbox: `<input type="checkbox" class="invoice-checkbox" value="${inv.id}">`,
@@ -213,18 +154,21 @@ function loadInvoices() {
                     items_count: inv.items_count ?? (inv.items?.length ?? 0)
                 });
             });
-
             invoicesTable.draw();
         },
-        error: function(xhr, status, error) {
-            console.error('Error loading invoices:', error);
+        error: function(xhr) {
+            console.error('Error loading invoices:', xhr.responseText);
+            // if server returns HTML, open in new window for debugging
+            if (xhr && xhr.responseText && xhr.responseText.startsWith('<')) {
+                const w = window.open();
+                w.document.write(xhr.responseText);
+                w.document.close();
+            }
             Swal.fire('خطأ', 'حدث خطأ أثناء تحميل بيانات الفواتير من السيرفر', 'error');
         }
     });
 }
-
-//-------------------------------------------------------------------------------------------
-    function openConfModal() {
+ function openConfModal() {
         // 💡 التعديل: تصفير النموذج الخاص بالتعميد
         $('#confForm')[0].reset();
 
@@ -352,40 +296,30 @@ function loadInvoices() {
         }
     }
 //-------------------------------------------------------------------------------------------
-
+// ====== Save invoice (uses /financial/store route) ======
 function saveInvoice(closeAfter = false) {
     const invoiceData = {
-        // 🧾 معلومات الفاتورة
         invoice_no: document.getElementById('deliveryNo').value,
         invoice_date: document.getElementById('deliveryDate').value,
         department: document.getElementById('departmentSelect').value,
         prof_date: document.getElementById('profDate').value,
         account_date: document.getElementById('accountDate').value,
         due_date: document.getElementById('dueDate').value,
-
-        // 🏗️ معلومات المشروع
         project_id: document.getElementById('projectNo').value,
-         project: document.getElementById('projectNo').value,
         project_code: document.getElementById('projectCodeSelect').value,
         project_name: document.getElementById('projectNameSelect').value,
         project_details: document.getElementById('projectDetails').value,
         contract_no: document.getElementById('contractNo').value,
-
-        // 👤 معلومات العميل
-customer_id: $('#editCustomerID').data('id') || $('#editCustomerID').val(),
+        customer_id: document.getElementById('customerID').value,
         customer_name: document.getElementById('customerName').value,
         account_no: document.getElementById('accountNo').value,
         trn_no: document.getElementById('trnNo').value,
         location: document.getElementById('location').value,
-
-        // 📞 معلومات الاتصال
         account_manager: document.getElementById('accountManager').value,
         contact_person: document.getElementById('contactMobile').value,
         attn_to: document.getElementById('attnTo').value,
         attn_pos: document.getElementById('attnPos').value,
         address_email: document.getElementById('addressEmail').value,
-
-        // 💰 الشروط والإعدادات المالية
         payment_terms: document.getElementById('paymentTerms').value,
         payment_method: document.getElementById('paymentMethod').value,
         vat_profile: document.getElementById('vatProfile').value,
@@ -399,43 +333,120 @@ customer_id: $('#editCustomerID').data('id') || $('#editCustomerID').val(),
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            'X-CSRF-TOKEN': getCsrf()
         },
         body: JSON.stringify(invoiceData)
     })
-    .then(res => res.json())
-    .then(result => {
-        if (result.message?.includes('success')) {
-            Swal.fire({
-                icon: 'success',
-                title: 'تم الحفظ بنجاح ✅',
-                text: 'تم إنشاء الفاتورة بنجاح.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-
-            if (closeAfter) {
-                setTimeout(() => {
-                    window.location.href = '/financial';
-                }, 2000);
-            }
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: '❌ خطأ',
-                text: result.message || 'حدث خطأ أثناء حفظ الفاتورة.',
-            });
+    .then(async res => {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            const data = await res.json();
+            if (!res.ok) throw { type: 'response', data };
+            return data;
         }
+        const text = await res.text();
+        throw { type: 'text', text };
     })
-    .catch(err => {
-        console.error('Error:', err);
-        Swal.fire({
-            icon: 'error',
-            title: '⚠️ خطأ',
-            text: 'حدث خطأ أثناء إرسال البيانات للسيرفر.',
-        });
+    .then(result => {
+        Swal.fire({ icon: 'success', title: 'تم الحفظ بنجاح ✅', text: result.message || 'تم إنشاء الفاتورة بنجاح.', timer: 1500, showConfirmButton: false });
+        // تحديث الجدول لإظهار الفاتورة الجديدة
+        loadInvoices();
+        if (closeAfter) closeModal('confModal');
+    })
+    .catch(async err => {
+        console.error('Save invoice error:', err);
+        let message = 'حدث خطأ أثناء إرسال البيانات للسيرفر.';
+        if (err.type === 'response' && err.data) {
+            if (err.data.errors) message = Object.values(err.data.errors).flat().join('\n');
+            else if (err.data.message) message = err.data.message;
+        } else if (err.type === 'text' && err.text) {
+            message = err.text;
+        } else if (err instanceof Error) {
+            message = err.message;
+        }
+        Swal.fire({ icon: 'error', title: '⚠️ خطأ', text: message });
     });
 }
+
+// ====== Project/Customer client-side maps (Blade -> JS safe) ======
+const projectsMap = {
+    @foreach($projects as $project)
+        "{{ $project->reference }}": {
+            id: {{ json_encode($project->id) }},
+            name: {!! json_encode($project->name) !!},
+            details: {!! json_encode($project->project_details ?? '') !!},
+            customer_id: {{ json_encode($project->customer_id) }}
+        }@if(!$loop->last),@endif
+    @endforeach
+};
+
+const customersMap = {
+    @foreach($customers as $customer)
+        "{{ $customer->id }}": {
+            name: {!! json_encode($customer->customer_name) !!},
+            account_no: {!! json_encode($customer->account_no ?? '') !!},
+            city: {!! json_encode($customer->city ?? '') !!},
+            contacts: [
+                @foreach($customer->contacts as $contact)
+                    {
+                        id: {{ json_encode($contact->id) }},
+                        name: {!! json_encode($contact->name) !!},
+                        position: {!! json_encode($contact->position ?? '') !!},
+                        email: {!! json_encode($contact->email ?? '') !!},
+                        mobile: {!! json_encode($contact->mobile ?? '') !!},
+                        phone: {!! json_encode($contact->phone ?? '') !!}
+                    }@if(!$loop->last),@endif
+                @endforeach
+            ]
+        }@if(!$loop->last),@endif
+    @endforeach
+};
+
+// fill project/customer selects when modal opens
+
+// when user selects project code
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'projectCodeSelect') {
+        const code = e.target.value;
+        if (!code || !projectsMap[code]) return;
+        const project = projectsMap[code];
+        document.getElementById('projectNameSelect').value = project.name || '';
+        document.getElementById('projectDetails').value = project.details || '';
+        document.getElementById('projectNo').value = project.id || '';
+        const customer = customersMap[project.customer_id];
+        const deliveryContact = document.getElementById('deliveryContact');
+        deliveryContact.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
+        if (customer && Array.isArray(customer.contacts)) {
+            customer.contacts.forEach(contact => {
+                const option = document.createElement('option');
+                option.value = contact.id;
+                option.textContent = `${contact.name} (${contact.mobile || ''})`;
+                option.dataset.name = contact.name || '';
+                option.dataset.position = contact.position || '';
+                option.dataset.email = contact.email || '';
+                option.dataset.mobile = contact.mobile || '';
+                deliveryContact.appendChild(option);
+            });
+            document.getElementById('customerID').value = project.customer_id;
+            document.getElementById('customerName').value = customer.name || '';
+            document.getElementById('accountNo').value = customer.account_no || '';
+            document.getElementById('location').value = customer.city || '';
+        }
+    }
+});
+
+// when user selects a contact
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'deliveryContact') {
+        const selected = e.target.selectedOptions[0];
+        if (!selected) return;
+        document.getElementById('attnTo').value = selected.dataset.name || '';
+        document.getElementById('attnPos').value = selected.dataset.position || '';
+        document.getElementById('addressEmail').value = selected.dataset.email || '';
+        document.getElementById('contactMobile').value = selected.dataset.mobile || '';
+    }
+});
+
 
 
 // ===============================
@@ -981,17 +992,6 @@ window.printInvoicesTable = function(tableId = 'invoicesTable') {
 };
 
 
-
-
-
 </script>
-
-
-
-
-
-
-
-
 
 @endsection

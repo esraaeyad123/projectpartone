@@ -13,12 +13,6 @@ use ZipArchive;
 class ConfirmationFileController extends Controller
 {
 
-     public function filesJson($confirmationId)
-    {
-        $files = ConfirmationFile::where('confirmation_id', $confirmationId)->get();
-        return response()->json($files);
-    }
-
     public function store(Request $request, $confirmationId)
     {
         $request->validate([
@@ -33,17 +27,34 @@ class ConfirmationFileController extends Controller
             'name' => $file->getClientOriginalName(),
             'path' => $path,
             'type' => $file->getClientOriginalExtension(),
-            'size' => $file->getSize() / 1024
+            'size' => $file->getSize() / 1024  // الحجم بالكيلو بايت
         ]);
+            $files = ConfirmationFile::where('confirmation_id', $confirmationId)->get();
 
-        return response()->json($confirmationFile, 201);
+
+        return response()->json([
+            'message' => 'تم رفع الملف بنجاح',
+            'file' => $files  // إرجاع تفاصيل الملف
+        ], 201);
     }
+
 
     public function viewFile($id)
     {
         $file = ConfirmationFile::findOrFail($id);
         return response()->file(storage_path("app/public/{$file->path}"));
     }
+
+   public function filesJson($confirmationId)
+{
+    $files = ConfirmationFile::where('confirmation_id', $confirmationId)->get();
+
+    // غلّف النتيجة داخل مفتاح files
+    return response()->json([
+        'files' => $files
+    ]);
+}
+
 
     public function download($id)
     {

@@ -15,6 +15,9 @@ class Confirmation extends Model
         'confirm_date',
         'project_id',
         'customer_id',
+        //'project_code',
+        //'project_name',
+//'project_details',
         'subject',
         'conf_source',
         'contract_no',
@@ -24,7 +27,7 @@ class Confirmation extends Model
         'discount',
         'tax',
         'validity',
-        'payment_terms',
+        'payment_terms'
     ];
 
     /**

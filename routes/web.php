@@ -218,14 +218,22 @@ Route::post('/deliveries/{delivery}/send-to-customer', [DeliveryController::clas
 
 
 // ======================= Confirmations =======================
-Route::resource('confirmations', ConfirmationController::class);
-Route::post('/confirmation-lines', [ConfirmationLineController::class, 'store'])->name('confirmation-lines.store');
-Route::get('/confirmations/{id}/lines', [ConfirmationController::class, 'getLines']);
-Route::put('/confirmation-lines/{id}', [ConfirmationLineController::class, 'update'])->name('confirmation-lines.update');
-Route::delete('/confirmation-lines/{id}', [ConfirmationLineController::class, 'destroy'])->name('confirmation-lines.destroy');
-Route::post('/confirmations/duplicate', [ConfirmationController::class, 'duplicate'])->name('confirmations.duplicate');
-Route::delete('/confirmations/{id}', [ConfirmationController::class, 'destroy'])->name('confirmations.destroy');
+// ✅ أولاً: Route ثابت لقائمة التأكيدات
+Route::get('/confirmations/list', [ConfirmationController::class, 'list'])->name('confirmations.list');
 
+// ✅ مسار POST لإنشاء التأكيدات (resource)
+Route::resource('confirmations', ConfirmationController::class);
+
+// Route مخصص للنسخ
+Route::post('/confirmations/duplicate', [ConfirmationController::class, 'duplicate'])->name('confirmations.duplicate');
+
+// Route حذف متعدد
+Route::post('/confirmations/bulk-delete', [ConfirmationController::class, 'bulkDelete'])->name('confirmations.bulkDelete');
+
+// Route للحصول على خطوط التأكيد
+Route::get('/confirmations/{id}/lines', [ConfirmationController::class, 'getLines']);
+
+// Route لملفات التأكيد
 // Confirmation Files
 Route::get('confirmations/{id}/files-json', [ConfirmationFileController::class, 'filesJson']);
 Route::post('confirmations/{id}/files', [ConfirmationFileController::class, 'store']);
@@ -233,11 +241,23 @@ Route::get('confirmations/files/view/{id}', [ConfirmationFileController::class, 
 Route::get('confirmations/files/download/{id}', [ConfirmationFileController::class, 'download']);
 Route::delete('confirmations/files/{id}', [ConfirmationFileController::class, 'destroy']);
 
+// تحديث خطوط التأكيد
+Route::put('/confirmation-lines/{id}', [ConfirmationLineController::class, 'update'])->name('confirmation-lines.update');
+Route::delete('/confirmation-lines/{id}', [ConfirmationLineController::class, 'destroy'])->name('confirmation-lines.destroy');
+
+// ✅ في النهاية: Route ديناميكي لأي تأكيد بواسطة ID
+Route::get('/confirmations/{id}', [ConfirmationController::class, 'show']);
+
+
 
 // ======================= Financial =======================
 
+// عرض صفحة الفواتير (HTML)
 Route::resource('financial', FinancialController::class);
 
+
+// تحديث فاتورة حسب ID
+Route::put('invoices/{invoiceId}', [FinancialController::class, 'update'])->name('invoices.update');
 Route::get('/projects/{id}/contacts', [ProjectController::class, 'getContacts']);
 Route::get('/projects/{id}', [ProjectController::class, 'show']);
 

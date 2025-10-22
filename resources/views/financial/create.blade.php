@@ -602,13 +602,28 @@
 
 
 <style>
-    /* تنسيق CSS لتمييز الصف المحدد */
-    .row-selected {
-        background-color: #ffe0b2 !important; /* لون برتقالي فاتح */
-        border-left: 5px solid #ff9800; /* شريط برتقالي على اليسار */
-        font-weight: 500;
-    }
-    /* يمكنك إضافة أي تنسيقات أخرى للجدول هنا */
+
+.modal {
+  display: none; /* افتراضيًا يكون مخفي */
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto; /* 👈 يسمح بالسكرول في الصفحة كاملة عند فتح المودال */
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  max-height: 90vh; /* 👈 يحدد أقصى ارتفاع للمودال */
+  overflow-y: auto; /* 👈 يسمح بسكرول داخل المودال نفسه */
+}
+
 </style>
 
 <script>
@@ -638,8 +653,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 id: @json($project->id),
                 name: @json($project->name),
                 details: @json($project->project_details ?? ''),
-                customer_id: @json($project->customer_id),
-            },
+                customer_id: @json($project->customer_id)
+            }@if(!$loop->last),@endif
         @endforeach
     };
 
@@ -661,10 +676,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             email: @json($contact->email ?? ''),
                             mobile: @json($contact->mobile ?? ''),
                             phone: @json($contact->phone ?? '')
-                        },
+                        }@if(!$loop->last),@endif
                     @endforeach
                 ]
-            },
+            }@if(!$loop->last),@endif
         @endforeach
     };
 
@@ -677,12 +692,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const project = projectsMap[selectedCode];
 
-        // تعبئة بيانات المشروع
         projectNameInput.value = project.name || '';
         projectDetailsInput.value = project.details || '';
         projectNoInput.value = project.id || '';
 
-        // تعبئة بيانات العميل
         const customer = customersMap[project.customer_id];
         if (customer) {
             customerIdInput.value = project.customer_id;
@@ -690,7 +703,6 @@ document.addEventListener('DOMContentLoaded', function() {
             accountNoInput.value = customer.account_no;
             locationInput.value = customer.city;
 
-            // تعبئة جهات الاتصال الخاصة بالعميل فقط
             deliveryContactSelect.innerHTML = '<option value="" disabled selected>[Select Contact]</option>';
             customer.contacts.forEach(contact => {
                 const option = document.createElement('option');
@@ -739,27 +751,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-<style>
-
-.modal {
-  display: none; /* افتراضيًا يكون مخفي */
-  position: fixed;
-  z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto; /* 👈 يسمح بالسكرول في الصفحة كاملة عند فتح المودال */
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-  margin: 40px auto;
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  max-height: 90vh; /* 👈 يحدد أقصى ارتفاع للمودال */
-  overflow-y: auto; /* 👈 يسمح بسكرول داخل المودال نفسه */
-}
-
-</style>
